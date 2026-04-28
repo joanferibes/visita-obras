@@ -1,0 +1,25 @@
+{
+  "name": "APP VISITA OBRAS",
+  "short_name": "Visita Obras",
+  "description": "Gestión de visitas de obra — Joanfe Ribes Oficina Tècnica",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4A8A80",
+  "theme_color": "#4A8A80",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

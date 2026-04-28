@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#4A8A80">
+<title>APP VISITA OBRAS</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root {
+  --azul: #4A8A80;
+  --verde: #7AADA3;
+  --gris-fondo: #f5f5f5;
+  --gris-medio: #e0e0e0;
+  --gris-texto: #555;
+  --texto: #222;
+  --rojo: #d9534f;
+  --naranja: #f0ad4e;
+  --verde-ok: #5cb85c;
+  --sombra: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--gris-fondo);
+  color: var(--texto);
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+
+/* ===== Header ===== */
+.header {
+  background: var(--azul);
+  color: white;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header .back {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: -8px;
+}
+
+/* ===== Contenedor principal ===== */
+.app { min-height: 100vh; padding-bottom: 80px; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.content { padding: 16px; max-width: 720px; margin: 0 auto; }
+
+/* ===== Indicador de cola offline ===== */
+.cola-status {
+  background: var(--naranja);
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  text-align: center;
+  display: none;
+}
+.cola-status.visible { display: block; }
+.cola-status.ok { background: var(--verde-ok); }
+
+/* ===== Lista de obras ===== */
+.buscador {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--gris-medio);
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  background: white;
+}
+
+.tabs {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 16px;
+  box-shadow: var(--sombra);
+}
+.tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  border: none;
+  background: none;
+  font-size: 15px;
+  color: var(--gris-texto);
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.tab.active { background: var(--azul); color: white; }
+
+.obra-card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  border-left: 4px solid var(--azul);
+  display: block;
+  transition: transform 0.1s;
+}
+.obra-card:active { transform: scale(0.98); }
+.obra-card.pendiente { border-left-color: var(--naranja); }
+.obra-card.archivada { border-left-color: var(--gris-medio); opacity: 0.85; }
+
+.obra-card .nombre {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--texto);
+}
+.obra-card .municipio {
+  font-size: 14px;
+  color: var(--gris-texto);
+  margin-bottom: 6px;
+}
+.obra-card .meta {
+  font-size: 12px;
+  color: var(--gris-texto);
+  display: flex;
+  justify-content: space-between;
+}
+.obra-card .badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: var(--naranja);
+  color: white;
+  margin-left: 6px;
+}
+
+/* ===== Botón flotante ===== */
+.fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--azul);
+  color: white;
+  border: none;
+  font-size: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Pantalla de obra ===== */
+.obra-titulo {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  box-shadow: var(--sombra);
+}
+.obra-titulo h2 { font-size: 16px; margin-bottom: 4px; color: var(--azul); }
+.obra-titulo .info { font-size: 13px; color: var(--gris-texto); margin-top: 2px; }
+
+.acciones { display: grid; gap: 10px; }
+
+.btn-principal {
+  background: var(--azul);
+  color: white;
+  border: none;
+  padding: 24px;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: var(--sombra);
+}
+.btn-principal:active { background: #3d7269; }
+.btn-principal .icon { font-size: 32px; }
+
+.btn-accion {
+  background: white;
+  border: none;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--sombra);
+  text-align: left;
+  color: var(--texto);
+  width: 100%;
+}
+.btn-accion:active { background: #f9f9f9; }
+.btn-accion .icon { font-size: 24px; min-width: 32px; text-align: center; }
+.btn-accion .label { flex: 1; font-weight: 500; }
+.btn-accion .arrow { color: var(--gris-medio); }
+
+.aviso {
+  background: #fff3cd;
+  border-left: 4px solid var(--naranja);
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #856404;
+}
+
+/* ===== Formulario ===== */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gris-texto);
+  margin-bottom: 4px;
+}
+.form-group label .req { color: var(--rojo); }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--gris-medio);
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+  background: white;
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-group .hint { font-size: 12px; color: var(--gris-texto); margin-top: 4px; }
+
+.btn-guardar {
+  background: var(--azul);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+.btn-secundario {
+  background: white;
+  color: var(--azul);
+  border: 1px solid var(--azul);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+}
+.btn-peligro {
+  background: white;
+  color: var(--rojo);
+  border: 1px solid var(--rojo);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ===== Cámara ===== */
+.camera-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: black;
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+}
+.camera-screen.active { display: flex; }
+
+.camera-video {
+  flex: 1;
+  width: 100%;
+  object-fit: cover;
+  background: black;
+}
+
+.camera-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+  z-index: 10;
+}
+.camera-top .btn-cerrar {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.camera-top .contador {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.camera-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 30px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent);
+  z-index: 10;
+}
+
+.btn-disparo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: white;
+  border: 5px solid rgba(255,255,255,0.5);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+}
+.btn-disparo:active { transform: scale(0.95); }
+.btn-disparo:disabled { opacity: 0.5; }
+
+/* Flash al hacer foto */
+.camera-flash {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.camera-flash.flashing {
+  animation: flash 0.3s;
+}
+@keyframes flash {
+  0% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+/* ===== Galería ===== */
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.galeria img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--gris-medio);
+  cursor: pointer;
+}
+
+.galeria-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gris-texto);
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.3s;
+  max-width: 90%;
+  text-align: center;
+}
+.toast.visible { opacity: 1; }
+.toast.error { background: var(--rojo); }
+.toast.ok { background: var(--verde-ok); }
+
+/* ===== Spinner ===== */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-screen {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gris-texto);
+}
+.loading-screen .spinner {
+  border-color: rgba(74,138,128,0.3);
+  border-top-color: var(--azul);
+  width: 32px;
+  height: 32px;
+  margin-bottom: 12px;
+}
+
+/* ===== Configuración ===== */
+.config-banner {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 14px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 2px solid #f5c6cb;
+  display: none;
+}
+.config-banner.visible { display: block; }
+
+</style>
+</head>
+<body>
+
+<div class="config-banner" id="configBanner">
+  ⚠️ Backend no configurado. Edita el archivo y rellena BACKEND_URL.
+</div>
+
+<div class="cola-status" id="colaStatus"></div>
+
+<div class="app">
+
+  <!-- ===== PANTALLA: LISTA DE OBRAS ===== -->
+  <div class="screen active" id="screen-lista">
+    <div class="header">
+      <h1>📋 OBRAS</h1>
+    </div>
+    <div class="content">
+      <input type="text" class="buscador" id="buscador" placeholder="🔍 Buscar obra...">
+      <div class="tabs">
+        <button class="tab active" data-tab="activas" onclick="cambiarTab('activas')">Activas</button>
+        <button class="tab" data-tab="archivadas" onclick="cambiarTab('archivadas')">Archivadas</button>
+      </div>
+      <div id="lista-obras">
+        <div class="loading-screen">
+          <div class="spinner"></div>
+          <div>Cargando obras...</div>
+        </div>
+      </div>
+    </div>
+    <button class="fab" onclick="irAFormularioNueva()">+</button>
+  </div>
+
+  <!-- ===== PANTALLA: OBRA ===== -->
+  <div class="screen" id="screen-obra">
+    <div class="header">
+      <button class="back" onclick="irALista()">←</button>
+      <h1 id="obra-header-nombre">Obra</h1>
+    </div>
+    <div class="content">
+      <div class="obra-titulo">
+        <h2 id="obra-titulo-oficial"></h2>
+        <div class="info" id="obra-titulo-direccion"></div>
+        <div class="info" id="obra-titulo-expediente"></div>
+      </div>
+
+      <div id="aviso-pendiente" style="display:none">
+        <div class="aviso">
+          ⚠️ Esta obra no tiene carpeta Drive asignada. Las fotos se guardan en _PENDIENTES.
+          <br><a href="#" onclick="irAFormularioEditar(); return false;" style="color:#856404; font-weight:600;">Asignar carpeta ahora →</a>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button class="btn-principal" onclick="abrirCamara('foto')">
+          <span class="icon">📷</span>
+          <span>HACER FOTOS</span>
+        </button>
+        <button class="btn-accion" onclick="abrirGaleria()">
+          <span class="icon">📸</span>
+          <span class="label">Ver fotos</span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="btn-accion" onclick="subirDocumentoGeneral()">
+          <span class="icon">📄</span>
+          <span class="label">Subir documento</span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="btn-accion" onclick="irAControlCalidad()">
+          <span class="icon">🧪</span>
+          <span class="label">Control de calidad</span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="btn-accion" onclick="abrirCarpetaProyecto()">
+          <span class="icon">📐</span>
+          <span class="label">Ver proyecto</span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="btn-accion" onclick="abrirCarpetaDrive()">
+          <span class="icon">📁</span>
+          <span class="label">Abrir en Drive</span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="btn-accion" onclick="irAFormularioEditar()">
+          <span class="icon">⚙️</span>
+          <span class="label">Datos del expediente</span>
+          <span class="arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA: CONTROL DE CALIDAD ===== -->
+  <div class="screen" id="screen-cc">
+    <div class="header">
+      <button class="back" onclick="irAObra()">←</button>
+      <h1>🧪 Control de calidad</h1>
+    </div>
+    <div class="content">
+      <div class="acciones">
+        <button class="btn-principal" onclick="abrirCamara('cc-foto')">
+          <span class="icon">📷</span>
+          <span>FOTO FICHA TÉCNICA</span>
+        </button>
+        <button class="btn-accion" onclick="subirDocumentoCC()">
+          <span class="icon">📄</span>
+          <span class="label">Subir documento de obra</span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="btn-accion" onclick="abrirCarpetaCC()">
+          <span class="icon">📁</span>
+          <span class="label">Ver todo en Drive</span>
+          <span class="arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA: FORMULARIO ===== -->
+  <div class="screen" id="screen-form">
+    <div class="header">
+      <button class="back" onclick="cancelarFormulario()">←</button>
+      <h1 id="form-titulo">Nueva obra</h1>
+    </div>
+    <div class="content">
+      <div class="form-group">
+        <label>Nombre corto <span class="req">*</span></label>
+        <input type="text" id="f-nombreCorto" placeholder="Ej: Ampliación Orba">
+        <div class="hint">El que aparece en la lista de obras</div>
+      </div>
+      <div class="form-group">
+        <label>Título oficial</label>
+        <input type="text" id="f-tituloOficial" placeholder="Ej: Ampliación de vivienda unifamiliar...">
+      </div>
+      <div class="form-group">
+        <label>Nº expediente</label>
+        <input type="text" id="f-numExpediente" placeholder="Ej: 128-24-D">
+      </div>
+      <div class="form-group">
+        <label>Dirección</label>
+        <input type="text" id="f-direccion" placeholder="Ej: C/ Mayor, 23">
+      </div>
+      <div class="form-group">
+        <label>Municipio</label>
+        <input type="text" id="f-municipio" placeholder="Ej: Orba">
+      </div>
+      <div class="form-group">
+        <label>Promotor</label>
+        <input type="text" id="f-promotor">
+      </div>
+      <div class="form-group">
+        <label>Arquitecto</label>
+        <input type="text" id="f-arquitecto">
+      </div>
+      <div class="form-group">
+        <label>Constructor</label>
+        <input type="text" id="f-constructor">
+      </div>
+      <div class="form-group">
+        <label>Otras especialidades</label>
+        <textarea id="f-otrasEspecialidades" placeholder="Ej: Ingeniero: Pedro Ruiz"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Carpeta Drive (URL o ID)</label>
+        <input type="text" id="f-carpetaDriveId" placeholder="Pega aquí el enlace de la carpeta">
+        <div class="hint">Si lo dejas vacío, se creará en _PENDIENTES</div>
+      </div>
+
+      <button class="btn-guardar" onclick="guardarFormulario()">💾 Guardar</button>
+      <button class="btn-secundario" id="btn-archivar" style="display:none" onclick="archivarObra()">📁 Archivar obra</button>
+      <button class="btn-secundario" id="btn-desarchivar" style="display:none" onclick="desarchivarObra()">↩ Desarchivar obra</button>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA: GALERÍA ===== -->
+  <div class="screen" id="screen-galeria">
+    <div class="header">
+      <button class="back" onclick="irAObra()">←</button>
+      <h1>📸 Fotos de la obra</h1>
+    </div>
+    <div class="content">
+      <div id="galeria-contenedor">
+        <div class="loading-screen">
+          <div class="spinner"></div>
+          <div>Cargando fotos...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== CÁMARA ===== -->
+<div class="camera-screen" id="camera">
+  <video class="camera-video" id="cameraVideo" autoplay playsinline></video>
+  <div class="camera-flash" id="cameraFlash"></div>
+  <div class="camera-top">
+    <button class="btn-cerrar" onclick="cerrarCamara()">✓ Terminar</button>
+    <span class="contador" id="cameraContador">0 fotos</span>
+  </div>
+  <div class="camera-bottom">
+    <button class="btn-disparo" id="btnDisparo" onclick="hacerFoto()"></button>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== INPUT FILE OCULTO PARA SUBIR DOCUMENTOS ===== -->
+<input type="file" id="inputFile" style="display:none" accept="image/*,application/pdf">
+
+<script>
+// ============================================================================
+// CONFIGURACIÓN
+// ============================================================================
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyYBkfaTkrXAAYquwI8ry0qTJ0he2CmGlBbWt5VWwUGBUP533QwiYYpm1ktJOI_4NNYiQ/exec';
+const APP_VERSION = '1.0.0';
+
+// ============================================================================
+// ESTADO GLOBAL
+// ============================================================================
+let estadoApp = {
+  pantalla: 'lista',
+  obras: [],
+  obraActual: null,
+  tabActivo: 'activas',
+  filtroBusqueda: '',
+  modoEdicion: false,
+  tipoSubidaActual: null, // 'foto' | 'cc-foto' | 'documento' | 'cc-documento'
+  contadorFotosSesion: 0,
+  cameraStream: null,
+};
+
+// ============================================================================
+// INDEXED DB — COLA OFFLINE
+// ============================================================================
+const DB_NAME = 'visitaobras';
+const DB_VERSION = 1;
+const STORE_COLA = 'cola';
+const STORE_FOTOS_LOCALES = 'fotosLocales';
+
+let db = null;
+
+function abrirDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => { db = req.result; resolve(db); };
+    req.onupgradeneeded = (e) => {
+      const dbu = e.target.result;
+      if (!dbu.objectStoreNames.contains(STORE_COLA)) {
+        const store = dbu.createObjectStore(STORE_COLA, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('estado', 'estado');
+      }
+      if (!dbu.objectStoreNames.contains(STORE_FOTOS_LOCALES)) {
+        const store = dbu.createObjectStore(STORE_FOTOS_LOCALES, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('obraId', 'obraId');
+      }
+    };
+  });
+}
+
+function colaAdd(item) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_COLA, 'readwrite');
+    const req = tx.objectStore(STORE_COLA).add({ ...item, estado: 'pendiente', fecha: Date.now() });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function colaListPendientes() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_COLA, 'readonly');
+    const store = tx.objectStore(STORE_COLA);
+    const req = store.index('estado').getAll('pendiente');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function colaUpdate(id, cambios) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_COLA, 'readwrite');
+    const store = tx.objectStore(STORE_COLA);
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const item = getReq.result;
+      if (!item) return reject(new Error('Item no encontrado'));
+      Object.assign(item, cambios);
+      const putReq = store.put(item);
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+function colaDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_COLA, 'readwrite');
+    const req = tx.objectStore(STORE_COLA).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function fotoLocalAdd(obraId, blob, nombre) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_FOTOS_LOCALES, 'readwrite');
+    const req = tx.objectStore(STORE_FOTOS_LOCALES).add({ obraId, blob, nombre, fecha: Date.now() });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function fotosLocalesByObra(obraId) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_FOTOS_LOCALES, 'readonly');
+    const req = tx.objectStore(STORE_FOTOS_LOCALES).index('obraId').getAll(obraId);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function fotoLocalDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_FOTOS_LOCALES, 'readwrite');
+    const req = tx.objectStore(STORE_FOTOS_LOCALES).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ============================================================================
+// COMUNICACIÓN BACKEND
+// ============================================================================
+
+async function backendGet(action, params = {}) {
+  const url = new URL(BACKEND_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+async function backendPost(payload) {
+  const res = await fetch(BACKEND_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'text/plain' } // text/plain evita preflight CORS
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+// ============================================================================
+// PROCESAMIENTO DE COLA
+// ============================================================================
+
+let procesandoCola = false;
+
+async function procesarCola() {
+  if (procesandoCola) return;
+  procesandoCola = true;
+  
+  try {
+    const pendientes = await colaListPendientes();
+    actualizarColaStatus(pendientes.length);
+    
+    for (const item of pendientes) {
+      try {
+        const result = await backendPost(item.payload);
+        if (result.ok) {
+          await colaDelete(item.id);
+          // Si era una foto local, eliminarla también del store local
+          if (item.fotoLocalId) {
+            await fotoLocalDelete(item.fotoLocalId);
+          }
+        } else {
+          await colaUpdate(item.id, { 
+            estado: 'pendiente', 
+            ultimoError: result.error,
+            intentos: (item.intentos || 0) + 1
+          });
+        }
+      } catch (err) {
+        // Error de red — sigue pendiente
+        await colaUpdate(item.id, { 
+          estado: 'pendiente',
+          ultimoError: err.toString(),
+          intentos: (item.intentos || 0) + 1
+        });
+        break; // si falla por red, no seguir intentando los demás ahora
+      }
+    }
+    
+    const pendientesDespues = await colaListPendientes();
+    actualizarColaStatus(pendientesDespues.length);
+    
+    // Refrescar galería si estamos viéndola
+    if (estadoApp.pantalla === 'galeria') {
+      cargarGaleria();
+    }
+  } finally {
+    procesandoCola = false;
+  }
+}
+
+function actualizarColaStatus(numPendientes) {
+  const el = document.getElementById('colaStatus');
+  if (numPendientes > 0) {
+    el.textContent = '📤 Subiendo ' + numPendientes + ' archivo' + (numPendientes > 1 ? 's' : '') + '...';
+    el.classList.add('visible');
+    el.classList.remove('ok');
+  } else {
+    el.classList.remove('visible');
+  }
+}
+
+// ============================================================================
+// COMPRESIÓN DE IMAGEN
+// ============================================================================
+
+async function comprimirImagen(blob, maxLado, calidad) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > height && width > maxLado) {
+        height = Math.round(height * maxLado / width);
+        width = maxLado;
+      } else if (height > maxLado) {
+        width = Math.round(width * maxLado / height);
+        height = maxLado;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(b => {
+        URL.revokeObjectURL(img.src);
+        resolve(b);
+      }, 'image/jpeg', calidad);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
+function blobABase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result;
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// ============================================================================
+// UI: NAVEGACIÓN
+// ============================================================================
+
+function mostrarPantalla(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function irALista() {
+  estadoApp.pantalla = 'lista';
+  mostrarPantalla('screen-lista');
+  cargarObras();
+}
+
+function irAObra() {
+  estadoApp.pantalla = 'obra';
+  mostrarPantalla('screen-obra');
+  renderObra();
+}
+
+function irAControlCalidad() {
+  estadoApp.pantalla = 'cc';
+  mostrarPantalla('screen-cc');
+}
+
+function irAFormularioNueva() {
+  estadoApp.pantalla = 'form';
+  estadoApp.modoEdicion = false;
+  document.getElementById('form-titulo').textContent = 'Nueva obra';
+  limpiarFormulario();
+  document.getElementById('btn-archivar').style.display = 'none';
+  document.getElementById('btn-desarchivar').style.display = 'none';
+  mostrarPantalla('screen-form');
+}
+
+function irAFormularioEditar() {
+  estadoApp.pantalla = 'form';
+  estadoApp.modoEdicion = true;
+  document.getElementById('form-titulo').textContent = 'Editar obra';
+  rellenarFormulario(estadoApp.obraActual);
+  document.getElementById('btn-archivar').style.display = estadoApp.obraActual.estado === 'Archivada' ? 'none' : 'block';
+  document.getElementById('btn-desarchivar').style.display = estadoApp.obraActual.estado === 'Archivada' ? 'block' : 'none';
+  mostrarPantalla('screen-form');
+}
+
+function cancelarFormulario() {
+  if (estadoApp.modoEdicion) irAObra();
+  else irALista();
+}
+
+function abrirGaleria() {
+  estadoApp.pantalla = 'galeria';
+  mostrarPantalla('screen-galeria');
+  cargarGaleria();
+}
+
+// ============================================================================
+// LISTA DE OBRAS
+// ============================================================================
+
+function cambiarTab(tab) {
+  estadoApp.tabActivo = tab;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  cargarObras();
+}
+
+async function cargarObras() {
+  const cont = document.getElementById('lista-obras');
+  cont.innerHTML = '<div class="loading-screen"><div class="spinner"></div><div>Cargando obras...</div></div>';
+  
+  try {
+    const estado = estadoApp.tabActivo === 'activas' ? 'Activa' : 'Archivada';
+    const res = await backendGet('listObras', { estado });
+    if (!res.ok) throw new Error(res.error);
+    estadoApp.obras = res.obras;
+    renderListaObras();
+  } catch (err) {
+    cont.innerHTML = '<div class="loading-screen">⚠️ Error al cargar: ' + err.message + 
+      '<br><br><button class="btn-secundario" onclick="cargarObras()">Reintentar</button></div>';
+  }
+}
+
+function renderListaObras() {
+  const cont = document.getElementById('lista-obras');
+  const filtro = (estadoApp.filtroBusqueda || '').toLowerCase().trim();
+  
+  let obras = estadoApp.obras;
+  if (filtro) {
+    obras = obras.filter(o => 
+      (o.nombreCorto || '').toLowerCase().includes(filtro) ||
+      (o.tituloOficial || '').toLowerCase().includes(filtro) ||
+      (o.municipio || '').toLowerCase().includes(filtro) ||
+      (o.numExpediente || '').toLowerCase().includes(filtro)
+    );
+  }
+  
+  if (obras.length === 0) {
+    cont.innerHTML = '<div class="loading-screen">' + 
+      (estadoApp.tabActivo === 'activas' 
+        ? '📋 No hay obras activas. Pulsa + para crear una.' 
+        : '📁 No hay obras archivadas.') + 
+      '</div>';
+    return;
+  }
+  
+  cont.innerHTML = obras.map(o => {
+    const cls = o.estado === 'Pendiente' ? 'pendiente' : (o.estado === 'Archivada' ? 'archivada' : '');
+    const meta = o.ultimaVisita 
+      ? '🕐 ' + formatearFechaRelativa(o.ultimaVisita) 
+      : 'Sin visitas aún';
+    const badge = o.estado === 'Pendiente' ? '<span class="badge">Sin Drive</span>' : '';
+    return `
+      <div class="obra-card ${cls}" onclick="seleccionarObra('${o.id}')">
+        <div class="nombre">${escape(o.nombreCorto)}${badge}</div>
+        <div class="municipio">${escape(o.municipio || '')}</div>
+        <div class="meta">
+          <span>${meta}</span>
+          <span>${escape(o.numExpediente || '')}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function seleccionarObra(id) {
+  estadoApp.obraActual = estadoApp.obras.find(o => o.id === id);
+  if (!estadoApp.obraActual) return;
+  irAObra();
+}
+
+function formatearFechaRelativa(fecha) {
+  if (!fecha) return '';
+  const d = new Date(fecha);
+  const ahora = Date.now();
+  const diff = ahora - d.getTime();
+  const dias = Math.floor(diff / 86400000);
+  if (dias === 0) return 'Hoy';
+  if (dias === 1) return 'Ayer';
+  if (dias < 7) return 'Hace ' + dias + ' días';
+  if (dias < 30) return 'Hace ' + Math.floor(dias / 7) + ' semanas';
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function escape(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ============================================================================
+// PANTALLA OBRA
+// ============================================================================
+
+function renderObra() {
+  const o = estadoApp.obraActual;
+  if (!o) return irALista();
+  
+  document.getElementById('obra-header-nombre').textContent = o.nombreCorto;
+  document.getElementById('obra-titulo-oficial').textContent = o.tituloOficial || o.nombreCorto;
+  document.getElementById('obra-titulo-direccion').textContent = 
+    [o.direccion, o.municipio].filter(Boolean).join(', ');
+  document.getElementById('obra-titulo-expediente').textContent = 
+    o.numExpediente ? 'Exp. ' + o.numExpediente : '';
+  
+  document.getElementById('aviso-pendiente').style.display = 
+    o.estado === 'Pendiente' ? 'block' : 'none';
+}
+
+// ============================================================================
+// FORMULARIO
+// ============================================================================
+
+function limpiarFormulario() {
+  ['nombreCorto', 'tituloOficial', 'numExpediente', 'direccion', 'municipio',
+   'promotor', 'arquitecto', 'constructor', 'otrasEspecialidades', 'carpetaDriveId']
+   .forEach(c => { document.getElementById('f-' + c).value = ''; });
+}
+
+function rellenarFormulario(obra) {
+  document.getElementById('f-nombreCorto').value = obra.nombreCorto || '';
+  document.getElementById('f-tituloOficial').value = obra.tituloOficial || '';
+  document.getElementById('f-numExpediente').value = obra.numExpediente || '';
+  document.getElementById('f-direccion').value = obra.direccion || '';
+  document.getElementById('f-municipio').value = obra.municipio || '';
+  document.getElementById('f-promotor').value = obra.promotor || '';
+  document.getElementById('f-arquitecto').value = obra.arquitecto || '';
+  document.getElementById('f-constructor').value = obra.constructor || '';
+  document.getElementById('f-otrasEspecialidades').value = obra.otrasEspecialidades || '';
+  document.getElementById('f-carpetaDriveId').value = obra.carpetaDriveId || '';
+}
+
+async function guardarFormulario() {
+  const datos = {
+    nombreCorto: document.getElementById('f-nombreCorto').value.trim(),
+    tituloOficial: document.getElementById('f-tituloOficial').value.trim(),
+    numExpediente: document.getElementById('f-numExpediente').value.trim(),
+    direccion: document.getElementById('f-direccion').value.trim(),
+    municipio: document.getElementById('f-municipio').value.trim(),
+    promotor: document.getElementById('f-promotor').value.trim(),
+    arquitecto: document.getElementById('f-arquitecto').value.trim(),
+    constructor: document.getElementById('f-constructor').value.trim(),
+    otrasEspecialidades: document.getElementById('f-otrasEspecialidades').value.trim(),
+    carpetaDriveId: document.getElementById('f-carpetaDriveId').value.trim(),
+  };
+  
+  if (!datos.nombreCorto) {
+    toast('El nombre corto es obligatorio', 'error');
+    return;
+  }
+  
+  toast('Guardando...');
+  
+  try {
+    let res;
+    if (estadoApp.modoEdicion) {
+      res = await backendPost({ action: 'editarObra', id: estadoApp.obraActual.id, obra: datos });
+    } else {
+      res = await backendPost({ action: 'crearObra', obra: datos });
+    }
+    
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ Guardado correctamente', 'ok');
+    
+    if (estadoApp.modoEdicion) {
+      // Actualizar obra actual con cambios
+      Object.assign(estadoApp.obraActual, datos);
+      if (res.estado) estadoApp.obraActual.estado = res.estado;
+      if (res.carpetaDriveId) estadoApp.obraActual.carpetaDriveId = res.carpetaDriveId;
+      irAObra();
+    } else {
+      irALista();
+    }
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function archivarObra() {
+  if (!confirm('¿Archivar esta obra? Quedará oculta de la lista principal pero los archivos en Drive no se tocan.')) return;
+  try {
+    const res = await backendPost({ action: 'archivarObra', id: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ Obra archivada', 'ok');
+    irALista();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function desarchivarObra() {
+  try {
+    const res = await backendPost({ action: 'desarchivarObra', id: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ Obra desarchivada', 'ok');
+    irALista();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// ============================================================================
+// CÁMARA
+// ============================================================================
+
+async function abrirCamara(tipo) {
+  estadoApp.tipoSubidaActual = tipo;
+  estadoApp.contadorFotosSesion = 0;
+  document.getElementById('cameraContador').textContent = '0 fotos';
+  
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 2400 },
+        height: { ideal: 1800 },
+      },
+      audio: false,
+    });
+    estadoApp.cameraStream = stream;
+    document.getElementById('cameraVideo').srcObject = stream;
+    document.getElementById('camera').classList.add('active');
+  } catch (err) {
+    toast('⚠️ No se pudo abrir la cámara: ' + err.message, 'error');
+  }
+}
+
+function cerrarCamara() {
+  if (estadoApp.cameraStream) {
+    estadoApp.cameraStream.getTracks().forEach(t => t.stop());
+    estadoApp.cameraStream = null;
+  }
+  document.getElementById('camera').classList.remove('active');
+  
+  if (estadoApp.contadorFotosSesion > 0) {
+    toast('✓ ' + estadoApp.contadorFotosSesion + ' foto' + 
+      (estadoApp.contadorFotosSesion > 1 ? 's' : '') + ' en cola', 'ok');
+  }
+}
+
+async function hacerFoto() {
+  const video = document.getElementById('cameraVideo');
+  if (!video.videoWidth) return;
+  
+  // Flash visual
+  const flash = document.getElementById('cameraFlash');
+  flash.classList.remove('flashing');
+  void flash.offsetWidth; // forzar reflow
+  flash.classList.add('flashing');
+  
+  // Disparo
+  document.getElementById('btnDisparo').disabled = true;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  
+  // Calidad según tipo
+  const esCC = estadoApp.tipoSubidaActual === 'cc-foto';
+  const maxLado = esCC ? 2400 : 1600;
+  const calidad = esCC ? 0.9 : 0.85;
+  
+  canvas.toBlob(async (blob) => {
+    try {
+      const blobComprimido = await comprimirImagen(blob, maxLado, calidad);
+      await encolarFoto(blobComprimido);
+      estadoApp.contadorFotosSesion++;
+      document.getElementById('cameraContador').textContent = 
+        estadoApp.contadorFotosSesion + ' foto' + (estadoApp.contadorFotosSesion > 1 ? 's' : '');
+    } catch (err) {
+      toast('⚠️ Error guardando foto: ' + err.message, 'error');
+    } finally {
+      document.getElementById('btnDisparo').disabled = false;
+    }
+  }, 'image/jpeg', 0.92);
+}
+
+async function encolarFoto(blob) {
+  const obra = estadoApp.obraActual;
+  const ahora = new Date();
+  const fecha = ahora.toISOString().slice(0, 10).replace(/-/g, '');
+  const hora = ahora.toTimeString().slice(0, 5).replace(':', '');
+  const slug = (obra.nombreCorto || 'obra')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, 30);
+  const nombre = `${fecha}_${hora}_${slug}.jpg`;
+  
+  // Guardar foto local primero (para galería sin conexión)
+  const fotoLocalId = await fotoLocalAdd(obra.id, blob, nombre);
+  
+  // Encolar subida
+  const base64 = await blobABase64(blob);
+  await colaAdd({
+    fotoLocalId,
+    payload: {
+      action: 'subirFoto',
+      id: obra.id,
+      tipo: estadoApp.tipoSubidaActual,
+      nombre,
+      contenidoBase64: base64,
+      mimeType: 'image/jpeg',
+    },
+  });
+  
+  // Lanzar procesamiento sin esperar
+  procesarCola();
+}
+
+// ============================================================================
+// SUBIR DOCUMENTOS
+// ============================================================================
+
+let resolveInputFile = null;
+
+document.getElementById('inputFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (resolveInputFile) {
+    resolveInputFile(file);
+    resolveInputFile = null;
+  }
+  e.target.value = '';
+});
+
+function elegirArchivo() {
+  return new Promise((resolve) => {
+    resolveInputFile = resolve;
+    document.getElementById('inputFile').click();
+  });
+}
+
+async function subirDocumentoGeneral() {
+  await subirDocumentoGenerico('documento', 'DOCUMENTACION');
+}
+
+async function subirDocumentoCC() {
+  await subirDocumentoGenerico('cc-documento', 'CONTROL DE CALIDAD/Documentos de obra');
+}
+
+async function subirDocumentoGenerico(tipo, descripcion) {
+  const file = await elegirArchivo();
+  if (!file) return;
+  
+  toast('Procesando ' + file.name + '...');
+  
+  try {
+    let blob = file;
+    let nombre = file.name;
+    let mimeType = file.type;
+    
+    // Si es imagen, comprimir
+    if (file.type.startsWith('image/')) {
+      blob = await comprimirImagen(file, 2400, 0.9);
+      nombre = nombre.replace(/\.[^.]+$/, '') + '.jpg';
+      mimeType = 'image/jpeg';
+    }
+    
+    // Renombrar con prefijo de fecha
+    const ahora = new Date();
+    const fecha = ahora.toISOString().slice(0, 10).replace(/-/g, '');
+    nombre = fecha + '_' + nombre;
+    
+    const base64 = await blobABase64(blob);
+    await colaAdd({
+      payload: {
+        action: 'subirFoto', // misma función backend
+        id: estadoApp.obraActual.id,
+        tipo,
+        nombre,
+        contenidoBase64: base64,
+        mimeType,
+      },
+    });
+    
+    toast('✓ Documento en cola → ' + descripcion, 'ok');
+    procesarCola();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// ============================================================================
+// GALERÍA
+// ============================================================================
+
+async function cargarGaleria() {
+  const cont = document.getElementById('galeria-contenedor');
+  
+  try {
+    const obra = estadoApp.obraActual;
+    if (!obra) return irALista();
+    
+    // Mostrar fotos locales (incluye subidas y pendientes)
+    const fotosLocales = await fotosLocalesByObra(obra.id);
+    
+    if (fotosLocales.length === 0) {
+      cont.innerHTML = '<div class="galeria-empty">📷 No hay fotos aún en este dispositivo<br><br>' +
+        '<small>Las fotos hechas desde otros dispositivos están disponibles en Drive</small></div>';
+      return;
+    }
+    
+    // Ordenar por fecha descendente
+    fotosLocales.sort((a, b) => b.fecha - a.fecha);
+    
+    cont.innerHTML = '<div class="galeria"></div>';
+    const cuadro = cont.querySelector('.galeria');
+    
+    for (const f of fotosLocales) {
+      const url = URL.createObjectURL(f.blob);
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = f.nombre;
+      img.onclick = () => verFotoGrande(url, f.nombre);
+      cuadro.appendChild(img);
+    }
+  } catch (err) {
+    cont.innerHTML = '<div class="loading-screen">⚠️ Error: ' + err.message + '</div>';
+  }
+}
+
+function verFotoGrande(url, nombre) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95); z-index: 400;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  `;
+  overlay.onclick = () => overlay.remove();
+  overlay.innerHTML = `
+    <img src="${url}" style="max-width: 100%; max-height: 90vh; object-fit: contain;">
+    <div style="color: white; padding: 16px; font-size: 13px;">${escape(nombre)}</div>
+    <div style="color: #aaa; font-size: 12px;">Toca para cerrar</div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// ============================================================================
+// ABRIR DRIVE
+// ============================================================================
+
+function abrirCarpetaDrive() {
+  const id = estadoApp.obraActual.carpetaDriveId;
+  if (!id) {
+    toast('Esta obra no tiene carpeta Drive asignada', 'error');
+    return;
+  }
+  window.open('https://drive.google.com/drive/folders/' + id, '_blank');
+}
+
+function abrirCarpetaProyecto() {
+  // Abre la carpeta de la obra (proyecto suele estar en DOCUMENTACION o en raíz)
+  // Por simplicidad, abre la carpeta raíz para que el usuario navegue
+  abrirCarpetaDrive();
+}
+
+function abrirCarpetaCC() {
+  // No tenemos el ID directo, abrimos la carpeta de la obra
+  abrirCarpetaDrive();
+}
+
+// ============================================================================
+// TOAST
+// ============================================================================
+
+let toastTimeout = null;
+function toast(msg, tipo) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast visible' + (tipo ? ' ' + tipo : '');
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    el.classList.remove('visible');
+  }, 2500);
+}
+
+// ============================================================================
+// BUSCADOR
+// ============================================================================
+
+document.getElementById('buscador').addEventListener('input', (e) => {
+  estadoApp.filtroBusqueda = e.target.value;
+  renderListaObras();
+});
+
+// ============================================================================
+// INICIALIZACIÓN
+// ============================================================================
+
+async function init() {
+  // Verificar configuración
+  if (BACKEND_URL.includes('PEGAR_AQUI')) {
+    document.getElementById('configBanner').classList.add('visible');
+    return;
+  }
+  
+  try {
+    await abrirDB();
+    
+    // Procesar cola al inicio
+    procesarCola();
+    
+    // Procesar cola cada 30 segundos
+    setInterval(procesarCola, 30000);
+    
+    // Procesar al recuperar conexión
+    window.addEventListener('online', procesarCola);
+    
+    // Cargar lista
+    cargarObras();
+  } catch (err) {
+    document.getElementById('lista-obras').innerHTML = 
+      '<div class="loading-screen">⚠️ Error al iniciar: ' + err.message + '</div>';
+  }
+}
+
+init();
+
+</script>
+</body>
+</html>
