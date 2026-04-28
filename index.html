@@ -404,21 +404,54 @@ body {
 }
 .galeria {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
 }
 .galeria-item {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4/3;
   background: var(--gris-medio);
   cursor: pointer;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 .galeria-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+.galeria-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spinner-small {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(74,138,128,0.3);
+  border-top-color: var(--azul);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.foto-overlay-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  font-size: 14px;
+}
+.foto-overlay-loading .spinner {
+  border-color: rgba(255,255,255,0.3);
+  border-top-color: white;
+  width: 40px;
+  height: 40px;
 }
 
 .galeria-empty {
@@ -510,7 +543,201 @@ body {
   margin-top: 2px;
 }
 
-/* ===== Toast ===== */
+/* ===== Acta de visita ===== */
+.acta-fotos-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.btn-mini-foto {
+  background: var(--azul);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+.acta-fotos-miniaturas {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.acta-fotos-miniaturas .mini {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--gris-medio);
+}
+.acta-fotos-miniaturas .mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.acta-fotos-miniaturas .mini .quitar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.acta-guion {
+  background: white;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: var(--sombra);
+  margin-bottom: 16px;
+}
+.guion-titulo {
+  font-size: 12px;
+  color: var(--gris-texto);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.guion-punto {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.guion-punto strong {
+  display: block;
+  color: var(--azul);
+  margin-bottom: 2px;
+}
+.guion-hint {
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.acta-transcripcion {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: var(--sombra);
+  margin-bottom: 16px;
+}
+.transcripcion-titulo {
+  font-size: 13px;
+  color: var(--gris-texto);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+#actaTranscripcion {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--gris-medio);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.acta-boton-grabar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+.btn-grabar {
+  background: var(--azul);
+  color: white;
+  border: none;
+  padding: 20px 40px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(74,138,128,0.4);
+}
+.btn-grabar.grabando {
+  background: var(--rojo);
+  box-shadow: 0 4px 12px rgba(217,83,79,0.4);
+  animation: pulso 1.5s ease-in-out infinite;
+}
+.btn-grabar .icon { font-size: 26px; }
+@keyframes pulso {
+  0%, 100% { box-shadow: 0 4px 12px rgba(217,83,79,0.4); }
+  50% { box-shadow: 0 4px 24px rgba(217,83,79,0.7); }
+}
+.grabacion-tiempo {
+  margin-top: 12px;
+  font-size: 16px;
+  color: var(--rojo);
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.acta-acciones-post {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Borradores */
+.borrador-card {
+  background: #fff8e1;
+  border-left: 4px solid var(--naranja);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.borrador-card .info {
+  flex: 1;
+}
+.borrador-card .nombre {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+.borrador-card .fecha {
+  font-size: 12px;
+  color: var(--gris-texto);
+}
+.borrador-card .btn-borrar {
+  background: none;
+  border: 1px solid var(--rojo);
+  color: var(--rojo);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
 .toast {
   position: fixed;
   bottom: 90px;
@@ -641,6 +868,11 @@ body {
           <span class="label">Control de calidad</span>
           <span class="arrow">›</span>
         </button>
+        <button class="btn-accion" onclick="irAActa()">
+          <span class="icon">🎙️</span>
+          <span class="label">Acta de visita</span>
+          <span class="arrow">›</span>
+        </button>
         <button class="btn-accion" onclick="abrirCarpetaProyecto()">
           <span class="icon">📐</span>
           <span class="label">Ver proyecto</span>
@@ -758,6 +990,169 @@ body {
     </div>
   </div>
 
+  <!-- ===== PANTALLA: ACTA - INICIO ===== -->
+  <div class="screen" id="screen-acta">
+    <div class="header">
+      <button class="back" onclick="salirActa()">←</button>
+      <h1>🎙️ Acta de visita</h1>
+    </div>
+    <div class="content">
+      
+      <!-- Lista de borradores existentes -->
+      <div id="acta-borradores"></div>
+      
+      <!-- Botón de nueva acta -->
+      <button class="btn-principal" onclick="iniciarNuevaActa()" style="margin-bottom:16px;">
+        <span class="icon">➕</span>
+        <span>NUEVA ACTA</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA: ACTA - DICTADO ===== -->
+  <div class="screen" id="screen-acta-dictado">
+    <div class="header">
+      <button class="back" onclick="cancelarDictado()">←</button>
+      <h1>🎙️ Dictar acta</h1>
+    </div>
+    <div class="content">
+      
+      <!-- Fotos del acta (miniaturas + añadir) -->
+      <div class="acta-fotos-row">
+        <button class="btn-mini-foto" onclick="abrirCamaraActa()">
+          <span style="font-size:20px;">📷</span>
+          <span>Añadir foto</span>
+        </button>
+        <div class="acta-fotos-miniaturas" id="actaFotosMiniaturas"></div>
+      </div>
+      
+      <!-- Guion -->
+      <div class="acta-guion" id="actaGuion">
+        <div class="guion-titulo">📝 GUION</div>
+        <div class="guion-punto">
+          <strong>1. ASISTENTES</strong>
+          <span class="guion-hint">(está el arquitecto, el promotor, el constructor, encargado...)</span>
+        </div>
+        <div class="guion-punto">
+          <strong>2. ESTADO ACTUAL DE LA OBRA</strong>
+          <span class="guion-hint">(en qué fase estamos, breve resumen)</span>
+        </div>
+        <div class="guion-punto">
+          <strong>3. TRABAJOS EN EJECUCIÓN</strong>
+          <span class="guion-hint">(describe los trabajos que se están realizando)</span>
+        </div>
+        <div class="guion-punto">
+          <strong>4. ÓRDENES E INDICACIONES</strong>
+          <span class="guion-hint">(órdenes o cosas a tener en cuenta que se comentan en obra)</span>
+        </div>
+        <div class="guion-punto">
+          <strong>5. INCIDENCIAS / OBSERVACIONES</strong>
+          <span class="guion-hint">(si hay algo que no se ajusta a proyecto o a algo indicado)</span>
+        </div>
+        <div class="guion-punto">
+          <strong>6. FIRMAS</strong>
+          <span class="guion-hint">(di "firma arquitecto" o "firman arquitecto y constructor". Si no dices nada firmas tú solo)</span>
+        </div>
+      </div>
+      
+      <!-- Transcripción en vivo -->
+      <div class="acta-transcripcion" id="actaTranscripcionWrapper" style="display:none;">
+        <div class="transcripcion-titulo">🎙️ Transcripción</div>
+        <textarea id="actaTranscripcion" placeholder="El texto dictado aparecerá aquí..."></textarea>
+      </div>
+      
+      <!-- Botón grabar -->
+      <div class="acta-boton-grabar" id="actaBotonGrabar">
+        <button class="btn-grabar" id="btnGrabar" onclick="toggleGrabacion()">
+          <span class="icon">🎙️</span>
+          <span class="texto">GRABAR</span>
+        </button>
+        <div class="grabacion-tiempo" id="grabacionTiempo" style="display:none;">0:00</div>
+      </div>
+      
+      <!-- Botones tras detener grabación -->
+      <div class="acta-acciones-post" id="actaAccionesPost" style="display:none;">
+        <button class="btn-guardar" onclick="generarActa()">✨ Generar acta</button>
+        <button class="btn-secundario" onclick="reiniciarDictado()">🔄 Reiniciar dictado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA: ACTA - PREVIEW ===== -->
+  <div class="screen" id="screen-acta-preview">
+    <div class="header">
+      <button class="back" onclick="volverADictado()">←</button>
+      <h1>📝 Revisar acta</h1>
+    </div>
+    <div class="content">
+      <div class="aviso" style="margin-bottom:16px;">
+        💡 Puedes editar cualquier campo antes de finalizar
+      </div>
+      
+      <div class="form-group">
+        <label>1. Asistentes (uno por línea)</label>
+        <textarea id="prev-asistentes" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>2. Estado actual de la obra</label>
+        <textarea id="prev-estado" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>3. Trabajos en ejecución (uno por línea)</label>
+        <textarea id="prev-trabajos" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label>4. Órdenes e indicaciones (una por línea)</label>
+        <textarea id="prev-ordenes" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label>5. Incidencias / observaciones</label>
+        <textarea id="prev-incidencias" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>6. Firmas</label>
+        <div style="font-size:14px;">
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+            <input type="checkbox" id="firma-arquitecto"> Arquitecto
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+            <input type="checkbox" id="firma-constructor"> Constructor
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+            <input type="checkbox" id="firma-tecnico" checked disabled> Director de Ejecución (tú, siempre)
+          </label>
+        </div>
+      </div>
+      
+      <!-- Fotos del acta -->
+      <div class="form-group">
+        <label>Fotos para anexar al PDF (<span id="prev-num-fotos">0</span>)</label>
+        <div class="acta-fotos-miniaturas" id="prevFotosMiniaturas"></div>
+      </div>
+      
+      <button class="btn-guardar" onclick="finalizarActa()">✓ Finalizar y guardar</button>
+      <button class="btn-secundario" onclick="guardarBorrador()">💾 Guardar borrador</button>
+      <button class="btn-peligro" onclick="descartarActa()">🗑️ Descartar</button>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA: ACTA - GUARDADA ===== -->
+  <div class="screen" id="screen-acta-guardada">
+    <div class="header">
+      <h1>✓ Acta guardada</h1>
+    </div>
+    <div class="content" style="text-align:center; padding-top:40px;">
+      <div style="font-size: 60px; margin-bottom:16px;">✅</div>
+      <h2 style="color:var(--verde-ok); margin-bottom:8px;">Acta finalizada</h2>
+      <p id="acta-guardada-nombre" style="color:var(--gris-texto); margin-bottom:24px; word-break:break-all;"></p>
+      <button class="btn-guardar" onclick="compartirActa()" style="background:var(--verde);">
+        📤 Compartir
+      </button>
+      <button class="btn-secundario" onclick="abrirActaEnDrive()">📁 Ver en Drive</button>
+      <button class="btn-secundario" onclick="volverAObra()">← Volver a la obra</button>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== CÁMARA ===== -->
@@ -784,7 +1179,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyYBkfaTkrXAAYquwI8ry0qTJ0he2CmGlBbWt5VWwUGBUP533QwiYYpm1ktJOI_4NNYiQ/exec';
-const APP_VERSION = '1.0.1';
+const APP_VERSION = '1.1.0';
 // Email de la cuenta donde están las carpetas (para abrir Drive con la cuenta correcta)
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
@@ -807,7 +1202,7 @@ let estadoApp = {
 // INDEXED DB — COLA OFFLINE
 // ============================================================================
 const DB_NAME = 'visitaobras';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_COLA = 'cola';
 const STORE_FOTOS_LOCALES = 'fotosLocales';
 
@@ -826,6 +1221,11 @@ function abrirDB() {
       }
       if (!dbu.objectStoreNames.contains(STORE_FOTOS_LOCALES)) {
         const store = dbu.createObjectStore(STORE_FOTOS_LOCALES, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('obraId', 'obraId');
+      }
+      // v2: store de borradores de acta
+      if (!dbu.objectStoreNames.contains('actaBorradores')) {
+        const store = dbu.createObjectStore('actaBorradores', { keyPath: 'id', autoIncrement: true });
         store.createIndex('obraId', 'obraId');
       }
     };
@@ -946,6 +1346,18 @@ async function procesarCola() {
       try {
         const result = await backendPost(item.payload);
         if (result.ok) {
+          // Si es una foto de acta, reemplazar el tempId por el archivoId real
+          if (item.esActa && item.tempId && result.archivoId) {
+            const idx = actaState.fotosIds.indexOf(item.tempId);
+            if (idx !== -1) {
+              actaState.fotosIds[idx] = result.archivoId;
+              actaState.fotosBlobs[result.archivoId] = actaState.fotosBlobs[item.tempId];
+              delete actaState.fotosBlobs[item.tempId];
+              if (estadoApp.pantalla === 'acta-dictado') actualizarMiniaturasActa();
+              if (estadoApp.pantalla === 'acta-preview') actualizarMiniaturasPreview();
+            }
+          }
+          
           await colaDelete(item.id);
           // Si era una foto local, eliminarla también del store local
           if (item.fotoLocalId) {
@@ -1389,17 +1801,31 @@ async function encolarFoto(blob) {
     .substring(0, 30);
   const nombre = `${fecha}_${hora}_${slug}.jpg`;
   
+  // Para fotos del acta, guardamos un ID temporal local hasta que suba a Drive
+  const esActa = estadoApp.tipoSubidaActual === 'acta-foto';
+  const tipoReal = esActa ? 'foto' : estadoApp.tipoSubidaActual;
+  
   // Guardar foto local primero (para galería sin conexión)
   const fotoLocalId = await fotoLocalAdd(obra.id, blob, nombre);
+  
+  // Si es foto de acta, generar ID temporal y guardar blob para mostrar miniatura
+  if (esActa) {
+    const tempId = 'temp-' + fotoLocalId;
+    actaState.fotosIds.push(tempId);
+    actaState.fotosBlobs[tempId] = blob;
+    actualizarMiniaturasActa();
+  }
   
   // Encolar subida
   const base64 = await blobABase64(blob);
   await colaAdd({
     fotoLocalId,
+    esActa: esActa,
+    tempId: esActa ? 'temp-' + fotoLocalId : null,
     payload: {
       action: 'subirFoto',
       id: obra.id,
-      tipo: estadoApp.tipoSubidaActual,
+      tipo: tipoReal,
       nombre,
       contenidoBase64: base64,
       mimeType: 'image/jpeg',
@@ -1542,14 +1968,57 @@ function renderGaleria() {
   fotos.forEach((f, idx) => {
     html += `
       <div class="galeria-item" onclick="verFotoGrande(${idx})">
-        <img src="${f.thumbnailUrl}" alt="${escape(f.nombre)}" loading="lazy"
-             onerror="this.onerror=null; this.src='${f.viewUrl}';">
+        <div class="galeria-loading"><div class="spinner-small"></div></div>
+        <img data-foto-idx="${idx}" data-foto-id="${f.id}" alt="${escape(f.nombre)}">
       </div>
     `;
   });
   
   html += '</div>';
   cont.innerHTML = html;
+  
+  // Cargar las miniaturas a través del backend (decodifica base64 en blob)
+  cont.querySelectorAll('img[data-foto-id]').forEach(img => {
+    cargarThumbnail(img);
+  });
+}
+
+/**
+ * Carga el thumbnail de una imagen pidiéndoselo al backend en base64
+ * y convirtiéndolo a un blob URL local.
+ */
+async function cargarThumbnail(imgElement) {
+  const fileId = imgElement.dataset.fotoId;
+  if (!fileId) return;
+  
+  try {
+    const url = urlThumbnail(fileId, 'thumb');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const base64 = await res.text();
+    // El backend devuelve base64, lo convertimos a blob URL
+    const blob = base64ABlob(base64, 'image/jpeg');
+    imgElement.src = URL.createObjectURL(blob);
+    
+    // Quitar el spinner cuando carga
+    imgElement.onload = () => {
+      const loading = imgElement.parentElement.querySelector('.galeria-loading');
+      if (loading) loading.style.display = 'none';
+    };
+  } catch (err) {
+    console.error('Error cargando thumbnail:', err);
+    imgElement.alt = '⚠️';
+  }
+}
+
+function base64ABlob(base64, mimeType) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mimeType });
 }
 
 function verFotoGrande(idx) {
@@ -1577,8 +2046,8 @@ function verFotoGrande(idx) {
     </div>
     <div class="foto-overlay-img-cont">
       ${idx > 0 ? '<button class="foto-nav izq" onclick="navegarFoto(-1)">‹</button>' : ''}
-      <img src="${f.viewUrl}" alt="${escape(f.nombre)}" id="foto-grande-img"
-           onerror="this.onerror=null; this.src='${f.thumbnailUrl.replace('w400','w1200')}';">
+      <div class="foto-overlay-loading"><div class="spinner"></div><div>Cargando...</div></div>
+      <img id="foto-grande-img" alt="${escape(f.nombre)}" style="display:none;">
       ${idx < fotos.length - 1 ? '<button class="foto-nav der" onclick="navegarFoto(1)">›</button>' : ''}
     </div>
     <div class="foto-overlay-bottom">
@@ -1588,6 +2057,27 @@ function verFotoGrande(idx) {
   `;
   document.body.appendChild(overlay);
   overlay.dataset.idx = idx;
+  
+  // Cargar imagen grande vía backend
+  (async () => {
+    try {
+      const url = urlThumbnail(f.id, 'full');
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const base64 = await res.text();
+      const blob = base64ABlob(base64, 'image/jpeg');
+      const img = document.getElementById('foto-grande-img');
+      if (img) {
+        img.src = URL.createObjectURL(blob);
+        img.style.display = 'block';
+        const loading = overlay.querySelector('.foto-overlay-loading');
+        if (loading) loading.style.display = 'none';
+      }
+    } catch (err) {
+      const loading = overlay.querySelector('.foto-overlay-loading');
+      if (loading) loading.innerHTML = '⚠️ Error: ' + escape(err.message);
+    }
+  })();
 }
 
 function cerrarFotoGrande() {
@@ -1635,13 +2125,23 @@ async function eliminarFoto(idx) {
 // ============================================================================
 
 /**
- * Construye URL de Drive que selecciona automáticamente la cuenta correcta
- * usando el formato authuser=email
+ * Construye URL de Drive que selecciona automáticamente la cuenta correcta.
+ * Usa authuser=0 (cuenta principal) que suele funcionar mejor que el email.
  */
 function urlDriveCarpeta(folderId) {
   if (!folderId) return null;
-  return 'https://drive.google.com/drive/folders/' + folderId + 
-         '?authuser=' + encodeURIComponent(DRIVE_ACCOUNT_EMAIL);
+  return 'https://drive.google.com/drive/folders/' + folderId + '?authuser=0';
+}
+
+/**
+ * Construye URL del backend para obtener un thumbnail de una foto
+ */
+function urlThumbnail(fileId, size) {
+  const url = new URL(BACKEND_URL);
+  url.searchParams.set('action', 'getThumbnail');
+  url.searchParams.set('fileId', fileId);
+  url.searchParams.set('size', size || 'thumb');
+  return url.toString();
 }
 
 /**
@@ -1740,6 +2240,601 @@ document.getElementById('buscador').addEventListener('input', (e) => {
   estadoApp.filtroBusqueda = e.target.value;
   renderListaObras();
 });
+
+// ============================================================================
+// ACTA DE VISITA
+// ============================================================================
+
+let actaState = {
+  fotosIds: [],          // IDs de fotos ya subidas a Drive
+  fotosBlobs: {},        // blobs locales por id
+  transcripcion: '',
+  recognition: null,
+  grabando: false,
+  tiempoInicio: 0,
+  intervaloTiempo: null,
+  acta: null,            // acta estructurada por Gemini, editable
+  borradorEditandoId: null,
+};
+
+function irAActa() {
+  estadoApp.pantalla = 'acta';
+  mostrarPantalla('screen-acta');
+  cargarBorradores();
+}
+
+async function cargarBorradores() {
+  const cont = document.getElementById('acta-borradores');
+  const obraId = estadoApp.obraActual.id;
+  
+  try {
+    const borradores = await actaBorradoresByObra(obraId);
+    
+    if (borradores.length === 0) {
+      cont.innerHTML = '<p style="color:var(--gris-texto); text-align:center; padding:20px 0;">No hay borradores guardados</p>';
+      return;
+    }
+    
+    let html = '<h3 style="font-size:14px; color:var(--gris-texto); margin-bottom:10px;">📝 BORRADORES (' + borradores.length + ')</h3>';
+    borradores.forEach(b => {
+      const fecha = new Date(b.fecha).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      html += `
+        <div class="borrador-card">
+          <div class="info" onclick="abrirBorrador(${b.id})">
+            <div class="nombre">Acta del ${fecha}</div>
+            <div class="fecha">${(b.acta && b.acta.estadoActual ? b.acta.estadoActual.substring(0,80) + '...' : 'Sin contenido')}</div>
+          </div>
+          <button class="btn-borrar" onclick="event.stopPropagation(); borrarBorrador(${b.id})">🗑️</button>
+        </div>
+      `;
+    });
+    cont.innerHTML = html;
+  } catch (err) {
+    cont.innerHTML = '<p style="color:var(--rojo);">Error: ' + err.message + '</p>';
+  }
+}
+
+function iniciarNuevaActa() {
+  actaState = {
+    fotosIds: [],
+    fotosBlobs: {},
+    transcripcion: '',
+    recognition: null,
+    grabando: false,
+    tiempoInicio: 0,
+    intervaloTiempo: null,
+    acta: null,
+    borradorEditandoId: null,
+  };
+  
+  document.getElementById('actaTranscripcion').value = '';
+  document.getElementById('actaTranscripcionWrapper').style.display = 'none';
+  document.getElementById('actaAccionesPost').style.display = 'none';
+  document.getElementById('actaGuion').style.display = 'block';
+  document.getElementById('actaBotonGrabar').style.display = 'flex';
+  document.getElementById('btnGrabar').classList.remove('grabando');
+  document.querySelector('#btnGrabar .texto').textContent = 'GRABAR';
+  document.getElementById('grabacionTiempo').style.display = 'none';
+  
+  actualizarMiniaturasActa();
+  
+  estadoApp.pantalla = 'acta-dictado';
+  mostrarPantalla('screen-acta-dictado');
+}
+
+function salirActa() {
+  if (estadoApp.tipoSubidaActual === 'acta') {
+    estadoApp.tipoSubidaActual = null;
+  }
+  irAObra();
+}
+
+function cancelarDictado() {
+  if (actaState.grabando) {
+    detenerGrabacion();
+  }
+  if (actaState.transcripcion || actaState.fotosIds.length > 0) {
+    if (!confirm('¿Salir? Se perderá el dictado actual y las fotos añadidas (no se han guardado todavía).')) {
+      return;
+    }
+  }
+  irAActa();
+}
+
+// ===== Reconocimiento de voz =====
+
+function toggleGrabacion() {
+  if (actaState.grabando) {
+    detenerGrabacion();
+  } else {
+    iniciarGrabacion();
+  }
+}
+
+function iniciarGrabacion() {
+  // Comprobar soporte
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    toast('⚠️ Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.', 'error');
+    return;
+  }
+  
+  const reco = new SpeechRecognition();
+  reco.lang = 'es-ES';
+  reco.continuous = true;
+  reco.interimResults = true;
+  
+  let textoFinal = actaState.transcripcion || '';
+  
+  reco.onresult = (event) => {
+    let textoInterim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        textoFinal += transcript + ' ';
+      } else {
+        textoInterim += transcript;
+      }
+    }
+    actaState.transcripcion = textoFinal;
+    document.getElementById('actaTranscripcion').value = textoFinal + textoInterim;
+  };
+  
+  reco.onerror = (event) => {
+    console.error('Error reconocimiento voz:', event.error);
+    if (event.error === 'no-speech') {
+      // Ignorar, es común que haya silencios
+      return;
+    }
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      toast('⚠️ Necesitas dar permiso al micrófono', 'error');
+      detenerGrabacion();
+    } else {
+      toast('⚠️ Error: ' + event.error, 'error');
+    }
+  };
+  
+  reco.onend = () => {
+    // Auto-reinicio si todavía estamos grabando (Chrome corta cada cierto tiempo)
+    if (actaState.grabando) {
+      try { reco.start(); } catch(e) { /* ya iniciado */ }
+    }
+  };
+  
+  try {
+    reco.start();
+  } catch (err) {
+    toast('⚠️ No se pudo iniciar la grabación: ' + err.message, 'error');
+    return;
+  }
+  
+  actaState.recognition = reco;
+  actaState.grabando = true;
+  actaState.tiempoInicio = Date.now();
+  
+  // Mostrar transcripción
+  document.getElementById('actaTranscripcionWrapper').style.display = 'block';
+  document.getElementById('actaGuion').style.display = 'none';
+  
+  // Cambiar UI del botón
+  const btn = document.getElementById('btnGrabar');
+  btn.classList.add('grabando');
+  document.querySelector('#btnGrabar .icon').textContent = '⏹️';
+  document.querySelector('#btnGrabar .texto').textContent = 'DETENER';
+  
+  // Tiempo
+  const tiempo = document.getElementById('grabacionTiempo');
+  tiempo.style.display = 'block';
+  actaState.intervaloTiempo = setInterval(() => {
+    const seg = Math.floor((Date.now() - actaState.tiempoInicio) / 1000);
+    const m = Math.floor(seg / 60);
+    const s = seg % 60;
+    tiempo.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  }, 500);
+}
+
+function detenerGrabacion() {
+  actaState.grabando = false;
+  
+  if (actaState.recognition) {
+    try { actaState.recognition.stop(); } catch(e) {}
+    actaState.recognition = null;
+  }
+  
+  if (actaState.intervaloTiempo) {
+    clearInterval(actaState.intervaloTiempo);
+    actaState.intervaloTiempo = null;
+  }
+  
+  // UI
+  const btn = document.getElementById('btnGrabar');
+  btn.classList.remove('grabando');
+  document.querySelector('#btnGrabar .icon').textContent = '🎙️';
+  document.querySelector('#btnGrabar .texto').textContent = 'CONTINUAR';
+  
+  document.getElementById('actaAccionesPost').style.display = 'flex';
+  
+  // Capturar texto editado por el usuario si lo modificó manualmente
+  actaState.transcripcion = document.getElementById('actaTranscripcion').value;
+}
+
+function reiniciarDictado() {
+  if (!confirm('¿Borrar el dictado actual y empezar de nuevo?')) return;
+  actaState.transcripcion = '';
+  document.getElementById('actaTranscripcion').value = '';
+  document.getElementById('actaTranscripcionWrapper').style.display = 'none';
+  document.getElementById('actaGuion').style.display = 'block';
+  document.getElementById('actaAccionesPost').style.display = 'none';
+  document.querySelector('#btnGrabar .texto').textContent = 'GRABAR';
+}
+
+// ===== Cámara desde el acta =====
+
+function abrirCamaraActa() {
+  // Igual que la cámara normal pero el tipo es 'foto' y al subir, también añadimos a actaState
+  estadoApp.tipoSubidaActual = 'acta-foto';
+  estadoApp.contadorFotosSesion = 0;
+  document.getElementById('cameraContador').textContent = '0 fotos';
+  
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 2400 }, height: { ideal: 1800 } },
+    audio: false,
+  }).then(stream => {
+    estadoApp.cameraStream = stream;
+    document.getElementById('cameraVideo').srcObject = stream;
+    document.getElementById('camera').classList.add('active');
+  }).catch(err => {
+    toast('⚠️ No se pudo abrir la cámara: ' + err.message, 'error');
+  });
+}
+
+async function actualizarMiniaturasActa() {
+  const cont = document.getElementById('actaFotosMiniaturas');
+  if (!cont) return;
+  
+  cont.innerHTML = '';
+  
+  for (const fotoId of actaState.fotosIds) {
+    const div = document.createElement('div');
+    div.className = 'mini';
+    
+    // Si tenemos blob local, mostrar; sino cargar desde backend
+    if (actaState.fotosBlobs[fotoId]) {
+      const url = URL.createObjectURL(actaState.fotosBlobs[fotoId]);
+      div.innerHTML = `
+        <img src="${url}">
+        <button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>
+      `;
+    } else {
+      div.innerHTML = `
+        <img>
+        <button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>
+      `;
+      const img = div.querySelector('img');
+      const url = urlThumbnail(fotoId, 'thumb');
+      try {
+        const res = await fetch(url);
+        const base64 = await res.text();
+        const blob = base64ABlob(base64, 'image/jpeg');
+        img.src = URL.createObjectURL(blob);
+      } catch (e) {
+        img.alt = '⚠️';
+      }
+    }
+    
+    cont.appendChild(div);
+  }
+  
+  // Actualizar contador en preview si existe
+  const numEl = document.getElementById('prev-num-fotos');
+  if (numEl) numEl.textContent = actaState.fotosIds.length;
+}
+
+function quitarFotoActa(fotoId) {
+  actaState.fotosIds = actaState.fotosIds.filter(id => id !== fotoId);
+  delete actaState.fotosBlobs[fotoId];
+  actualizarMiniaturasActa();
+  // Si estamos en preview, actualizar también allí
+  if (estadoApp.pantalla === 'acta-preview') {
+    actualizarMiniaturasPreview();
+  }
+}
+
+// ===== Generación con Gemini =====
+
+async function generarActa() {
+  const texto = document.getElementById('actaTranscripcion').value.trim();
+  if (!texto) {
+    toast('⚠️ El dictado está vacío', 'error');
+    return;
+  }
+  
+  // Detener grabación si sigue activa
+  if (actaState.grabando) detenerGrabacion();
+  
+  toast('Generando acta...');
+  document.getElementById('btnGrabar').disabled = true;
+  
+  try {
+    const res = await backendPost({
+      action: 'generarActa',
+      id: estadoApp.obraActual.id,
+      dictado: texto,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    actaState.acta = res.acta;
+    irAPreview();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+    document.getElementById('btnGrabar').disabled = false;
+  }
+}
+
+// ===== Preview editable =====
+
+function irAPreview() {
+  const a = actaState.acta;
+  document.getElementById('prev-asistentes').value = (a.asistentes || []).join('\n');
+  document.getElementById('prev-estado').value = a.estadoActual || '';
+  document.getElementById('prev-trabajos').value = (a.trabajosEjecucion || []).join('\n');
+  document.getElementById('prev-ordenes').value = (a.ordenesIndicaciones || []).join('\n');
+  document.getElementById('prev-incidencias').value = a.incidenciasObservaciones || '';
+  
+  const firmas = a.firmas || ['tecnico'];
+  document.getElementById('firma-arquitecto').checked = firmas.indexOf('arquitecto') !== -1;
+  document.getElementById('firma-constructor').checked = firmas.indexOf('constructor') !== -1;
+  
+  actualizarMiniaturasPreview();
+  
+  estadoApp.pantalla = 'acta-preview';
+  mostrarPantalla('screen-acta-preview');
+}
+
+async function actualizarMiniaturasPreview() {
+  const cont = document.getElementById('prevFotosMiniaturas');
+  if (!cont) return;
+  
+  cont.innerHTML = '';
+  document.getElementById('prev-num-fotos').textContent = actaState.fotosIds.length;
+  
+  for (const fotoId of actaState.fotosIds) {
+    const div = document.createElement('div');
+    div.className = 'mini';
+    div.innerHTML = `
+      <img>
+      <button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>
+    `;
+    
+    const img = div.querySelector('img');
+    if (actaState.fotosBlobs[fotoId]) {
+      img.src = URL.createObjectURL(actaState.fotosBlobs[fotoId]);
+    } else {
+      try {
+        const res = await fetch(urlThumbnail(fotoId, 'thumb'));
+        const base64 = await res.text();
+        const blob = base64ABlob(base64, 'image/jpeg');
+        img.src = URL.createObjectURL(blob);
+      } catch (e) {
+        img.alt = '⚠️';
+      }
+    }
+    cont.appendChild(div);
+  }
+}
+
+function volverADictado() {
+  estadoApp.pantalla = 'acta-dictado';
+  mostrarPantalla('screen-acta-dictado');
+}
+
+function recogerActaDelPreview() {
+  const asistentes = document.getElementById('prev-asistentes').value
+    .split('\n').map(s => s.trim()).filter(s => s);
+  const trabajos = document.getElementById('prev-trabajos').value
+    .split('\n').map(s => s.trim()).filter(s => s);
+  const ordenes = document.getElementById('prev-ordenes').value
+    .split('\n').map(s => s.trim()).filter(s => s);
+  
+  const firmas = ['tecnico'];
+  if (document.getElementById('firma-arquitecto').checked) firmas.unshift('arquitecto');
+  if (document.getElementById('firma-constructor').checked) firmas.push('constructor');
+  
+  return {
+    asistentes,
+    estadoActual: document.getElementById('prev-estado').value.trim(),
+    trabajosEjecucion: trabajos,
+    ordenesIndicaciones: ordenes,
+    incidenciasObservaciones: document.getElementById('prev-incidencias').value.trim(),
+    firmas,
+  };
+}
+
+// ===== Finalizar / borrador / descartar =====
+
+let actaGuardadaInfo = null;
+
+async function finalizarActa() {
+  const acta = recogerActaDelPreview();
+  
+  toast('Guardando acta y generando PDF...');
+  
+  try {
+    const res = await backendPost({
+      action: 'guardarActa',
+      id: estadoApp.obraActual.id,
+      acta: acta,
+      fotosIds: actaState.fotosIds,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    actaGuardadaInfo = res;
+    
+    // Si era un borrador, eliminarlo
+    if (actaState.borradorEditandoId) {
+      await actaBorradorDelete(actaState.borradorEditandoId);
+    }
+    
+    estadoApp.pantalla = 'acta-guardada';
+    mostrarPantalla('screen-acta-guardada');
+    document.getElementById('acta-guardada-nombre').textContent = res.nombre;
+  } catch (err) {
+    toast('⚠️ Error al guardar: ' + err.message, 'error');
+  }
+}
+
+async function guardarBorrador() {
+  const acta = recogerActaDelPreview();
+  
+  try {
+    if (actaState.borradorEditandoId) {
+      // Actualizar borrador existente
+      await actaBorradorUpdate(actaState.borradorEditandoId, {
+        obraId: estadoApp.obraActual.id,
+        acta,
+        fotosIds: actaState.fotosIds,
+        fecha: Date.now(),
+      });
+    } else {
+      // Nuevo borrador
+      await actaBorradorAdd({
+        obraId: estadoApp.obraActual.id,
+        acta,
+        fotosIds: actaState.fotosIds,
+        fecha: Date.now(),
+      });
+    }
+    toast('✓ Borrador guardado', 'ok');
+    irAActa();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function descartarActa() {
+  if (!confirm('¿Descartar este acta? Se perderá todo lo dictado.')) return;
+  if (actaState.borradorEditandoId) {
+    await actaBorradorDelete(actaState.borradorEditandoId);
+  }
+  irAActa();
+}
+
+async function abrirBorrador(borradorId) {
+  try {
+    const b = await actaBorradorGet(borradorId);
+    if (!b) throw new Error('Borrador no encontrado');
+    
+    actaState = {
+      fotosIds: b.fotosIds || [],
+      fotosBlobs: {},
+      transcripcion: '',
+      recognition: null,
+      grabando: false,
+      tiempoInicio: 0,
+      intervaloTiempo: null,
+      acta: b.acta,
+      borradorEditandoId: b.id,
+    };
+    
+    irAPreview();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function borrarBorrador(borradorId) {
+  if (!confirm('¿Borrar este borrador definitivamente?')) return;
+  await actaBorradorDelete(borradorId);
+  cargarBorradores();
+}
+
+// ===== Compartir / Drive =====
+
+function compartirActa() {
+  if (!actaGuardadaInfo) return;
+  if (navigator.share) {
+    navigator.share({
+      title: actaGuardadaInfo.nombre,
+      url: actaGuardadaInfo.url,
+    }).catch(() => {});
+  } else {
+    // Fallback: copiar URL
+    navigator.clipboard.writeText(actaGuardadaInfo.url);
+    toast('✓ Enlace copiado al portapapeles', 'ok');
+  }
+}
+
+function abrirActaEnDrive() {
+  if (!actaGuardadaInfo) return;
+  window.open(actaGuardadaInfo.url, '_blank');
+}
+
+function volverAObra() {
+  actaGuardadaInfo = null;
+  irAObra();
+}
+
+// ===== IndexedDB para borradores de acta =====
+
+const STORE_BORRADORES = 'actaBorradores';
+
+function actaBorradoresByObra(obraId) {
+  return new Promise((resolve, reject) => {
+    if (!db.objectStoreNames.contains(STORE_BORRADORES)) {
+      return resolve([]);
+    }
+    const tx = db.transaction(STORE_BORRADORES, 'readonly');
+    const req = tx.objectStore(STORE_BORRADORES).index('obraId').getAll(obraId);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function actaBorradorAdd(b) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BORRADORES, 'readwrite');
+    const req = tx.objectStore(STORE_BORRADORES).add(b);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function actaBorradorUpdate(id, b) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BORRADORES, 'readwrite');
+    const store = tx.objectStore(STORE_BORRADORES);
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const item = getReq.result;
+      if (!item) return reject(new Error('No encontrado'));
+      Object.assign(item, b, { id });
+      const putReq = store.put(item);
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+function actaBorradorGet(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BORRADORES, 'readonly');
+    const req = tx.objectStore(STORE_BORRADORES).get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function actaBorradorDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_BORRADORES, 'readwrite');
+    const req = tx.objectStore(STORE_BORRADORES).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
 
 // ============================================================================
 // INICIALIZACIÓN
