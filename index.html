@@ -1141,15 +1141,32 @@ body {
     <div class="header">
       <h1>✓ Acta guardada</h1>
     </div>
-    <div class="content" style="text-align:center; padding-top:40px;">
+    <div class="content" style="text-align:center; padding-top:30px;">
       <div style="font-size: 60px; margin-bottom:16px;">✅</div>
       <h2 style="color:var(--verde-ok); margin-bottom:8px;">Acta finalizada</h2>
-      <p id="acta-guardada-nombre" style="color:var(--gris-texto); margin-bottom:24px; word-break:break-all;"></p>
+      <p id="acta-guardada-nombre" style="color:var(--gris-texto); margin-bottom:8px; word-break:break-all; font-size:14px;"></p>
+      <p style="color:var(--gris-texto); font-size:13px; margin-bottom:24px;">
+        Guardada en <strong>DOCUMENTACION/Actas/</strong>
+      </p>
+      
       <button class="btn-guardar" onclick="compartirActa()" style="background:var(--verde);">
-        📤 Compartir
+        📤 Compartir (WhatsApp / Email)
       </button>
-      <button class="btn-secundario" onclick="abrirActaEnDrive()">📁 Ver en Drive</button>
-      <button class="btn-secundario" onclick="volverAObra()">← Volver a la obra</button>
+      <button class="btn-secundario" onclick="abrirActaEnDrive()">
+        📁 Ver acta en Drive
+      </button>
+      <button class="btn-secundario" onclick="volverAObra()">
+        ← Volver a la obra
+      </button>
+      
+      <div style="margin-top:30px; padding-top:20px; border-top:1px solid var(--gris-medio);">
+        <button class="btn-peligro" onclick="eliminarActaGuardada()">
+          🗑️ Eliminar acta
+        </button>
+        <p style="color:var(--gris-texto); font-size:11px; margin-top:6px;">
+          Si te has equivocado, puedes eliminarla del Drive (recuperable 30 días)
+        </p>
+      </div>
     </div>
   </div>
 
@@ -1179,7 +1196,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 // Email de la cuenta donde están las carpetas (para abrir Drive con la cuenta correcta)
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
@@ -2364,40 +2381,82 @@ function iniciarGrabacion() {
   reco.continuous = true;
   reco.interimResults = true;
   
-  let textoFinal = actaState.transcripcion || '';
+  // Texto previamente confirmado (de sesiones anteriores en el mismo dictado)
+  let textoConfirmado = actaState.transcripcion || '';
+  // IDs de resultados ya procesados, para evitar duplicación tras reinicios
+  let resultadosProcesados = new Set();
   
   reco.onresult = (event) => {
     let textoInterim = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        textoFinal += transcript + ' ';
+    let nuevoTextoFinal = '';
+    
+    for (let i = 0; i < event.results.length; i++) {
+      const result = event.results[i];
+      const transcript = result[0].transcript;
+      
+      if (result.isFinal) {
+        // Cada resultado final tiene un ID único basado en su contenido + posición
+        const id = i + ':' + transcript;
+        if (!resultadosProcesados.has(id)) {
+          resultadosProcesados.add(id);
+          nuevoTextoFinal += transcript;
+          // Asegurar separación con espacio
+          if (!nuevoTextoFinal.endsWith(' ') && !nuevoTextoFinal.endsWith('.')) {
+            nuevoTextoFinal += ' ';
+          }
+        }
       } else {
         textoInterim += transcript;
       }
     }
-    actaState.transcripcion = textoFinal;
-    document.getElementById('actaTranscripcion').value = textoFinal + textoInterim;
+    
+    // Sumar lo nuevo confirmado
+    if (nuevoTextoFinal) {
+      textoConfirmado += nuevoTextoFinal;
+      actaState.transcripcion = textoConfirmado;
+    }
+    
+    // Mostrar todo: confirmado + provisional
+    const mostrar = textoConfirmado + textoInterim;
+    document.getElementById('actaTranscripcion').value = mostrar;
+    
+    // Auto-scroll al final
+    const ta = document.getElementById('actaTranscripcion');
+    ta.scrollTop = ta.scrollHeight;
   };
   
   reco.onerror = (event) => {
     console.error('Error reconocimiento voz:', event.error);
-    if (event.error === 'no-speech') {
-      // Ignorar, es común que haya silencios
+    if (event.error === 'no-speech' || event.error === 'aborted') {
+      // Ignorar, son comunes y se gestionan en onend
       return;
     }
     if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
       toast('⚠️ Necesitas dar permiso al micrófono', 'error');
       detenerGrabacion();
+    } else if (event.error === 'network') {
+      toast('⚠️ Sin conexión para reconocimiento. Reintentando...', 'error');
     } else {
-      toast('⚠️ Error: ' + event.error, 'error');
+      console.warn('Error voz: ' + event.error);
     }
   };
   
   reco.onend = () => {
-    // Auto-reinicio si todavía estamos grabando (Chrome corta cada cierto tiempo)
+    // Auto-reinicio silencioso solo si seguimos grabando
+    // Importante: NO reiniciar inmediatamente para evitar pitido
     if (actaState.grabando) {
-      try { reco.start(); } catch(e) { /* ya iniciado */ }
+      // Limpiar el set de resultados procesados al reiniciar (los índices se resetean)
+      resultadosProcesados = new Set();
+      // Pequeño delay para evitar conflicto
+      setTimeout(() => {
+        if (actaState.grabando) {
+          try { 
+            reco.start(); 
+          } catch(e) { 
+            console.warn('No se pudo reiniciar reco:', e.message);
+          }
+        }
+      }, 100);
     }
   };
   
@@ -2412,9 +2471,9 @@ function iniciarGrabacion() {
   actaState.grabando = true;
   actaState.tiempoInicio = Date.now();
   
-  // Mostrar transcripción
+  // Mostrar wrapper de transcripción (PERO NO ocultar el guion - debe quedar visible)
   document.getElementById('actaTranscripcionWrapper').style.display = 'block';
-  document.getElementById('actaGuion').style.display = 'none';
+  // El guion queda visible siempre
   
   // Cambiar UI del botón
   const btn = document.getElementById('btnGrabar');
@@ -2774,6 +2833,30 @@ function abrirActaEnDrive() {
 function volverAObra() {
   actaGuardadaInfo = null;
   irAObra();
+}
+
+async function eliminarActaGuardada() {
+  if (!actaGuardadaInfo) return;
+  
+  if (!confirm('¿Eliminar el acta?\n\n' + actaGuardadaInfo.nombre + 
+               '\n\nSe enviará a la papelera de Drive (recuperable durante 30 días).')) {
+    return;
+  }
+  
+  try {
+    toast('Eliminando...');
+    const res = await backendPost({ 
+      action: 'eliminarFoto',  // misma función backend que vale para cualquier archivo
+      archivoId: actaGuardadaInfo.archivoId 
+    });
+    if (!res.ok) throw new Error(res.error);
+    
+    toast('✓ Acta eliminada', 'ok');
+    actaGuardadaInfo = null;
+    setTimeout(() => irAObra(), 1000);
+  } catch (err) {
+    toast('⚠️ Error al eliminar: ' + err.message, 'error');
+  }
 }
 
 // ===== IndexedDB para borradores de acta =====
