@@ -1095,19 +1095,19 @@ body {
       </div>
       <div class="form-group">
         <label>2. Estado actual de la obra</label>
-        <textarea id="prev-estado" rows="3"></textarea>
+        <textarea id="prev-estado" rows="6"></textarea>
       </div>
       <div class="form-group">
-        <label>3. Trabajos en ejecución (uno por línea)</label>
-        <textarea id="prev-trabajos" rows="4"></textarea>
+        <label>3. Trabajos en ejecución</label>
+        <textarea id="prev-trabajos" rows="8"></textarea>
       </div>
       <div class="form-group">
-        <label>4. Órdenes e indicaciones (una por línea)</label>
-        <textarea id="prev-ordenes" rows="4"></textarea>
+        <label>4. Órdenes e indicaciones</label>
+        <textarea id="prev-ordenes" rows="8"></textarea>
       </div>
       <div class="form-group">
         <label>5. Incidencias / observaciones</label>
-        <textarea id="prev-incidencias" rows="3"></textarea>
+        <textarea id="prev-incidencias" rows="4"></textarea>
       </div>
       <div class="form-group">
         <label>6. Firmas</label>
@@ -1195,7 +1195,7 @@ body {
 // ============================================================================
 // CONFIGURACIÓN
 // ============================================================================
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
+const BACKEND_URL = 'https://joanferibes.github.io/visita-obras/';
 const APP_VERSION = '1.1.1';
 // Email de la cuenta donde están las carpetas (para abrir Drive con la cuenta correcta)
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
@@ -2633,13 +2633,24 @@ async function generarActa() {
 
 // ===== Preview editable =====
 
+// Convierte un valor (string o array) a string para mostrar en textarea
+function aTextoEditable(valor) {
+  if (!valor) return '';
+  if (Array.isArray(valor)) {
+    // Formato antiguo (borradores guardados antes del cambio): array → líneas
+    return valor.join('\n');
+  }
+  // Formato nuevo: string narrativo → respetar como está
+  return String(valor);
+}
+
 function irAPreview() {
   const a = actaState.acta;
   document.getElementById('prev-asistentes').value = (a.asistentes || []).join('\n');
-  document.getElementById('prev-estado').value = a.estadoActual || '';
-  document.getElementById('prev-trabajos').value = (a.trabajosEjecucion || []).join('\n');
-  document.getElementById('prev-ordenes').value = (a.ordenesIndicaciones || []).join('\n');
-  document.getElementById('prev-incidencias').value = a.incidenciasObservaciones || '';
+  document.getElementById('prev-estado').value = aTextoEditable(a.estadoActual);
+  document.getElementById('prev-trabajos').value = aTextoEditable(a.trabajosEjecucion);
+  document.getElementById('prev-ordenes').value = aTextoEditable(a.ordenesIndicaciones);
+  document.getElementById('prev-incidencias').value = aTextoEditable(a.incidenciasObservaciones);
   
   const firmas = a.firmas || ['tecnico'];
   document.getElementById('firma-arquitecto').checked = firmas.indexOf('arquitecto') !== -1;
@@ -2689,12 +2700,15 @@ function volverADictado() {
 }
 
 function recogerActaDelPreview() {
+  // Asistentes siguen siendo array (uno por línea)
   const asistentes = document.getElementById('prev-asistentes').value
     .split('\n').map(s => s.trim()).filter(s => s);
-  const trabajos = document.getElementById('prev-trabajos').value
-    .split('\n').map(s => s.trim()).filter(s => s);
-  const ordenes = document.getElementById('prev-ordenes').value
-    .split('\n').map(s => s.trim()).filter(s => s);
+  
+  // Trabajos, órdenes, estado e incidencias: texto narrativo (string)
+  const estado = document.getElementById('prev-estado').value.trim();
+  const trabajos = document.getElementById('prev-trabajos').value.trim();
+  const ordenes = document.getElementById('prev-ordenes').value.trim();
+  const incidencias = document.getElementById('prev-incidencias').value.trim();
   
   const firmas = ['tecnico'];
   if (document.getElementById('firma-arquitecto').checked) firmas.unshift('arquitecto');
@@ -2702,10 +2716,10 @@ function recogerActaDelPreview() {
   
   return {
     asistentes,
-    estadoActual: document.getElementById('prev-estado').value.trim(),
+    estadoActual: estado,
     trabajosEjecucion: trabajos,
     ordenesIndicaciones: ordenes,
-    incidenciasObservaciones: document.getElementById('prev-incidencias').value.trim(),
+    incidenciasObservaciones: incidencias,
     firmas,
   };
 }
