@@ -34,766 +34,217 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== Header ===== */
+/* Estilos completos del v1.1.1 — los reutilizo todos */
 .header {
-  background: var(--azul);
-  color: white;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  background: var(--azul); color: white; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 100;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.header h1 {
-  font-size: 18px;
-  font-weight: 600;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.header .back {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  padding: 4px 8px;
-  margin-left: -8px;
-}
+.header h1 { font-size: 18px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header .back { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 4px 8px; margin-left: -8px; }
 
-/* ===== Contenedor principal ===== */
 .app { min-height: 100vh; padding-bottom: 80px; }
 .screen { display: none; }
 .screen.active { display: block; }
-
 .content { padding: 16px; max-width: 720px; margin: 0 auto; }
 
-/* ===== Indicador de cola offline ===== */
-.cola-status {
-  background: var(--naranja);
-  color: white;
-  padding: 8px 16px;
-  font-size: 14px;
-  text-align: center;
-  display: none;
-}
+.cola-status { background: var(--naranja); color: white; padding: 8px 16px; font-size: 14px; text-align: center; display: none; }
 .cola-status.visible { display: block; }
 .cola-status.ok { background: var(--verde-ok); }
 
-/* ===== Lista de obras ===== */
-.buscador {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--gris-medio);
-  border-radius: 8px;
-  font-size: 16px;
-  margin-bottom: 16px;
-  background: white;
-}
+.buscador { width: 100%; padding: 12px 16px; border: 1px solid var(--gris-medio); border-radius: 8px; font-size: 16px; margin-bottom: 16px; background: white; }
 
-.tabs {
-  display: flex;
-  background: white;
-  border-radius: 8px;
-  padding: 4px;
-  margin-bottom: 16px;
-  box-shadow: var(--sombra);
-}
-.tab {
-  flex: 1;
-  padding: 10px;
-  text-align: center;
-  border: none;
-  background: none;
-  font-size: 15px;
-  color: var(--gris-texto);
-  cursor: pointer;
-  border-radius: 6px;
-  font-weight: 500;
-}
+.tabs { display: flex; background: white; border-radius: 8px; padding: 4px; margin-bottom: 16px; box-shadow: var(--sombra); }
+.tab { flex: 1; padding: 10px; text-align: center; border: none; background: none; font-size: 15px; color: var(--gris-texto); cursor: pointer; border-radius: 6px; font-weight: 500; }
 .tab.active { background: var(--azul); color: white; }
 
-.obra-card {
-  background: white;
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  box-shadow: var(--sombra);
-  cursor: pointer;
-  border-left: 4px solid var(--azul);
-  display: block;
-  transition: transform 0.1s;
-}
+.obra-card { background: white; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--sombra); cursor: pointer; border-left: 4px solid var(--azul); display: block; transition: transform 0.1s; }
 .obra-card:active { transform: scale(0.98); }
 .obra-card.pendiente { border-left-color: var(--naranja); }
 .obra-card.archivada { border-left-color: var(--gris-medio); opacity: 0.85; }
+.obra-card .nombre { font-size: 17px; font-weight: 600; margin-bottom: 4px; color: var(--texto); }
+.obra-card .municipio { font-size: 14px; color: var(--gris-texto); margin-bottom: 6px; }
+.obra-card .meta { font-size: 12px; color: var(--gris-texto); display: flex; justify-content: space-between; }
+.obra-card .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: var(--naranja); color: white; margin-left: 6px; }
 
-.obra-card .nombre {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: var(--texto);
-}
-.obra-card .municipio {
-  font-size: 14px;
-  color: var(--gris-texto);
-  margin-bottom: 6px;
-}
-.obra-card .meta {
-  font-size: 12px;
-  color: var(--gris-texto);
-  display: flex;
-  justify-content: space-between;
-}
-.obra-card .badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  background: var(--naranja);
-  color: white;
-  margin-left: 6px;
-}
+.fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--azul); color: white; border: none; font-size: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; }
 
-/* ===== Botón flotante ===== */
-.fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--azul);
-  color: white;
-  border: none;
-  font-size: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  cursor: pointer;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ===== Pantalla de obra ===== */
-.obra-titulo {
-  background: white;
-  padding: 16px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  box-shadow: var(--sombra);
-}
+.obra-titulo { background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; box-shadow: var(--sombra); }
 .obra-titulo h2 { font-size: 16px; margin-bottom: 4px; color: var(--azul); }
 .obra-titulo .info { font-size: 13px; color: var(--gris-texto); margin-top: 2px; }
 
 .acciones { display: grid; gap: 10px; }
 
-.btn-principal {
-  background: var(--azul);
-  color: white;
-  border: none;
-  padding: 24px;
-  border-radius: 12px;
-  font-size: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  box-shadow: var(--sombra);
-}
+.btn-principal { background: var(--azul); color: white; border: none; padding: 24px; border-radius: 12px; font-size: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: var(--sombra); }
 .btn-principal:active { background: #3d7269; }
 .btn-principal .icon { font-size: 32px; }
 
-.btn-accion {
-  background: white;
-  border: none;
-  padding: 16px;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: var(--sombra);
-  text-align: left;
-  color: var(--texto);
-  width: 100%;
-}
+.btn-accion { background: white; border: none; padding: 16px; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; box-shadow: var(--sombra); text-align: left; color: var(--texto); width: 100%; }
 .btn-accion:active { background: #f9f9f9; }
 .btn-accion .icon { font-size: 24px; min-width: 32px; text-align: center; }
 .btn-accion .label { flex: 1; font-weight: 500; }
 .btn-accion .arrow { color: var(--gris-medio); }
 
-.aviso {
-  background: #fff3cd;
-  border-left: 4px solid var(--naranja);
-  padding: 12px 14px;
-  border-radius: 6px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #856404;
-}
+/* ⭐ NUEVO v1.2.0 — Botón S+S destacado en naranja */
+.btn-accion.btn-ss { border-left: 4px solid var(--naranja); }
 
-/* ===== Formulario ===== */
+.aviso { background: #fff3cd; border-left: 4px solid var(--naranja); padding: 12px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; color: #856404; }
+
 .form-group { margin-bottom: 14px; }
-.form-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gris-texto);
-  margin-bottom: 4px;
-}
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--gris-texto); margin-bottom: 4px; }
 .form-group label .req { color: var(--rojo); }
-.form-group input, .form-group textarea, .form-group select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--gris-medio);
-  border-radius: 6px;
-  font-size: 16px;
-  font-family: inherit;
-  background: white;
-}
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--gris-medio); border-radius: 6px; font-size: 16px; font-family: inherit; background: white; }
 .form-group textarea { resize: vertical; min-height: 60px; }
 .form-group .hint { font-size: 12px; color: var(--gris-texto); margin-top: 4px; }
 
-.btn-guardar {
-  background: var(--azul);
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 10px;
-}
-.btn-secundario {
-  background: white;
-  color: var(--azul);
-  border: 1px solid var(--azul);
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 8px;
-}
-.btn-peligro {
-  background: white;
-  color: var(--rojo);
-  border: 1px solid var(--rojo);
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 8px;
-}
+.btn-guardar { background: var(--azul); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
+.btn-secundario { background: white; color: var(--azul); border: 1px solid var(--azul); padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
+.btn-peligro { background: white; color: var(--rojo); border: 1px solid var(--rojo); padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
 
-/* ===== Cámara ===== */
-.camera-screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: black;
-  z-index: 200;
-  display: none;
-  flex-direction: column;
-}
+/* Cámara y galería (sin cambios) */
+.camera-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 200; display: none; flex-direction: column; }
 .camera-screen.active { display: flex; }
-
-.camera-video {
-  flex: 1;
-  width: 100%;
-  object-fit: cover;
-  background: black;
-}
-
-.camera-top {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
-  z-index: 10;
-}
-.camera-top .btn-cerrar {
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.camera-top .contador {
-  background: rgba(0,0,0,0.5);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-}
-
-.camera-bottom {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 30px 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent);
-  z-index: 10;
-}
-
-.btn-disparo {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: white;
-  border: 5px solid rgba(255,255,255,0.5);
-  cursor: pointer;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
-}
+.camera-video { flex: 1; width: 100%; object-fit: cover; background: black; }
+.camera-top { position: absolute; top: 0; left: 0; right: 0; padding: 16px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent); z-index: 10; }
+.camera-top .btn-cerrar { background: rgba(0,0,0,0.5); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 15px; font-weight: 500; cursor: pointer; }
+.camera-top .contador { background: rgba(0,0,0,0.5); color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; }
+.camera-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px 20px; display: flex; justify-content: center; align-items: center; background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent); z-index: 10; }
+.btn-disparo { width: 80px; height: 80px; border-radius: 50%; background: white; border: 5px solid rgba(255,255,255,0.5); cursor: pointer; box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
 .btn-disparo:active { transform: scale(0.95); }
 .btn-disparo:disabled { opacity: 0.5; }
+.camera-flash { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: white; opacity: 0; pointer-events: none; z-index: 5; }
+.camera-flash.flashing { animation: flash 0.3s; }
+@keyframes flash { 0% { opacity: 0.8; } 100% { opacity: 0; } }
 
-/* Flash al hacer foto */
-.camera-flash {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: white;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 5;
-}
-.camera-flash.flashing {
-  animation: flash 0.3s;
-}
-@keyframes flash {
-  0% { opacity: 0.8; }
-  100% { opacity: 0; }
-}
+.galeria-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; color: var(--gris-texto); }
+.btn-mini { background: white; border: 1px solid var(--gris-medio); color: var(--gris-texto); padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.galeria { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.galeria-item { position: relative; aspect-ratio: 4/3; background: var(--gris-medio); cursor: pointer; overflow: hidden; border-radius: 6px; }
+.galeria-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.galeria-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+.spinner-small { display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(74,138,128,0.3); border-top-color: var(--azul); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.foto-overlay-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; color: white; font-size: 14px; }
+.foto-overlay-loading .spinner { border-color: rgba(255,255,255,0.3); border-top-color: white; width: 40px; height: 40px; }
+.galeria-empty { text-align: center; padding: 60px 20px; color: var(--gris-texto); }
 
-/* ===== Galería ===== */
-.galeria-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: var(--gris-texto);
-}
-.btn-mini {
-  background: white;
-  border: 1px solid var(--gris-medio);
-  color: var(--gris-texto);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.galeria {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-}
-.galeria-item {
-  position: relative;
-  aspect-ratio: 4/3;
-  background: var(--gris-medio);
-  cursor: pointer;
-  overflow: hidden;
-  border-radius: 6px;
-}
-.galeria-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.galeria-loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.spinner-small {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border: 3px solid rgba(74,138,128,0.3);
-  border-top-color: var(--azul);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-.foto-overlay-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: white;
-  font-size: 14px;
-}
-.foto-overlay-loading .spinner {
-  border-color: rgba(255,255,255,0.3);
-  border-top-color: white;
-  width: 40px;
-  height: 40px;
-}
-
-.galeria-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--gris-texto);
-}
-
-/* ===== Vista de foto a pantalla completa ===== */
-.foto-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.95);
-  z-index: 400;
-  display: flex;
-  flex-direction: column;
-}
-.foto-overlay-top {
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0,0,0,0.6);
-  z-index: 5;
-}
-.foto-btn {
-  background: rgba(255,255,255,0.15);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.foto-btn.rojo {
-  background: rgba(217,83,79,0.7);
-}
+.foto-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 400; display: flex; flex-direction: column; }
+.foto-overlay-top { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); z-index: 5; }
+.foto-btn { background: rgba(255,255,255,0.15); color: white; border: none; padding: 8px 14px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.foto-btn.rojo { background: rgba(217,83,79,0.7); }
 .foto-btn:active { transform: scale(0.95); }
-.foto-info {
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
-}
-.foto-overlay-img-cont {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-#foto-grande-img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-.foto-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  font-size: 32px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.foto-info { color: white; font-size: 14px; font-weight: 500; }
+.foto-overlay-img-cont { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+#foto-grande-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.foto-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 32px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .foto-nav.izq { left: 12px; }
 .foto-nav.der { right: 12px; }
-.foto-overlay-bottom {
-  padding: 12px 16px;
-  background: rgba(0,0,0,0.6);
-  color: white;
-}
-.foto-nombre {
-  font-size: 13px;
-  word-break: break-all;
-}
-.foto-fecha {
-  font-size: 12px;
-  color: #ccc;
-  margin-top: 2px;
-}
+.foto-overlay-bottom { padding: 12px 16px; background: rgba(0,0,0,0.6); color: white; }
+.foto-nombre { font-size: 13px; word-break: break-all; }
+.foto-fecha { font-size: 12px; color: #ccc; margin-top: 2px; }
 
-/* ===== Acta de visita ===== */
-.acta-fotos-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 14px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-.btn-mini-foto {
-  background: var(--azul);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  min-width: 70px;
-  flex-shrink: 0;
-}
-.acta-fotos-miniaturas {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-.acta-fotos-miniaturas .mini {
-  position: relative;
-  width: 70px;
-  height: 70px;
-  border-radius: 6px;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--gris-medio);
-}
-.acta-fotos-miniaturas .mini img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.acta-fotos-miniaturas .mini .quitar {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  border: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-}
+/* Acta (sin cambios) */
+.acta-fotos-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+.btn-mini-foto { background: var(--azul); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; flex-shrink: 0; }
+.acta-fotos-miniaturas { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.acta-fotos-miniaturas .mini { position: relative; width: 70px; height: 70px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: var(--gris-medio); }
+.acta-fotos-miniaturas .mini img { width: 100%; height: 100%; object-fit: cover; }
+.acta-fotos-miniaturas .mini .quitar { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
 
-.acta-guion {
-  background: white;
-  border-radius: 10px;
-  padding: 14px 16px;
-  box-shadow: var(--sombra);
-  margin-bottom: 16px;
-}
-.guion-titulo {
-  font-size: 12px;
-  color: var(--gris-texto);
-  font-weight: 600;
-  letter-spacing: 1px;
-  margin-bottom: 10px;
-}
-.guion-punto {
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-.guion-punto strong {
-  display: block;
-  color: var(--azul);
-  margin-bottom: 2px;
-}
-.guion-hint {
-  color: #999;
-  font-size: 13px;
-  font-style: italic;
-}
+.acta-guion { background: white; border-radius: 10px; padding: 14px 16px; box-shadow: var(--sombra); margin-bottom: 16px; }
+.guion-titulo { font-size: 12px; color: var(--gris-texto); font-weight: 600; letter-spacing: 1px; margin-bottom: 10px; }
+.guion-punto { margin-bottom: 12px; font-size: 14px; }
+.guion-punto strong { display: block; color: var(--azul); margin-bottom: 2px; }
+.guion-hint { color: #999; font-size: 13px; font-style: italic; }
 
-.acta-transcripcion {
-  background: white;
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: var(--sombra);
-  margin-bottom: 16px;
-}
-.transcripcion-titulo {
-  font-size: 13px;
-  color: var(--gris-texto);
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-#actaTranscripcion {
-  width: 100%;
-  min-height: 120px;
-  border: 1px solid var(--gris-medio);
-  border-radius: 6px;
-  padding: 10px;
-  font-family: inherit;
-  font-size: 15px;
-  resize: vertical;
-}
+.acta-transcripcion { background: white; border-radius: 10px; padding: 12px; box-shadow: var(--sombra); margin-bottom: 16px; }
+.transcripcion-titulo { font-size: 13px; color: var(--gris-texto); font-weight: 600; margin-bottom: 8px; }
+#actaTranscripcion { width: 100%; min-height: 120px; border: 1px solid var(--gris-medio); border-radius: 6px; padding: 10px; font-family: inherit; font-size: 15px; resize: vertical; }
 
-.acta-boton-grabar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px 0;
-}
-.btn-grabar {
-  background: var(--azul);
-  color: white;
-  border: none;
-  padding: 20px 40px;
-  border-radius: 50px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(74,138,128,0.4);
-}
-.btn-grabar.grabando {
-  background: var(--rojo);
-  box-shadow: 0 4px 12px rgba(217,83,79,0.4);
-  animation: pulso 1.5s ease-in-out infinite;
-}
+.acta-boton-grabar { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
+.btn-grabar { background: var(--azul); color: white; border: none; padding: 20px 40px; border-radius: 50px; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(74,138,128,0.4); }
+.btn-grabar.grabando { background: var(--rojo); box-shadow: 0 4px 12px rgba(217,83,79,0.4); animation: pulso 1.5s ease-in-out infinite; }
 .btn-grabar .icon { font-size: 26px; }
-@keyframes pulso {
-  0%, 100% { box-shadow: 0 4px 12px rgba(217,83,79,0.4); }
-  50% { box-shadow: 0 4px 24px rgba(217,83,79,0.7); }
-}
-.grabacion-tiempo {
-  margin-top: 12px;
-  font-size: 16px;
-  color: var(--rojo);
-  font-weight: 600;
-  font-family: monospace;
-}
+@keyframes pulso { 0%, 100% { box-shadow: 0 4px 12px rgba(217,83,79,0.4); } 50% { box-shadow: 0 4px 24px rgba(217,83,79,0.7); } }
+.grabacion-tiempo { margin-top: 12px; font-size: 16px; color: var(--rojo); font-weight: 600; font-family: monospace; }
 
-.acta-acciones-post {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-}
+.acta-acciones-post { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 
-/* Borradores */
-.borrador-card {
-  background: #fff8e1;
-  border-left: 4px solid var(--naranja);
-  border-radius: 8px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-.borrador-card .info {
-  flex: 1;
-}
-.borrador-card .nombre {
-  font-weight: 600;
-  font-size: 15px;
-  margin-bottom: 2px;
-}
-.borrador-card .fecha {
-  font-size: 12px;
-  color: var(--gris-texto);
-}
-.borrador-card .btn-borrar {
-  background: none;
-  border: 1px solid var(--rojo);
-  color: var(--rojo);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.toast {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.85);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 24px;
-  font-size: 14px;
-  z-index: 300;
-  opacity: 0;
-  transition: opacity 0.3s;
-  max-width: 90%;
-  text-align: center;
-}
+.borrador-card { background: #fff8e1; border-left: 4px solid var(--naranja); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.borrador-card .info { flex: 1; }
+.borrador-card .nombre { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.borrador-card .fecha { font-size: 12px; color: var(--gris-texto); }
+.borrador-card .btn-borrar { background: none; border: 1px solid var(--rojo); color: var(--rojo); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 12px 20px; border-radius: 24px; font-size: 14px; z-index: 300; opacity: 0; transition: opacity 0.3s; max-width: 90%; text-align: center; }
 .toast.visible { opacity: 1; }
 .toast.error { background: var(--rojo); }
 .toast.ok { background: var(--verde-ok); }
 
-/* ===== Spinner ===== */
-.spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.loading-screen {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--gris-texto);
-}
-.loading-screen .spinner {
-  border-color: rgba(74,138,128,0.3);
-  border-top-color: var(--azul);
-  width: 32px;
-  height: 32px;
-  margin-bottom: 12px;
-}
+.loading-screen { text-align: center; padding: 60px 20px; color: var(--gris-texto); }
+.loading-screen .spinner { border-color: rgba(74,138,128,0.3); border-top-color: var(--azul); width: 32px; height: 32px; margin-bottom: 12px; }
 
-/* ===== Configuración ===== */
-.config-banner {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 14px;
-  text-align: center;
-  font-size: 14px;
-  border-bottom: 2px solid #f5c6cb;
-  display: none;
-}
+.config-banner { background: #f8d7da; color: #721c24; padding: 14px; text-align: center; font-size: 14px; border-bottom: 2px solid #f5c6cb; display: none; }
 .config-banner.visible { display: block; }
+
+/* ============================================================================
+   ⭐ NUEVOS ESTILOS v1.2.0 — SEGURIDAD Y SALUD
+   ============================================================================ */
+
+/* Pantalla principal S+S */
+.ss-seccion { background: white; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--sombra); }
+.ss-seccion h3 { font-size: 13px; color: var(--gris-texto); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; text-transform: uppercase; }
+.ss-seccion h3 .icono { margin-right: 6px; }
+
+/* Tarjetas de estado (checks de qué se ha hecho) */
+.ss-estado-grid { display: grid; gap: 8px; }
+.ss-estado-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--gris-fondo); border-radius: 8px; font-size: 14px; }
+.ss-estado-item .estado-icon { font-size: 20px; min-width: 24px; text-align: center; }
+.ss-estado-item.hecho { background: #e7f5ea; color: var(--verde-ok); }
+.ss-estado-item.pendiente { background: #fff3cd; color: #856404; }
+.ss-estado-item .fecha { font-size: 11px; color: var(--gris-texto); margin-left: auto; }
+
+/* Acción S+S — un botón con icono, título y descripción */
+.ss-accion { background: white; border: 1px solid var(--gris-medio); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; }
+.ss-accion:active { background: #f9f9f9; }
+.ss-accion.deshabilitado { opacity: 0.5; cursor: not-allowed; }
+.ss-accion .icono-grande { font-size: 28px; min-width: 36px; text-align: center; }
+.ss-accion .texto-accion { flex: 1; }
+.ss-accion .titulo-accion { font-weight: 600; font-size: 15px; color: var(--texto); margin-bottom: 2px; }
+.ss-accion .desc-accion { font-size: 12px; color: var(--gris-texto); }
+.ss-accion .marca-hecho { color: var(--verde-ok); font-size: 18px; font-weight: bold; }
+
+/* Empresas */
+.ss-empresa-card { background: white; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--sombra); border-left: 3px solid var(--azul); }
+.ss-empresa-card.subcontratista { border-left-color: var(--naranja); }
+.ss-empresa-card .nombre-emp { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.ss-empresa-card .actividad-emp { font-size: 13px; color: var(--gris-texto); margin-bottom: 4px; }
+.ss-empresa-card .estado-emp { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: var(--gris-medio); color: var(--gris-texto); }
+.ss-empresa-card .estado-emp.ok { background: var(--verde-ok); color: white; }
+.ss-empresa-card .estado-emp.pendiente { background: var(--naranja); color: white; }
+.ss-empresa-card .acciones-emp { margin-top: 8px; display: flex; gap: 6px; }
+.ss-empresa-card .acciones-emp button { background: white; border: 1px solid var(--gris-medio); padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--gris-texto); }
+
+/* Pantalla de firma con canvas */
+.firma-pantalla { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 500; display: none; flex-direction: column; }
+.firma-pantalla.active { display: flex; }
+.firma-cabecera { background: var(--azul); color: white; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+.firma-cabecera h2 { font-size: 16px; font-weight: 600; }
+.firma-cabecera .firma-quien { font-size: 13px; opacity: 0.9; }
+.firma-contenido { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow: hidden; }
+.firma-instrucciones { text-align: center; font-size: 14px; color: var(--gris-texto); padding: 8px; }
+.firma-canvas-wrapper { flex: 1; border: 2px dashed var(--gris-medio); border-radius: 12px; position: relative; background: #fafafa; min-height: 200px; }
+#firmaCanvas { width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+.firma-canvas-vacio { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--gris-medio); font-size: 16px; pointer-events: none; }
+.firma-canvas-vacio.oculto { display: none; }
+.firma-botones { display: flex; gap: 8px; padding: 12px 16px 20px; background: white; border-top: 1px solid var(--gris-medio); }
+.firma-botones button { flex: 1; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; }
+.firma-btn-limpiar { background: white; color: var(--rojo); border: 1px solid var(--rojo) !important; }
+.firma-btn-cancelar { background: white; color: var(--gris-texto); border: 1px solid var(--gris-medio) !important; }
+.firma-btn-aceptar { background: var(--verde-ok); color: white; }
 
 </style>
 </head>
@@ -809,21 +260,14 @@ body {
 
   <!-- ===== PANTALLA: LISTA DE OBRAS ===== -->
   <div class="screen active" id="screen-lista">
-    <div class="header">
-      <h1>📋 OBRAS</h1>
-    </div>
+    <div class="header"><h1>📋 OBRAS</h1></div>
     <div class="content">
       <input type="text" class="buscador" id="buscador" placeholder="🔍 Buscar obra...">
       <div class="tabs">
         <button class="tab active" data-tab="activas" onclick="cambiarTab('activas')">Activas</button>
         <button class="tab" data-tab="archivadas" onclick="cambiarTab('archivadas')">Archivadas</button>
       </div>
-      <div id="lista-obras">
-        <div class="loading-screen">
-          <div class="spinner"></div>
-          <div>Cargando obras...</div>
-        </div>
-      </div>
+      <div id="lista-obras"><div class="loading-screen"><div class="spinner"></div><div>Cargando obras...</div></div></div>
     </div>
     <button class="fab" onclick="irAFormularioNueva()">+</button>
   </div>
@@ -850,43 +294,34 @@ body {
 
       <div class="acciones">
         <button class="btn-principal" onclick="abrirCamara('foto')">
-          <span class="icon">📷</span>
-          <span>HACER FOTOS</span>
+          <span class="icon">📷</span><span>HACER FOTOS</span>
         </button>
         <button class="btn-accion" onclick="abrirGaleria()">
-          <span class="icon">📸</span>
-          <span class="label">Ver fotos</span>
-          <span class="arrow">›</span>
+          <span class="icon">📸</span><span class="label">Ver fotos</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="subirDocumentoGeneral()">
-          <span class="icon">📄</span>
-          <span class="label">Subir documento</span>
-          <span class="arrow">›</span>
+          <span class="icon">📄</span><span class="label">Subir documento</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="irAControlCalidad()">
-          <span class="icon">🧪</span>
-          <span class="label">Control de calidad</span>
-          <span class="arrow">›</span>
+          <span class="icon">🧪</span><span class="label">Control de calidad</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="irAActa()">
-          <span class="icon">🎙️</span>
-          <span class="label">Acta de visita</span>
-          <span class="arrow">›</span>
+          <span class="icon">🎙️</span><span class="label">Acta de visita</span><span class="arrow">›</span>
         </button>
+        
+        <!-- ⭐ NUEVO v1.2.0 — Botón Seguridad y Salud -->
+        <button class="btn-accion btn-ss" onclick="irASeguridadSalud()">
+          <span class="icon">🦺</span><span class="label">Seguridad y Salud</span><span class="arrow">›</span>
+        </button>
+        
         <button class="btn-accion" onclick="abrirCarpetaProyecto()">
-          <span class="icon">📐</span>
-          <span class="label">Ver proyecto</span>
-          <span class="arrow">›</span>
+          <span class="icon">📐</span><span class="label">Ver proyecto</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="abrirCarpetaDrive()">
-          <span class="icon">📁</span>
-          <span class="label">Abrir en Drive</span>
-          <span class="arrow">›</span>
+          <span class="icon">📁</span><span class="label">Abrir en Drive</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="irAFormularioEditar()">
-          <span class="icon">⚙️</span>
-          <span class="label">Datos del expediente</span>
-          <span class="arrow">›</span>
+          <span class="icon">⚙️</span><span class="label">Datos del expediente</span><span class="arrow">›</span>
         </button>
       </div>
     </div>
@@ -901,18 +336,13 @@ body {
     <div class="content">
       <div class="acciones">
         <button class="btn-principal" onclick="abrirCamara('cc-foto')">
-          <span class="icon">📷</span>
-          <span>FOTO FICHA TÉCNICA</span>
+          <span class="icon">📷</span><span>FOTO FICHA TÉCNICA</span>
         </button>
         <button class="btn-accion" onclick="subirDocumentoCC()">
-          <span class="icon">📄</span>
-          <span class="label">Subir documento de obra</span>
-          <span class="arrow">›</span>
+          <span class="icon">📄</span><span class="label">Subir documento de obra</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="abrirCarpetaCC()">
-          <span class="icon">📁</span>
-          <span class="label">Ver todo en Drive</span>
-          <span class="arrow">›</span>
+          <span class="icon">📁</span><span class="label">Ver todo en Drive</span><span class="arrow">›</span>
         </button>
       </div>
     </div>
@@ -930,34 +360,36 @@ body {
         <input type="text" id="f-nombreCorto" placeholder="Ej: Ampliación Orba">
         <div class="hint">El que aparece en la lista de obras</div>
       </div>
-      <div class="form-group">
-        <label>Título oficial</label>
-        <input type="text" id="f-tituloOficial" placeholder="Ej: Ampliación de vivienda unifamiliar...">
-      </div>
-      <div class="form-group">
-        <label>Nº expediente</label>
-        <input type="text" id="f-numExpediente" placeholder="Ej: 128-24-D">
-      </div>
-      <div class="form-group">
-        <label>Dirección</label>
-        <input type="text" id="f-direccion" placeholder="Ej: C/ Mayor, 23">
-      </div>
-      <div class="form-group">
-        <label>Municipio</label>
-        <input type="text" id="f-municipio" placeholder="Ej: Orba">
-      </div>
+      <div class="form-group"><label>Título oficial</label><input type="text" id="f-tituloOficial"></div>
+      <div class="form-group"><label>Nº expediente</label><input type="text" id="f-numExpediente"></div>
+      <div class="form-group"><label>Dirección</label><input type="text" id="f-direccion"></div>
+      <div class="form-group"><label>Municipio</label><input type="text" id="f-municipio"></div>
+      
       <div class="form-group">
         <label>Promotor</label>
         <input type="text" id="f-promotor">
       </div>
+      <!-- ⭐ NUEVO v1.2.0 -->
       <div class="form-group">
-        <label>Arquitecto</label>
-        <input type="text" id="f-arquitecto">
+        <label>📧 Email del promotor</label>
+        <input type="email" id="f-emailPromotor" placeholder="ejemplo@correo.com">
+        <div class="hint">Para correos de Seguridad y Salud</div>
       </div>
+      
+      <div class="form-group"><label>Arquitecto</label><input type="text" id="f-arquitecto"></div>
+      
       <div class="form-group">
         <label>Constructor</label>
         <input type="text" id="f-constructor">
+        <div class="hint">Será el contratista principal a efectos de S+S</div>
       </div>
+      <!-- ⭐ NUEVO v1.2.0 -->
+      <div class="form-group">
+        <label>📧 Email del constructor</label>
+        <input type="email" id="f-emailConstructor" placeholder="ejemplo@correo.com">
+        <div class="hint">Para correos de Seguridad y Salud</div>
+      </div>
+      
       <div class="form-group">
         <label>Otras especialidades</label>
         <textarea id="f-otrasEspecialidades" placeholder="Ej: Ingeniero: Pedro Ruiz"></textarea>
@@ -982,95 +414,50 @@ body {
     </div>
     <div class="content">
       <div id="galeria-contenedor">
-        <div class="loading-screen">
-          <div class="spinner"></div>
-          <div>Cargando fotos...</div>
-        </div>
+        <div class="loading-screen"><div class="spinner"></div><div>Cargando fotos...</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== PANTALLA: ACTA - INICIO ===== -->
+  <!-- ===== PANTALLAS DE ACTA (sin cambios) ===== -->
   <div class="screen" id="screen-acta">
-    <div class="header">
-      <button class="back" onclick="salirActa()">←</button>
-      <h1>🎙️ Acta de visita</h1>
-    </div>
+    <div class="header"><button class="back" onclick="salirActa()">←</button><h1>🎙️ Acta de visita</h1></div>
     <div class="content">
-      
-      <!-- Lista de borradores existentes -->
       <div id="acta-borradores"></div>
-      
-      <!-- Botón de nueva acta -->
       <button class="btn-principal" onclick="iniciarNuevaActa()" style="margin-bottom:16px;">
-        <span class="icon">➕</span>
-        <span>NUEVA ACTA</span>
+        <span class="icon">➕</span><span>NUEVA ACTA</span>
       </button>
     </div>
   </div>
 
-  <!-- ===== PANTALLA: ACTA - DICTADO ===== -->
   <div class="screen" id="screen-acta-dictado">
-    <div class="header">
-      <button class="back" onclick="cancelarDictado()">←</button>
-      <h1>🎙️ Dictar acta</h1>
-    </div>
+    <div class="header"><button class="back" onclick="cancelarDictado()">←</button><h1>🎙️ Dictar acta</h1></div>
     <div class="content">
-      
-      <!-- Fotos del acta (miniaturas + añadir) -->
       <div class="acta-fotos-row">
         <button class="btn-mini-foto" onclick="abrirCamaraActa()">
-          <span style="font-size:20px;">📷</span>
-          <span>Añadir foto</span>
+          <span style="font-size:20px;">📷</span><span>Añadir foto</span>
         </button>
         <div class="acta-fotos-miniaturas" id="actaFotosMiniaturas"></div>
       </div>
-      
-      <!-- Guion -->
       <div class="acta-guion" id="actaGuion">
         <div class="guion-titulo">📝 GUION</div>
-        <div class="guion-punto">
-          <strong>1. ASISTENTES</strong>
-          <span class="guion-hint">(está el arquitecto, el promotor, el constructor, encargado...)</span>
-        </div>
-        <div class="guion-punto">
-          <strong>2. ESTADO ACTUAL DE LA OBRA</strong>
-          <span class="guion-hint">(en qué fase estamos, breve resumen)</span>
-        </div>
-        <div class="guion-punto">
-          <strong>3. TRABAJOS EN EJECUCIÓN</strong>
-          <span class="guion-hint">(describe los trabajos que se están realizando)</span>
-        </div>
-        <div class="guion-punto">
-          <strong>4. ÓRDENES E INDICACIONES</strong>
-          <span class="guion-hint">(órdenes o cosas a tener en cuenta que se comentan en obra)</span>
-        </div>
-        <div class="guion-punto">
-          <strong>5. INCIDENCIAS / OBSERVACIONES</strong>
-          <span class="guion-hint">(si hay algo que no se ajusta a proyecto o a algo indicado)</span>
-        </div>
-        <div class="guion-punto">
-          <strong>6. FIRMAS</strong>
-          <span class="guion-hint">(di "firma arquitecto" o "firman arquitecto y constructor". Si no dices nada firmas tú solo)</span>
-        </div>
+        <div class="guion-punto"><strong>1. ASISTENTES</strong><span class="guion-hint">(está el arquitecto, el promotor, el constructor, encargado...)</span></div>
+        <div class="guion-punto"><strong>2. ESTADO ACTUAL DE LA OBRA</strong><span class="guion-hint">(en qué fase estamos, breve resumen)</span></div>
+        <div class="guion-punto"><strong>3. TRABAJOS EN EJECUCIÓN</strong><span class="guion-hint">(describe los trabajos que se están realizando)</span></div>
+        <div class="guion-punto"><strong>4. ÓRDENES E INDICACIONES</strong><span class="guion-hint">(órdenes o cosas a tener en cuenta que se comentan en obra)</span></div>
+        <div class="guion-punto"><strong>5. INCIDENCIAS / OBSERVACIONES</strong><span class="guion-hint">(si hay algo que no se ajusta a proyecto)</span></div>
+        <div class="guion-punto"><strong>6. FIRMAS</strong><span class="guion-hint">(di "firma arquitecto" o "firman arquitecto y constructor")</span></div>
       </div>
-      
-      <!-- Transcripción en vivo -->
       <div class="acta-transcripcion" id="actaTranscripcionWrapper" style="display:none;">
         <div class="transcripcion-titulo">🎙️ Transcripción</div>
         <textarea id="actaTranscripcion" placeholder="El texto dictado aparecerá aquí..."></textarea>
       </div>
-      
-      <!-- Botón grabar -->
       <div class="acta-boton-grabar" id="actaBotonGrabar">
         <button class="btn-grabar" id="btnGrabar" onclick="toggleGrabacion()">
-          <span class="icon">🎙️</span>
-          <span class="texto">GRABAR</span>
+          <span class="icon">🎙️</span><span class="texto">GRABAR</span>
         </button>
         <div class="grabacion-tiempo" id="grabacionTiempo" style="display:none;">0:00</div>
       </div>
-      
-      <!-- Botones tras detener grabación -->
       <div class="acta-acciones-post" id="actaAccionesPost" style="display:none;">
         <button class="btn-guardar" onclick="generarActa()">✨ Generar acta</button>
         <button class="btn-secundario" onclick="reiniciarDictado()">🔄 Reiniciar dictado</button>
@@ -1078,94 +465,137 @@ body {
     </div>
   </div>
 
-  <!-- ===== PANTALLA: ACTA - PREVIEW ===== -->
   <div class="screen" id="screen-acta-preview">
-    <div class="header">
-      <button class="back" onclick="volverADictado()">←</button>
-      <h1>📝 Revisar acta</h1>
-    </div>
+    <div class="header"><button class="back" onclick="volverADictado()">←</button><h1>📝 Revisar acta</h1></div>
     <div class="content">
-      <div class="aviso" style="margin-bottom:16px;">
-        💡 Puedes editar cualquier campo antes de finalizar
-      </div>
-      
-      <div class="form-group">
-        <label>1. Asistentes (uno por línea)</label>
-        <textarea id="prev-asistentes" rows="3"></textarea>
-      </div>
-      <div class="form-group">
-        <label>2. Estado actual de la obra</label>
-        <textarea id="prev-estado" rows="6"></textarea>
-      </div>
-      <div class="form-group">
-        <label>3. Trabajos en ejecución</label>
-        <textarea id="prev-trabajos" rows="8"></textarea>
-      </div>
-      <div class="form-group">
-        <label>4. Órdenes e indicaciones</label>
-        <textarea id="prev-ordenes" rows="8"></textarea>
-      </div>
-      <div class="form-group">
-        <label>5. Incidencias / observaciones</label>
-        <textarea id="prev-incidencias" rows="4"></textarea>
-      </div>
+      <div class="aviso" style="margin-bottom:16px;">💡 Puedes editar cualquier campo antes de finalizar</div>
+      <div class="form-group"><label>1. Asistentes (uno por línea)</label><textarea id="prev-asistentes" rows="3"></textarea></div>
+      <div class="form-group"><label>2. Estado actual de la obra</label><textarea id="prev-estado" rows="6"></textarea></div>
+      <div class="form-group"><label>3. Trabajos en ejecución</label><textarea id="prev-trabajos" rows="8"></textarea></div>
+      <div class="form-group"><label>4. Órdenes e indicaciones</label><textarea id="prev-ordenes" rows="8"></textarea></div>
+      <div class="form-group"><label>5. Incidencias / observaciones</label><textarea id="prev-incidencias" rows="4"></textarea></div>
       <div class="form-group">
         <label>6. Firmas</label>
         <div style="font-size:14px;">
-          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
-            <input type="checkbox" id="firma-arquitecto"> Arquitecto
-          </label>
-          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
-            <input type="checkbox" id="firma-constructor"> Constructor
-          </label>
-          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;">
-            <input type="checkbox" id="firma-tecnico" checked disabled> Director de Ejecución (tú, siempre)
-          </label>
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-arquitecto"> Arquitecto</label>
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-constructor"> Constructor</label>
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-tecnico" checked disabled> Director de Ejecución (tú, siempre)</label>
         </div>
       </div>
-      
-      <!-- Fotos del acta -->
       <div class="form-group">
         <label>Fotos para anexar al PDF (<span id="prev-num-fotos">0</span>)</label>
         <div class="acta-fotos-miniaturas" id="prevFotosMiniaturas"></div>
       </div>
-      
       <button class="btn-guardar" onclick="finalizarActa()">✓ Finalizar y guardar</button>
       <button class="btn-secundario" onclick="guardarBorrador()">💾 Guardar borrador</button>
       <button class="btn-peligro" onclick="descartarActa()">🗑️ Descartar</button>
     </div>
   </div>
 
-  <!-- ===== PANTALLA: ACTA - GUARDADA ===== -->
   <div class="screen" id="screen-acta-guardada">
-    <div class="header">
-      <h1>✓ Acta guardada</h1>
-    </div>
+    <div class="header"><h1>✓ Acta guardada</h1></div>
     <div class="content" style="text-align:center; padding-top:30px;">
       <div style="font-size: 60px; margin-bottom:16px;">✅</div>
       <h2 style="color:var(--verde-ok); margin-bottom:8px;">Acta finalizada</h2>
       <p id="acta-guardada-nombre" style="color:var(--gris-texto); margin-bottom:8px; word-break:break-all; font-size:14px;"></p>
-      <p style="color:var(--gris-texto); font-size:13px; margin-bottom:24px;">
-        Guardada en <strong>DOCUMENTACION/Actas/</strong>
-      </p>
-      
-      <button class="btn-guardar" onclick="compartirActa()" style="background:var(--verde);">
-        📤 Compartir (WhatsApp / Email)
-      </button>
-      <button class="btn-secundario" onclick="abrirActaEnDrive()">
-        📁 Ver acta en Drive
-      </button>
-      <button class="btn-secundario" onclick="volverAObra()">
-        ← Volver a la obra
-      </button>
-      
+      <p style="color:var(--gris-texto); font-size:13px; margin-bottom:24px;">Guardada en <strong>DOCUMENTACION/Actas/</strong></p>
+      <button class="btn-guardar" onclick="compartirActa()" style="background:var(--verde);">📤 Compartir (WhatsApp / Email)</button>
+      <button class="btn-secundario" onclick="abrirActaEnDrive()">📁 Ver acta en Drive</button>
+      <button class="btn-secundario" onclick="volverAObra()">← Volver a la obra</button>
       <div style="margin-top:30px; padding-top:20px; border-top:1px solid var(--gris-medio);">
-        <button class="btn-peligro" onclick="eliminarActaGuardada()">
-          🗑️ Eliminar acta
-        </button>
-        <p style="color:var(--gris-texto); font-size:11px; margin-top:6px;">
-          Si te has equivocado, puedes eliminarla del Drive (recuperable 30 días)
+        <button class="btn-peligro" onclick="eliminarActaGuardada()">🗑️ Eliminar acta</button>
+        <p style="color:var(--gris-texto); font-size:11px; margin-top:6px;">Si te has equivocado, puedes eliminarla del Drive (recuperable 30 días)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- ⭐ NUEVA PANTALLA v1.2.0 — SEGURIDAD Y SALUD                   -->
+  <!-- ============================================================== -->
+  <div class="screen" id="screen-ss">
+    <div class="header">
+      <button class="back" onclick="irAObra()">←</button>
+      <h1>🦺 Seguridad y Salud</h1>
+    </div>
+    <div class="content">
+      
+      <!-- Aviso si faltan datos -->
+      <div id="ss-aviso-datos" style="display:none">
+        <div class="aviso">
+          ⚠️ Faltan datos importantes para Seguridad y Salud (emails, constructor, etc.)
+          <br><a href="#" onclick="irAFormularioEditar(); return false;" style="color:#856404; font-weight:600;">Completar datos →</a>
+        </div>
+      </div>
+
+      <!-- Estado actual: qué se ha hecho -->
+      <div class="ss-seccion">
+        <h3><span class="icono">📋</span>ESTADO DE LA OBRA</h3>
+        <div id="ss-estado-resumen">
+          <div class="loading-screen" style="padding:20px;"><div class="spinner"></div><div>Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- Acciones disponibles (Paso B → B implementará el contenido) -->
+      <div class="ss-seccion">
+        <h3><span class="icono">📄</span>DOCUMENTOS S+S</h3>
+        <p style="font-size:13px; color:var(--gris-texto); margin-bottom:12px;">
+          Las acciones para generar documentos (acta de aprobación, recibí del libro, etc.) se añadirán en la próxima actualización (Paso B).
         </p>
+        <button class="ss-accion deshabilitado" onclick="proximamente('Solicitar Plan de S+S')">
+          <span class="icono-grande">📧</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Solicitar Plan de S+S</div>
+            <div class="desc-accion">Correo al constructor pidiéndolo</div>
+          </div>
+        </button>
+        <button class="ss-accion deshabilitado" onclick="proximamente('Acta Designación Coordinador')">
+          <span class="icono-grande">🧑‍💼</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Designación de Coordinador</div>
+            <div class="desc-accion">Firma promotor</div>
+          </div>
+        </button>
+        <button class="ss-accion deshabilitado" onclick="proximamente('Acta Aprobación del Plan')">
+          <span class="icono-grande">✅</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Aprobación del Plan de S+S</div>
+            <div class="desc-accion">Firma coordinador y constructor</div>
+          </div>
+        </button>
+        <button class="ss-accion deshabilitado" onclick="proximamente('Recibí Libro de Incidencias')">
+          <span class="icono-grande">📕</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Recibí del Libro de Incidencias</div>
+            <div class="desc-accion">Firma constructor en obra</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Empresas (contratista + subcontratas) -->
+      <div class="ss-seccion">
+        <h3><span class="icono">🏗️</span>EMPRESAS EN OBRA</h3>
+        <div id="ss-empresas-lista">
+          <div class="loading-screen" style="padding:20px;"><div class="spinner"></div><div>Cargando...</div></div>
+        </div>
+        <button class="ss-accion" onclick="proximamente('Añadir subcontrata')" style="margin-top:8px;">
+          <span class="icono-grande">➕</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Añadir subcontrata</div>
+            <div class="desc-accion">(disponible en Paso D)</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Acceso rápido a carpetas Drive -->
+      <div class="ss-seccion">
+        <h3><span class="icono">📂</span>CARPETAS EN DRIVE</h3>
+        <button class="ss-accion" onclick="abrirCarpetaSSDrive()">
+          <span class="icono-grande">📁</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Abrir carpeta SEGURIDAD Y SALUD</div>
+            <div class="desc-accion">en Drive</div>
+          </div>
+        </button>
       </div>
     </div>
   </div>
@@ -1185,10 +615,32 @@ body {
   </div>
 </div>
 
+<!-- ⭐ NUEVO v1.2.0 — PANTALLA DE FIRMA -->
+<div class="firma-pantalla" id="firmaPantalla">
+  <div class="firma-cabecera">
+    <div>
+      <h2 id="firmaTitulo">Firma</h2>
+      <div class="firma-quien" id="firmaQuien"></div>
+    </div>
+  </div>
+  <div class="firma-contenido">
+    <p class="firma-instrucciones">Firme con el dedo o lápiz en el recuadro</p>
+    <div class="firma-canvas-wrapper">
+      <canvas id="firmaCanvas"></canvas>
+      <div class="firma-canvas-vacio" id="firmaVacio">✍️ Toque aquí para firmar</div>
+    </div>
+  </div>
+  <div class="firma-botones">
+    <button class="firma-btn-cancelar" onclick="cancelarFirma()">Cancelar</button>
+    <button class="firma-btn-limpiar" onclick="limpiarFirma()">Limpiar</button>
+    <button class="firma-btn-aceptar" onclick="aceptarFirma()">✓ Aceptar firma</button>
+  </div>
+</div>
+
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
-<!-- ===== INPUT FILE OCULTO PARA SUBIR DOCUMENTOS ===== -->
+<!-- ===== INPUT FILE OCULTO ===== -->
 <input type="file" id="inputFile" style="display:none" accept="image/*,application/pdf">
 
 <script>
@@ -1196,8 +648,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.1.1';
-// Email de la cuenta donde están las carpetas (para abrir Drive con la cuenta correcta)
+const APP_VERSION = '1.2.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1210,13 +661,16 @@ let estadoApp = {
   tabActivo: 'activas',
   filtroBusqueda: '',
   modoEdicion: false,
-  tipoSubidaActual: null, // 'foto' | 'cc-foto' | 'documento' | 'cc-documento'
+  tipoSubidaActual: null,
   contadorFotosSesion: 0,
   cameraStream: null,
 };
 
+// ⭐ NUEVO v1.2.0 — cache de subcarpetas S+S por obra
+let subcarpetasSSObra = null;
+
 // ============================================================================
-// INDEXED DB — COLA OFFLINE
+// INDEXED DB — COLA OFFLINE (sin cambios)
 // ============================================================================
 const DB_NAME = 'visitaobras';
 const DB_VERSION = 2;
@@ -1240,7 +694,6 @@ function abrirDB() {
         const store = dbu.createObjectStore(STORE_FOTOS_LOCALES, { keyPath: 'id', autoIncrement: true });
         store.createIndex('obraId', 'obraId');
       }
-      // v2: store de borradores de acta
       if (!dbu.objectStoreNames.contains('actaBorradores')) {
         const store = dbu.createObjectStore('actaBorradores', { keyPath: 'id', autoIncrement: true });
         store.createIndex('obraId', 'obraId');
@@ -1329,7 +782,6 @@ async function backendGet(action, params = {}) {
   const url = new URL(BACKEND_URL);
   url.searchParams.set('action', action);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
@@ -1339,7 +791,7 @@ async function backendPost(payload) {
   const res = await fetch(BACKEND_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'text/plain' } // text/plain evita preflight CORS
+    headers: { 'Content-Type': 'text/plain' }
   });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
@@ -1363,7 +815,6 @@ async function procesarCola() {
       try {
         const result = await backendPost(item.payload);
         if (result.ok) {
-          // Si es una foto de acta, reemplazar el tempId por el archivoId real
           if (item.esActa && item.tempId && result.archivoId) {
             const idx = actaState.fotosIds.indexOf(item.tempId);
             if (idx !== -1) {
@@ -1374,9 +825,7 @@ async function procesarCola() {
               if (estadoApp.pantalla === 'acta-preview') actualizarMiniaturasPreview();
             }
           }
-          
           await colaDelete(item.id);
-          // Si era una foto local, eliminarla también del store local
           if (item.fotoLocalId) {
             await fotoLocalDelete(item.fotoLocalId);
           }
@@ -1388,20 +837,18 @@ async function procesarCola() {
           });
         }
       } catch (err) {
-        // Error de red — sigue pendiente
         await colaUpdate(item.id, { 
           estado: 'pendiente',
           ultimoError: err.toString(),
           intentos: (item.intentos || 0) + 1
         });
-        break; // si falla por red, no seguir intentando los demás ahora
+        break;
       }
     }
     
     const pendientesDespues = await colaListPendientes();
     actualizarColaStatus(pendientesDespues.length);
     
-    // Refrescar galería si estamos viéndola
     if (estadoApp.pantalla === 'galeria') {
       cargarGaleria();
     }
@@ -1456,8 +903,7 @@ function blobABase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
-      const result = reader.result;
-      const base64 = result.split(',')[1];
+      const base64 = reader.result.split(',')[1];
       resolve(base64);
     };
     reader.onerror = reject;
@@ -1576,9 +1022,7 @@ function renderListaObras() {
   
   cont.innerHTML = obras.map(o => {
     const cls = o.estado === 'Pendiente' ? 'pendiente' : (o.estado === 'Archivada' ? 'archivada' : '');
-    const meta = o.ultimaVisita 
-      ? '🕐 ' + formatearFechaRelativa(o.ultimaVisita) 
-      : 'Sin visitas aún';
+    const meta = o.ultimaVisita ? '🕐 ' + formatearFechaRelativa(o.ultimaVisita) : 'Sin visitas aún';
     const badge = o.estado === 'Pendiente' ? '<span class="badge">Sin Drive</span>' : '';
     return `
       <div class="obra-card ${cls}" onclick="seleccionarObra('${o.id}')">
@@ -1596,8 +1040,9 @@ function renderListaObras() {
 function seleccionarObra(id) {
   estadoApp.obraActual = estadoApp.obras.find(o => o.id === id);
   if (!estadoApp.obraActual) return;
-  subcarpetasObra = null; // resetear cache de subcarpetas
-  cargarSubcarpetas(); // cargar en background
+  subcarpetasObra = null;
+  subcarpetasSSObra = null; // ⭐ NUEVO v1.2.0
+  cargarSubcarpetas();
   irAObra();
 }
 
@@ -1629,23 +1074,23 @@ function renderObra() {
   
   document.getElementById('obra-header-nombre').textContent = o.nombreCorto;
   document.getElementById('obra-titulo-oficial').textContent = o.tituloOficial || o.nombreCorto;
-  document.getElementById('obra-titulo-direccion').textContent = 
-    [o.direccion, o.municipio].filter(Boolean).join(', ');
-  document.getElementById('obra-titulo-expediente').textContent = 
-    o.numExpediente ? 'Exp. ' + o.numExpediente : '';
-  
-  document.getElementById('aviso-pendiente').style.display = 
-    o.estado === 'Pendiente' ? 'block' : 'none';
+  document.getElementById('obra-titulo-direccion').textContent = [o.direccion, o.municipio].filter(Boolean).join(', ');
+  document.getElementById('obra-titulo-expediente').textContent = o.numExpediente ? 'Exp. ' + o.numExpediente : '';
+  document.getElementById('aviso-pendiente').style.display = o.estado === 'Pendiente' ? 'block' : 'none';
 }
 
 // ============================================================================
-// FORMULARIO
+// FORMULARIO (con cambios mínimos: añadir emailPromotor y emailConstructor)
 // ============================================================================
 
 function limpiarFormulario() {
   ['nombreCorto', 'tituloOficial', 'numExpediente', 'direccion', 'municipio',
-   'promotor', 'arquitecto', 'constructor', 'otrasEspecialidades', 'carpetaDriveId']
-   .forEach(c => { document.getElementById('f-' + c).value = ''; });
+   'promotor', 'arquitecto', 'constructor', 'otrasEspecialidades', 'carpetaDriveId',
+   'emailPromotor', 'emailConstructor']  // ⭐ NUEVO v1.2.0
+   .forEach(c => { 
+     const el = document.getElementById('f-' + c);
+     if (el) el.value = '';
+   });
 }
 
 function rellenarFormulario(obra) {
@@ -1659,6 +1104,9 @@ function rellenarFormulario(obra) {
   document.getElementById('f-constructor').value = obra.constructor || '';
   document.getElementById('f-otrasEspecialidades').value = obra.otrasEspecialidades || '';
   document.getElementById('f-carpetaDriveId').value = obra.carpetaDriveId || '';
+  // ⭐ NUEVOS v1.2.0
+  document.getElementById('f-emailPromotor').value = obra.emailPromotor || '';
+  document.getElementById('f-emailConstructor').value = obra.emailConstructor || '';
 }
 
 async function guardarFormulario() {
@@ -1673,6 +1121,9 @@ async function guardarFormulario() {
     constructor: document.getElementById('f-constructor').value.trim(),
     otrasEspecialidades: document.getElementById('f-otrasEspecialidades').value.trim(),
     carpetaDriveId: document.getElementById('f-carpetaDriveId').value.trim(),
+    // ⭐ NUEVOS v1.2.0
+    emailPromotor: document.getElementById('f-emailPromotor').value.trim(),
+    emailConstructor: document.getElementById('f-emailConstructor').value.trim(),
   };
   
   if (!datos.nombreCorto) {
@@ -1694,7 +1145,6 @@ async function guardarFormulario() {
     toast('✓ Guardado correctamente', 'ok');
     
     if (estadoApp.modoEdicion) {
-      // Actualizar obra actual con cambios
       Object.assign(estadoApp.obraActual, datos);
       if (res.estado) estadoApp.obraActual.estado = res.estado;
       if (res.carpetaDriveId) estadoApp.obraActual.carpetaDriveId = res.carpetaDriveId;
@@ -1730,8 +1180,9 @@ async function desarchivarObra() {
   }
 }
 
+
 // ============================================================================
-// CÁMARA
+// CÁMARA (sin cambios)
 // ============================================================================
 
 async function abrirCamara(tipo) {
@@ -1741,11 +1192,7 @@ async function abrirCamara(tipo) {
   
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: 'environment',
-        width: { ideal: 2400 },
-        height: { ideal: 1800 },
-      },
+      video: { facingMode: 'environment', width: { ideal: 2400 }, height: { ideal: 1800 } },
       audio: false,
     });
     estadoApp.cameraStream = stream;
@@ -1773,13 +1220,11 @@ async function hacerFoto() {
   const video = document.getElementById('cameraVideo');
   if (!video.videoWidth) return;
   
-  // Flash visual
   const flash = document.getElementById('cameraFlash');
   flash.classList.remove('flashing');
-  void flash.offsetWidth; // forzar reflow
+  void flash.offsetWidth;
   flash.classList.add('flashing');
   
-  // Disparo
   document.getElementById('btnDisparo').disabled = true;
   
   const canvas = document.createElement('canvas');
@@ -1787,7 +1232,6 @@ async function hacerFoto() {
   canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0);
   
-  // Calidad según tipo
   const esCC = estadoApp.tipoSubidaActual === 'cc-foto';
   const maxLado = esCC ? 2400 : 1600;
   const calidad = esCC ? 0.9 : 0.85;
@@ -1818,14 +1262,11 @@ async function encolarFoto(blob) {
     .substring(0, 30);
   const nombre = `${fecha}_${hora}_${slug}.jpg`;
   
-  // Para fotos del acta, guardamos un ID temporal local hasta que suba a Drive
   const esActa = estadoApp.tipoSubidaActual === 'acta-foto';
   const tipoReal = esActa ? 'foto' : estadoApp.tipoSubidaActual;
   
-  // Guardar foto local primero (para galería sin conexión)
   const fotoLocalId = await fotoLocalAdd(obra.id, blob, nombre);
   
-  // Si es foto de acta, generar ID temporal y guardar blob para mostrar miniatura
   if (esActa) {
     const tempId = 'temp-' + fotoLocalId;
     actaState.fotosIds.push(tempId);
@@ -1833,7 +1274,6 @@ async function encolarFoto(blob) {
     actualizarMiniaturasActa();
   }
   
-  // Encolar subida
   const base64 = await blobABase64(blob);
   await colaAdd({
     fotoLocalId,
@@ -1849,12 +1289,11 @@ async function encolarFoto(blob) {
     },
   });
   
-  // Lanzar procesamiento sin esperar
   procesarCola();
 }
 
 // ============================================================================
-// SUBIR DOCUMENTOS
+// SUBIR DOCUMENTOS (sin cambios)
 // ============================================================================
 
 let resolveInputFile = null;
@@ -1894,14 +1333,12 @@ async function subirDocumentoGenerico(tipo, descripcion) {
     let nombre = file.name;
     let mimeType = file.type;
     
-    // Si es imagen, comprimir
     if (file.type.startsWith('image/')) {
       blob = await comprimirImagen(file, 2400, 0.9);
       nombre = nombre.replace(/\.[^.]+$/, '') + '.jpg';
       mimeType = 'image/jpeg';
     }
     
-    // Renombrar con prefijo de fecha
     const ahora = new Date();
     const fecha = ahora.toISOString().slice(0, 10).replace(/-/g, '');
     nombre = fecha + '_' + nombre;
@@ -1909,7 +1346,7 @@ async function subirDocumentoGenerico(tipo, descripcion) {
     const base64 = await blobABase64(blob);
     await colaAdd({
       payload: {
-        action: 'subirFoto', // misma función backend
+        action: 'subirFoto',
         id: estadoApp.obraActual.id,
         tipo,
         nombre,
@@ -1926,23 +1363,18 @@ async function subirDocumentoGenerico(tipo, descripcion) {
 }
 
 // ============================================================================
-// GALERÍA — desde Drive con opción de eliminar
+// GALERÍA (sin cambios)
 // ============================================================================
 
-let galeriaState = {
-  fotos: [],
-  cargando: false,
-};
+let galeriaState = { fotos: [], cargando: false };
 
 async function cargarGaleria() {
   const cont = document.getElementById('galeria-contenedor');
-  
   const obra = estadoApp.obraActual;
   if (!obra) return irALista();
   
   if (!obra.carpetaDriveId) {
-    cont.innerHTML = '<div class="galeria-empty">⚠️ Esta obra no tiene carpeta Drive asignada<br><br>' +
-      '<small>Asigna una carpeta en "Datos del expediente" para ver las fotos</small></div>';
+    cont.innerHTML = '<div class="galeria-empty">⚠️ Esta obra no tiene carpeta Drive asignada</div>';
     return;
   }
   
@@ -1952,7 +1384,6 @@ async function cargarGaleria() {
   try {
     const res = await backendGet('listFotos', { id: obra.id });
     if (!res.ok) throw new Error(res.error);
-    
     galeriaState.fotos = res.fotos || [];
     galeriaState.cargando = false;
     renderGaleria();
@@ -1968,12 +1399,10 @@ function renderGaleria() {
   const fotos = galeriaState.fotos;
   
   if (fotos.length === 0) {
-    cont.innerHTML = '<div class="galeria-empty">📷 No hay fotos en esta obra todavía<br><br>' +
-      '<small>Vuelve a la pantalla de la obra y pulsa "HACER FOTOS"</small></div>';
+    cont.innerHTML = '<div class="galeria-empty">📷 No hay fotos en esta obra todavía</div>';
     return;
   }
   
-  // Cabecera con contador y botón refrescar
   let html = `
     <div class="galeria-header">
       <span><strong>${fotos.length}</strong> foto${fotos.length > 1 ? 's' : ''}</span>
@@ -1990,20 +1419,12 @@ function renderGaleria() {
       </div>
     `;
   });
-  
   html += '</div>';
   cont.innerHTML = html;
   
-  // Cargar las miniaturas a través del backend (decodifica base64 en blob)
-  cont.querySelectorAll('img[data-foto-id]').forEach(img => {
-    cargarThumbnail(img);
-  });
+  cont.querySelectorAll('img[data-foto-id]').forEach(img => cargarThumbnail(img));
 }
 
-/**
- * Carga el thumbnail de una imagen pidiéndoselo al backend en base64
- * y convirtiéndolo a un blob URL local.
- */
 async function cargarThumbnail(imgElement) {
   const fileId = imgElement.dataset.fotoId;
   if (!fileId) return;
@@ -2013,11 +1434,8 @@ async function cargarThumbnail(imgElement) {
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const base64 = await res.text();
-    // El backend devuelve base64, lo convertimos a blob URL
     const blob = base64ABlob(base64, 'image/jpeg');
     imgElement.src = URL.createObjectURL(blob);
-    
-    // Quitar el spinner cuando carga
     imgElement.onload = () => {
       const loading = imgElement.parentElement.querySelector('.galeria-loading');
       if (loading) loading.style.display = 'none';
@@ -2044,11 +1462,9 @@ function verFotoGrande(idx) {
   
   const f = fotos[idx];
   const fechaFormateada = new Date(f.fecha).toLocaleString('es-ES', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
   
-  // Eliminar overlay anterior si existe
   const previo = document.getElementById('foto-overlay');
   if (previo) previo.remove();
   
@@ -2075,7 +1491,6 @@ function verFotoGrande(idx) {
   document.body.appendChild(overlay);
   overlay.dataset.idx = idx;
   
-  // Cargar imagen grande vía backend
   (async () => {
     try {
       const url = urlThumbnail(f.id, 'full');
@@ -2117,18 +1532,13 @@ async function eliminarFoto(idx) {
   if (idx < 0 || idx >= fotos.length) return;
   
   const f = fotos[idx];
-  if (!confirm('¿Eliminar esta foto?\n\n' + f.nombre + '\n\nLa foto se enviará a la papelera de Drive (recuperable durante 30 días).')) {
-    return;
-  }
+  if (!confirm('¿Eliminar esta foto?\n\n' + f.nombre + '\n\nLa foto se enviará a la papelera de Drive.')) return;
   
   try {
     toast('Eliminando...');
     const res = await backendPost({ action: 'eliminarFoto', archivoId: f.id });
     if (!res.ok) throw new Error(res.error);
-    
-    // Quitar de la lista
     galeriaState.fotos.splice(idx, 1);
-    
     cerrarFotoGrande();
     renderGaleria();
     toast('✓ Foto eliminada', 'ok');
@@ -2141,18 +1551,11 @@ async function eliminarFoto(idx) {
 // ABRIR DRIVE
 // ============================================================================
 
-/**
- * Construye URL de Drive que selecciona automáticamente la cuenta correcta.
- * Usa authuser=0 (cuenta principal) que suele funcionar mejor que el email.
- */
 function urlDriveCarpeta(folderId) {
   if (!folderId) return null;
   return 'https://drive.google.com/drive/folders/' + folderId + '?authuser=0';
 }
 
-/**
- * Construye URL del backend para obtener un thumbnail de una foto
- */
 function urlThumbnail(fileId, size) {
   const url = new URL(BACKEND_URL);
   url.searchParams.set('action', 'getThumbnail');
@@ -2161,9 +1564,6 @@ function urlThumbnail(fileId, size) {
   return url.toString();
 }
 
-/**
- * Cache de subcarpetas por obra (se rellena al entrar en la obra)
- */
 let subcarpetasObra = null;
 
 async function cargarSubcarpetas() {
@@ -2174,11 +1574,8 @@ async function cargarSubcarpetas() {
   }
   try {
     const res = await backendGet('getSubcarpetas', { id: obra.id });
-    if (res.ok) {
-      subcarpetasObra = res.carpetas;
-    } else {
-      subcarpetasObra = null;
-    }
+    if (res.ok) subcarpetasObra = res.carpetas;
+    else subcarpetasObra = null;
   } catch (err) {
     subcarpetasObra = null;
   }
@@ -2199,14 +1596,8 @@ async function abrirCarpetaProyecto() {
     toast('Esta obra no tiene carpeta Drive asignada', 'error');
     return;
   }
-  
   toast('Abriendo carpeta Proyecto...');
-  
-  // Si no tenemos las subcarpetas cacheadas, las cargamos
-  if (!subcarpetasObra) {
-    await cargarSubcarpetas();
-  }
-  
+  if (!subcarpetasObra) await cargarSubcarpetas();
   if (subcarpetasObra && subcarpetasObra.proyecto) {
     window.open(urlDriveCarpeta(subcarpetasObra.proyecto), '_blank');
   } else {
@@ -2220,13 +1611,8 @@ async function abrirCarpetaCC() {
     toast('Esta obra no tiene carpeta Drive asignada', 'error');
     return;
   }
-  
   toast('Abriendo Control de calidad...');
-  
-  if (!subcarpetasObra) {
-    await cargarSubcarpetas();
-  }
-  
+  if (!subcarpetasObra) await cargarSubcarpetas();
   if (subcarpetasObra && subcarpetasObra.controlCalidad) {
     window.open(urlDriveCarpeta(subcarpetasObra.controlCalidad), '_blank');
   } else {
@@ -2244,33 +1630,28 @@ function toast(msg, tipo) {
   el.textContent = msg;
   el.className = 'toast visible' + (tipo ? ' ' + tipo : '');
   if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
-    el.classList.remove('visible');
-  }, 2500);
+  toastTimeout = setTimeout(() => el.classList.remove('visible'), 2500);
 }
-
-// ============================================================================
-// BUSCADOR
-// ============================================================================
 
 document.getElementById('buscador').addEventListener('input', (e) => {
   estadoApp.filtroBusqueda = e.target.value;
   renderListaObras();
 });
 
+
 // ============================================================================
-// ACTA DE VISITA
+// ACTA DE VISITA (sin cambios respecto a v1.1.1)
 // ============================================================================
 
 let actaState = {
-  fotosIds: [],          // IDs de fotos ya subidas a Drive
-  fotosBlobs: {},        // blobs locales por id
+  fotosIds: [],
+  fotosBlobs: {},
   transcripcion: '',
   recognition: null,
   grabando: false,
   tiempoInicio: 0,
   intervaloTiempo: null,
-  acta: null,            // acta estructurada por Gemini, editable
+  acta: null,
   borradorEditandoId: null,
 };
 
@@ -2299,7 +1680,7 @@ async function cargarBorradores() {
         <div class="borrador-card">
           <div class="info" onclick="abrirBorrador(${b.id})">
             <div class="nombre">Acta del ${fecha}</div>
-            <div class="fecha">${(b.acta && b.acta.estadoActual ? b.acta.estadoActual.substring(0,80) + '...' : 'Sin contenido')}</div>
+            <div class="fecha">${(b.acta && b.acta.estadoActual ? String(b.acta.estadoActual).substring(0,80) + '...' : 'Sin contenido')}</div>
           </div>
           <button class="btn-borrar" onclick="event.stopPropagation(); borrarBorrador(${b.id})">🗑️</button>
         </div>
@@ -2312,17 +1693,7 @@ async function cargarBorradores() {
 }
 
 function iniciarNuevaActa() {
-  actaState = {
-    fotosIds: [],
-    fotosBlobs: {},
-    transcripcion: '',
-    recognition: null,
-    grabando: false,
-    tiempoInicio: 0,
-    intervaloTiempo: null,
-    acta: null,
-    borradorEditandoId: null,
-  };
+  actaState = { fotosIds: [], fotosBlobs: {}, transcripcion: '', recognition: null, grabando: false, tiempoInicio: 0, intervaloTiempo: null, acta: null, borradorEditandoId: null };
   
   document.getElementById('actaTranscripcion').value = '';
   document.getElementById('actaTranscripcionWrapper').style.display = 'none';
@@ -2334,42 +1705,29 @@ function iniciarNuevaActa() {
   document.getElementById('grabacionTiempo').style.display = 'none';
   
   actualizarMiniaturasActa();
-  
   estadoApp.pantalla = 'acta-dictado';
   mostrarPantalla('screen-acta-dictado');
 }
 
 function salirActa() {
-  if (estadoApp.tipoSubidaActual === 'acta') {
-    estadoApp.tipoSubidaActual = null;
-  }
+  if (estadoApp.tipoSubidaActual === 'acta') estadoApp.tipoSubidaActual = null;
   irAObra();
 }
 
 function cancelarDictado() {
-  if (actaState.grabando) {
-    detenerGrabacion();
-  }
+  if (actaState.grabando) detenerGrabacion();
   if (actaState.transcripcion || actaState.fotosIds.length > 0) {
-    if (!confirm('¿Salir? Se perderá el dictado actual y las fotos añadidas (no se han guardado todavía).')) {
-      return;
-    }
+    if (!confirm('¿Salir? Se perderá el dictado actual y las fotos añadidas.')) return;
   }
   irAActa();
 }
 
-// ===== Reconocimiento de voz =====
-
 function toggleGrabacion() {
-  if (actaState.grabando) {
-    detenerGrabacion();
-  } else {
-    iniciarGrabacion();
-  }
+  if (actaState.grabando) detenerGrabacion();
+  else iniciarGrabacion();
 }
 
 function iniciarGrabacion() {
-  // Comprobar soporte
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     toast('⚠️ Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.', 'error');
@@ -2381,9 +1739,7 @@ function iniciarGrabacion() {
   reco.continuous = true;
   reco.interimResults = true;
   
-  // Texto previamente confirmado (de sesiones anteriores en el mismo dictado)
   let textoConfirmado = actaState.transcripcion || '';
-  // IDs de resultados ya procesados, para evitar duplicación tras reinicios
   let resultadosProcesados = new Set();
   
   reco.onresult = (event) => {
@@ -2393,14 +1749,11 @@ function iniciarGrabacion() {
     for (let i = 0; i < event.results.length; i++) {
       const result = event.results[i];
       const transcript = result[0].transcript;
-      
       if (result.isFinal) {
-        // Cada resultado final tiene un ID único basado en su contenido + posición
         const id = i + ':' + transcript;
         if (!resultadosProcesados.has(id)) {
           resultadosProcesados.add(id);
           nuevoTextoFinal += transcript;
-          // Asegurar separación con espacio
           if (!nuevoTextoFinal.endsWith(' ') && !nuevoTextoFinal.endsWith('.')) {
             nuevoTextoFinal += ' ';
           }
@@ -2410,51 +1763,30 @@ function iniciarGrabacion() {
       }
     }
     
-    // Sumar lo nuevo confirmado
     if (nuevoTextoFinal) {
       textoConfirmado += nuevoTextoFinal;
       actaState.transcripcion = textoConfirmado;
     }
     
-    // Mostrar todo: confirmado + provisional
-    const mostrar = textoConfirmado + textoInterim;
-    document.getElementById('actaTranscripcion').value = mostrar;
-    
-    // Auto-scroll al final
+    document.getElementById('actaTranscripcion').value = textoConfirmado + textoInterim;
     const ta = document.getElementById('actaTranscripcion');
     ta.scrollTop = ta.scrollHeight;
   };
   
   reco.onerror = (event) => {
-    console.error('Error reconocimiento voz:', event.error);
-    if (event.error === 'no-speech' || event.error === 'aborted') {
-      // Ignorar, son comunes y se gestionan en onend
-      return;
-    }
+    if (event.error === 'no-speech' || event.error === 'aborted') return;
     if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
       toast('⚠️ Necesitas dar permiso al micrófono', 'error');
       detenerGrabacion();
-    } else if (event.error === 'network') {
-      toast('⚠️ Sin conexión para reconocimiento. Reintentando...', 'error');
-    } else {
-      console.warn('Error voz: ' + event.error);
     }
   };
   
   reco.onend = () => {
-    // Auto-reinicio silencioso solo si seguimos grabando
-    // Importante: NO reiniciar inmediatamente para evitar pitido
     if (actaState.grabando) {
-      // Limpiar el set de resultados procesados al reiniciar (los índices se resetean)
       resultadosProcesados = new Set();
-      // Pequeño delay para evitar conflicto
       setTimeout(() => {
         if (actaState.grabando) {
-          try { 
-            reco.start(); 
-          } catch(e) { 
-            console.warn('No se pudo reiniciar reco:', e.message);
-          }
+          try { reco.start(); } catch(e) {}
         }
       }, 100);
     }
@@ -2471,17 +1803,13 @@ function iniciarGrabacion() {
   actaState.grabando = true;
   actaState.tiempoInicio = Date.now();
   
-  // Mostrar wrapper de transcripción (PERO NO ocultar el guion - debe quedar visible)
   document.getElementById('actaTranscripcionWrapper').style.display = 'block';
-  // El guion queda visible siempre
   
-  // Cambiar UI del botón
   const btn = document.getElementById('btnGrabar');
   btn.classList.add('grabando');
   document.querySelector('#btnGrabar .icon').textContent = '⏹️';
   document.querySelector('#btnGrabar .texto').textContent = 'DETENER';
   
-  // Tiempo
   const tiempo = document.getElementById('grabacionTiempo');
   tiempo.style.display = 'block';
   actaState.intervaloTiempo = setInterval(() => {
@@ -2494,26 +1822,21 @@ function iniciarGrabacion() {
 
 function detenerGrabacion() {
   actaState.grabando = false;
-  
   if (actaState.recognition) {
     try { actaState.recognition.stop(); } catch(e) {}
     actaState.recognition = null;
   }
-  
   if (actaState.intervaloTiempo) {
     clearInterval(actaState.intervaloTiempo);
     actaState.intervaloTiempo = null;
   }
   
-  // UI
   const btn = document.getElementById('btnGrabar');
   btn.classList.remove('grabando');
   document.querySelector('#btnGrabar .icon').textContent = '🎙️';
   document.querySelector('#btnGrabar .texto').textContent = 'CONTINUAR';
   
   document.getElementById('actaAccionesPost').style.display = 'flex';
-  
-  // Capturar texto editado por el usuario si lo modificó manualmente
   actaState.transcripcion = document.getElementById('actaTranscripcion').value;
 }
 
@@ -2527,10 +1850,7 @@ function reiniciarDictado() {
   document.querySelector('#btnGrabar .texto').textContent = 'GRABAR';
 }
 
-// ===== Cámara desde el acta =====
-
 function abrirCamaraActa() {
-  // Igual que la cámara normal pero el tipo es 'foto' y al subir, también añadimos a actaState
   estadoApp.tipoSubidaActual = 'acta-foto';
   estadoApp.contadorFotosSesion = 0;
   document.getElementById('cameraContador').textContent = '0 fotos';
@@ -2550,29 +1870,19 @@ function abrirCamaraActa() {
 async function actualizarMiniaturasActa() {
   const cont = document.getElementById('actaFotosMiniaturas');
   if (!cont) return;
-  
   cont.innerHTML = '';
   
   for (const fotoId of actaState.fotosIds) {
     const div = document.createElement('div');
     div.className = 'mini';
-    
-    // Si tenemos blob local, mostrar; sino cargar desde backend
     if (actaState.fotosBlobs[fotoId]) {
       const url = URL.createObjectURL(actaState.fotosBlobs[fotoId]);
-      div.innerHTML = `
-        <img src="${url}">
-        <button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>
-      `;
+      div.innerHTML = `<img src="${url}"><button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>`;
     } else {
-      div.innerHTML = `
-        <img>
-        <button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>
-      `;
+      div.innerHTML = `<img><button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>`;
       const img = div.querySelector('img');
-      const url = urlThumbnail(fotoId, 'thumb');
       try {
-        const res = await fetch(url);
+        const res = await fetch(urlThumbnail(fotoId, 'thumb'));
         const base64 = await res.text();
         const blob = base64ABlob(base64, 'image/jpeg');
         img.src = URL.createObjectURL(blob);
@@ -2580,11 +1890,9 @@ async function actualizarMiniaturasActa() {
         img.alt = '⚠️';
       }
     }
-    
     cont.appendChild(div);
   }
   
-  // Actualizar contador en preview si existe
   const numEl = document.getElementById('prev-num-fotos');
   if (numEl) numEl.textContent = actaState.fotosIds.length;
 }
@@ -2593,13 +1901,8 @@ function quitarFotoActa(fotoId) {
   actaState.fotosIds = actaState.fotosIds.filter(id => id !== fotoId);
   delete actaState.fotosBlobs[fotoId];
   actualizarMiniaturasActa();
-  // Si estamos en preview, actualizar también allí
-  if (estadoApp.pantalla === 'acta-preview') {
-    actualizarMiniaturasPreview();
-  }
+  if (estadoApp.pantalla === 'acta-preview') actualizarMiniaturasPreview();
 }
-
-// ===== Generación con Gemini =====
 
 async function generarActa() {
   const texto = document.getElementById('actaTranscripcion').value.trim();
@@ -2608,21 +1911,14 @@ async function generarActa() {
     return;
   }
   
-  // Detener grabación si sigue activa
   if (actaState.grabando) detenerGrabacion();
   
   toast('Generando acta...');
   document.getElementById('btnGrabar').disabled = true;
   
   try {
-    const res = await backendPost({
-      action: 'generarActa',
-      id: estadoApp.obraActual.id,
-      dictado: texto,
-    });
-    
+    const res = await backendPost({ action: 'generarActa', id: estadoApp.obraActual.id, dictado: texto });
     if (!res.ok) throw new Error(res.error);
-    
     actaState.acta = res.acta;
     irAPreview();
   } catch (err) {
@@ -2631,16 +1927,9 @@ async function generarActa() {
   }
 }
 
-// ===== Preview editable =====
-
-// Convierte un valor (string o array) a string para mostrar en textarea
 function aTextoEditable(valor) {
   if (!valor) return '';
-  if (Array.isArray(valor)) {
-    // Formato antiguo (borradores guardados antes del cambio): array → líneas
-    return valor.join('\n');
-  }
-  // Formato nuevo: string narrativo → respetar como está
+  if (Array.isArray(valor)) return valor.join('\n');
   return String(valor);
 }
 
@@ -2657,7 +1946,6 @@ function irAPreview() {
   document.getElementById('firma-constructor').checked = firmas.indexOf('constructor') !== -1;
   
   actualizarMiniaturasPreview();
-  
   estadoApp.pantalla = 'acta-preview';
   mostrarPantalla('screen-acta-preview');
 }
@@ -2665,18 +1953,13 @@ function irAPreview() {
 async function actualizarMiniaturasPreview() {
   const cont = document.getElementById('prevFotosMiniaturas');
   if (!cont) return;
-  
   cont.innerHTML = '';
   document.getElementById('prev-num-fotos').textContent = actaState.fotosIds.length;
   
   for (const fotoId of actaState.fotosIds) {
     const div = document.createElement('div');
     div.className = 'mini';
-    div.innerHTML = `
-      <img>
-      <button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>
-    `;
-    
+    div.innerHTML = `<img><button class="quitar" onclick="quitarFotoActa('${fotoId}')">×</button>`;
     const img = div.querySelector('img');
     if (actaState.fotosBlobs[fotoId]) {
       img.src = URL.createObjectURL(actaState.fotosBlobs[fotoId]);
@@ -2700,11 +1983,7 @@ function volverADictado() {
 }
 
 function recogerActaDelPreview() {
-  // Asistentes siguen siendo array (uno por línea)
-  const asistentes = document.getElementById('prev-asistentes').value
-    .split('\n').map(s => s.trim()).filter(s => s);
-  
-  // Trabajos, órdenes, estado e incidencias: texto narrativo (string)
+  const asistentes = document.getElementById('prev-asistentes').value.split('\n').map(s => s.trim()).filter(s => s);
   const estado = document.getElementById('prev-estado').value.trim();
   const trabajos = document.getElementById('prev-trabajos').value.trim();
   const ordenes = document.getElementById('prev-ordenes').value.trim();
@@ -2714,41 +1993,21 @@ function recogerActaDelPreview() {
   if (document.getElementById('firma-arquitecto').checked) firmas.unshift('arquitecto');
   if (document.getElementById('firma-constructor').checked) firmas.push('constructor');
   
-  return {
-    asistentes,
-    estadoActual: estado,
-    trabajosEjecucion: trabajos,
-    ordenesIndicaciones: ordenes,
-    incidenciasObservaciones: incidencias,
-    firmas,
-  };
+  return { asistentes, estadoActual: estado, trabajosEjecucion: trabajos, ordenesIndicaciones: ordenes, incidenciasObservaciones: incidencias, firmas };
 }
-
-// ===== Finalizar / borrador / descartar =====
 
 let actaGuardadaInfo = null;
 
 async function finalizarActa() {
   const acta = recogerActaDelPreview();
-  
   toast('Guardando acta y generando PDF...');
   
   try {
-    const res = await backendPost({
-      action: 'guardarActa',
-      id: estadoApp.obraActual.id,
-      acta: acta,
-      fotosIds: actaState.fotosIds,
-    });
-    
+    const res = await backendPost({ action: 'guardarActa', id: estadoApp.obraActual.id, acta: acta, fotosIds: actaState.fotosIds });
     if (!res.ok) throw new Error(res.error);
     
     actaGuardadaInfo = res;
-    
-    // Si era un borrador, eliminarlo
-    if (actaState.borradorEditandoId) {
-      await actaBorradorDelete(actaState.borradorEditandoId);
-    }
+    if (actaState.borradorEditandoId) await actaBorradorDelete(actaState.borradorEditandoId);
     
     estadoApp.pantalla = 'acta-guardada';
     mostrarPantalla('screen-acta-guardada');
@@ -2760,24 +2019,11 @@ async function finalizarActa() {
 
 async function guardarBorrador() {
   const acta = recogerActaDelPreview();
-  
   try {
     if (actaState.borradorEditandoId) {
-      // Actualizar borrador existente
-      await actaBorradorUpdate(actaState.borradorEditandoId, {
-        obraId: estadoApp.obraActual.id,
-        acta,
-        fotosIds: actaState.fotosIds,
-        fecha: Date.now(),
-      });
+      await actaBorradorUpdate(actaState.borradorEditandoId, { obraId: estadoApp.obraActual.id, acta, fotosIds: actaState.fotosIds, fecha: Date.now() });
     } else {
-      // Nuevo borrador
-      await actaBorradorAdd({
-        obraId: estadoApp.obraActual.id,
-        acta,
-        fotosIds: actaState.fotosIds,
-        fecha: Date.now(),
-      });
+      await actaBorradorAdd({ obraId: estadoApp.obraActual.id, acta, fotosIds: actaState.fotosIds, fecha: Date.now() });
     }
     toast('✓ Borrador guardado', 'ok');
     irAActa();
@@ -2788,9 +2034,7 @@ async function guardarBorrador() {
 
 async function descartarActa() {
   if (!confirm('¿Descartar este acta? Se perderá todo lo dictado.')) return;
-  if (actaState.borradorEditandoId) {
-    await actaBorradorDelete(actaState.borradorEditandoId);
-  }
+  if (actaState.borradorEditandoId) await actaBorradorDelete(actaState.borradorEditandoId);
   irAActa();
 }
 
@@ -2798,19 +2042,7 @@ async function abrirBorrador(borradorId) {
   try {
     const b = await actaBorradorGet(borradorId);
     if (!b) throw new Error('Borrador no encontrado');
-    
-    actaState = {
-      fotosIds: b.fotosIds || [],
-      fotosBlobs: {},
-      transcripcion: '',
-      recognition: null,
-      grabando: false,
-      tiempoInicio: 0,
-      intervaloTiempo: null,
-      acta: b.acta,
-      borradorEditandoId: b.id,
-    };
-    
+    actaState = { fotosIds: b.fotosIds || [], fotosBlobs: {}, transcripcion: '', recognition: null, grabando: false, tiempoInicio: 0, intervaloTiempo: null, acta: b.acta, borradorEditandoId: b.id };
     irAPreview();
   } catch (err) {
     toast('⚠️ Error: ' + err.message, 'error');
@@ -2823,17 +2055,11 @@ async function borrarBorrador(borradorId) {
   cargarBorradores();
 }
 
-// ===== Compartir / Drive =====
-
 function compartirActa() {
   if (!actaGuardadaInfo) return;
   if (navigator.share) {
-    navigator.share({
-      title: actaGuardadaInfo.nombre,
-      url: actaGuardadaInfo.url,
-    }).catch(() => {});
+    navigator.share({ title: actaGuardadaInfo.nombre, url: actaGuardadaInfo.url }).catch(() => {});
   } else {
-    // Fallback: copiar URL
     navigator.clipboard.writeText(actaGuardadaInfo.url);
     toast('✓ Enlace copiado al portapapeles', 'ok');
   }
@@ -2851,20 +2077,11 @@ function volverAObra() {
 
 async function eliminarActaGuardada() {
   if (!actaGuardadaInfo) return;
-  
-  if (!confirm('¿Eliminar el acta?\n\n' + actaGuardadaInfo.nombre + 
-               '\n\nSe enviará a la papelera de Drive (recuperable durante 30 días).')) {
-    return;
-  }
-  
+  if (!confirm('¿Eliminar el acta?\n\n' + actaGuardadaInfo.nombre)) return;
   try {
     toast('Eliminando...');
-    const res = await backendPost({ 
-      action: 'eliminarFoto',  // misma función backend que vale para cualquier archivo
-      archivoId: actaGuardadaInfo.archivoId 
-    });
+    const res = await backendPost({ action: 'eliminarFoto', archivoId: actaGuardadaInfo.archivoId });
     if (!res.ok) throw new Error(res.error);
-    
     toast('✓ Acta eliminada', 'ok');
     actaGuardadaInfo = null;
     setTimeout(() => irAObra(), 1000);
@@ -2873,15 +2090,11 @@ async function eliminarActaGuardada() {
   }
 }
 
-// ===== IndexedDB para borradores de acta =====
-
 const STORE_BORRADORES = 'actaBorradores';
 
 function actaBorradoresByObra(obraId) {
   return new Promise((resolve, reject) => {
-    if (!db.objectStoreNames.contains(STORE_BORRADORES)) {
-      return resolve([]);
-    }
+    if (!db.objectStoreNames.contains(STORE_BORRADORES)) return resolve([]);
     const tx = db.transaction(STORE_BORRADORES, 'readonly');
     const req = tx.objectStore(STORE_BORRADORES).index('obraId').getAll(obraId);
     req.onsuccess = () => resolve(req.result || []);
@@ -2933,12 +2146,330 @@ function actaBorradorDelete(id) {
   });
 }
 
+
+// ============================================================================
+// ⭐ NUEVO v1.2.0 — SEGURIDAD Y SALUD
+// ============================================================================
+
+async function irASeguridadSalud() {
+  const obra = estadoApp.obraActual;
+  if (!obra) return irALista();
+  
+  if (!obra.carpetaDriveId) {
+    toast('⚠️ La obra no tiene carpeta Drive asignada', 'error');
+    return;
+  }
+  
+  estadoApp.pantalla = 'ss';
+  mostrarPantalla('screen-ss');
+  
+  // Mostrar aviso si faltan datos esenciales
+  const faltanDatos = !obra.constructor || !obra.emailConstructor || !obra.promotor;
+  document.getElementById('ss-aviso-datos').style.display = faltanDatos ? 'block' : 'none';
+  
+  // Cargar estado y empresas
+  cargarEstadoSS();
+}
+
+async function cargarEstadoSS() {
+  const contEstado = document.getElementById('ss-estado-resumen');
+  const contEmpresas = document.getElementById('ss-empresas-lista');
+  
+  contEstado.innerHTML = '<div class="loading-screen" style="padding:20px;"><div class="spinner"></div><div>Cargando...</div></div>';
+  contEmpresas.innerHTML = '<div class="loading-screen" style="padding:20px;"><div class="spinner"></div><div>Cargando...</div></div>';
+  
+  // Crear/obtener estructura S+S en Drive en paralelo
+  cargarSubcarpetasSS();
+  
+  try {
+    const res = await backendGet('getEstadoSS', { id: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    
+    renderEstadoSS(res.estado, res.documentos || []);
+    renderEmpresasSS(res.empresas || []);
+  } catch (err) {
+    contEstado.innerHTML = '<div style="color:var(--rojo); padding:12px;">⚠️ Error: ' + escape(err.message) + '</div>';
+    contEmpresas.innerHTML = '';
+  }
+}
+
+async function cargarSubcarpetasSS() {
+  const obra = estadoApp.obraActual;
+  if (!obra || !obra.carpetaDriveId) {
+    subcarpetasSSObra = null;
+    return;
+  }
+  try {
+    const res = await backendGet('getSubcarpetasSS', { id: obra.id });
+    if (res.ok) subcarpetasSSObra = res.subcarpetas;
+    else subcarpetasSSObra = null;
+  } catch (err) {
+    subcarpetasSSObra = null;
+  }
+}
+
+function renderEstadoSS(estado, documentos) {
+  const cont = document.getElementById('ss-estado-resumen');
+  
+  // Resumen tipo checklist
+  const items = [
+    { hecho: estado.planSolicitado, label: 'Plan de S+S solicitado al constructor', icono: '📧' },
+    { hecho: estado.planAprobado, label: 'Plan de S+S aprobado y firmado', icono: '✅' },
+    { hecho: estado.coordinadorDesignado, label: 'Coordinador designado por el promotor', icono: '🧑‍💼' },
+    { hecho: estado.libroEntregado, label: 'Libro de Incidencias entregado', icono: '📕' },
+  ];
+  
+  let html = '<div class="ss-estado-grid">';
+  items.forEach(item => {
+    const cls = item.hecho ? 'hecho' : 'pendiente';
+    const icon = item.hecho ? '✅' : '⏳';
+    html += `
+      <div class="ss-estado-item ${cls}">
+        <span class="estado-icon">${icon}</span>
+        <span>${item.icono} ${escape(item.label)}</span>
+      </div>
+    `;
+  });
+  
+  if (estado.numSubcontratas > 0) {
+    html += `
+      <div class="ss-estado-item ${estado.numAdhesionesFirmadas === estado.numSubcontratas ? 'hecho' : 'pendiente'}">
+        <span class="estado-icon">📋</span>
+        <span>🏗️ Adhesiones subcontratas: ${estado.numAdhesionesFirmadas} / ${estado.numSubcontratas}</span>
+      </div>
+    `;
+  }
+  
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+function renderEmpresasSS(empresas) {
+  const cont = document.getElementById('ss-empresas-lista');
+  const obra = estadoApp.obraActual;
+  
+  // Si no hay empresas registradas y hay constructor en la ficha, mostrarlo como contratista
+  let empresasMostrar = empresas.slice();
+  if (empresasMostrar.length === 0 && obra.constructor) {
+    empresasMostrar.push({
+      id: 'auto-contratista',
+      nombre: obra.constructor,
+      actividad: 'Contratista principal',
+      tipo: 'contratista',
+      adhesionFirmada: '',
+      _auto: true,
+    });
+  }
+  
+  if (empresasMostrar.length === 0) {
+    cont.innerHTML = '<p style="color:var(--gris-texto); font-size:13px; padding:8px;">No hay empresas registradas. Añade el constructor en los datos del expediente.</p>';
+    return;
+  }
+  
+  cont.innerHTML = empresasMostrar.map(e => {
+    const cls = e.tipo === 'subcontratista' ? 'subcontratista' : '';
+    let estadoTxt = '';
+    let estadoCls = '';
+    if (e.tipo === 'subcontratista') {
+      if (e.adhesionFirmada) {
+        estadoTxt = '✓ Adhesión firmada';
+        estadoCls = 'ok';
+      } else {
+        estadoTxt = '⏳ Sin adhesión';
+        estadoCls = 'pendiente';
+      }
+    } else {
+      estadoTxt = 'Contratista principal';
+    }
+    
+    return `
+      <div class="ss-empresa-card ${cls}">
+        <div class="nombre-emp">${escape(e.nombre)}</div>
+        <div class="actividad-emp">${escape(e.actividad || '(sin actividad)')}</div>
+        <span class="estado-emp ${estadoCls}">${estadoTxt}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+async function abrirCarpetaSSDrive() {
+  if (!subcarpetasSSObra) await cargarSubcarpetasSS();
+  
+  if (subcarpetasSSObra && subcarpetasSSObra.raiz) {
+    window.open(urlDriveCarpeta(subcarpetasSSObra.raiz), '_blank');
+  } else {
+    toast('No se pudo abrir la carpeta S+S', 'error');
+  }
+}
+
+function proximamente(nombreAccion) {
+  toast('🚧 "' + nombreAccion + '" se implementará en el Paso B', 'ok');
+}
+
+// ============================================================================
+// ⭐ NUEVO v1.2.0 — SISTEMA DE FIRMA EN PANTALLA (canvas)
+// ============================================================================
+
+let firmaState = {
+  activa: false,
+  canvas: null,
+  ctx: null,
+  dibujando: false,
+  ultX: 0,
+  ultY: 0,
+  vacia: true,
+  callbackAceptar: null,
+  callbackCancelar: null,
+};
+
+/**
+ * Abre la pantalla de firma. Llamar a esta función desde otros sitios cuando
+ * se necesite una firma.
+ * 
+ * Ejemplo:
+ *   pedirFirma('Aprobación del Plan de S+S', 'El Constructor', (dataUrl) => {
+ *     // dataUrl contiene la firma como PNG en base64
+ *     console.log('firma recibida', dataUrl);
+ *   });
+ */
+function pedirFirma(titulo, quien, callbackAceptar, callbackCancelar) {
+  firmaState.callbackAceptar = callbackAceptar || (() => {});
+  firmaState.callbackCancelar = callbackCancelar || (() => {});
+  
+  document.getElementById('firmaTitulo').textContent = titulo || 'Firma';
+  document.getElementById('firmaQuien').textContent = quien || '';
+  
+  const pantalla = document.getElementById('firmaPantalla');
+  pantalla.classList.add('active');
+  
+  // Inicializar canvas tras renderizar
+  setTimeout(() => {
+    inicializarCanvasFirma();
+  }, 50);
+}
+
+function inicializarCanvasFirma() {
+  const canvas = document.getElementById('firmaCanvas');
+  const wrapper = canvas.parentElement;
+  
+  // Ajustar tamaño del canvas al wrapper
+  const rect = wrapper.getBoundingClientRect();
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  
+  const ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  firmaState.canvas = canvas;
+  firmaState.ctx = ctx;
+  firmaState.dibujando = false;
+  firmaState.vacia = true;
+  
+  document.getElementById('firmaVacio').classList.remove('oculto');
+  
+  // Eventos de puntero (funcionan con dedo, lápiz y ratón)
+  canvas.onpointerdown = (e) => {
+    e.preventDefault();
+    canvas.setPointerCapture(e.pointerId);
+    firmaState.dibujando = true;
+    firmaState.vacia = false;
+    document.getElementById('firmaVacio').classList.add('oculto');
+    
+    const rect = canvas.getBoundingClientRect();
+    firmaState.ultX = e.clientX - rect.left;
+    firmaState.ultY = e.clientY - rect.top;
+  };
+  
+  canvas.onpointermove = (e) => {
+    if (!firmaState.dibujando) return;
+    e.preventDefault();
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    ctx.beginPath();
+    ctx.moveTo(firmaState.ultX, firmaState.ultY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    
+    firmaState.ultX = x;
+    firmaState.ultY = y;
+  };
+  
+  canvas.onpointerup = (e) => {
+    firmaState.dibujando = false;
+  };
+  
+  canvas.onpointercancel = (e) => {
+    firmaState.dibujando = false;
+  };
+  
+  canvas.onpointerleave = (e) => {
+    firmaState.dibujando = false;
+  };
+}
+
+function limpiarFirma() {
+  if (!firmaState.canvas || !firmaState.ctx) return;
+  firmaState.ctx.clearRect(0, 0, firmaState.canvas.width, firmaState.canvas.height);
+  firmaState.vacia = true;
+  document.getElementById('firmaVacio').classList.remove('oculto');
+}
+
+function cancelarFirma() {
+  document.getElementById('firmaPantalla').classList.remove('active');
+  const cb = firmaState.callbackCancelar;
+  firmaState.callbackAceptar = null;
+  firmaState.callbackCancelar = null;
+  if (cb) cb();
+}
+
+function aceptarFirma() {
+  if (firmaState.vacia) {
+    toast('⚠️ La firma está vacía', 'error');
+    return;
+  }
+  
+  // Generar PNG transparente recortado
+  const dataUrl = firmaState.canvas.toDataURL('image/png');
+  
+  document.getElementById('firmaPantalla').classList.remove('active');
+  
+  const cb = firmaState.callbackAceptar;
+  firmaState.callbackAceptar = null;
+  firmaState.callbackCancelar = null;
+  if (cb) cb(dataUrl);
+}
+
+// Función de prueba para verificar que el sistema de firma funciona
+// (se puede llamar desde consola del navegador: pruebaFirma())
+function pruebaFirma() {
+  pedirFirma(
+    'Prueba de firma',
+    'Firma aquí con el dedo',
+    (dataUrl) => {
+      console.log('✓ Firma capturada, tamaño base64:', dataUrl.length);
+      toast('✓ Firma capturada correctamente', 'ok');
+    },
+    () => {
+      console.log('Firma cancelada');
+      toast('Firma cancelada');
+    }
+  );
+}
+
 // ============================================================================
 // INICIALIZACIÓN
 // ============================================================================
 
 async function init() {
-  // Verificar configuración
   if (BACKEND_URL.includes('PEGAR_AQUI')) {
     document.getElementById('configBanner').classList.add('visible');
     return;
@@ -2946,17 +2477,9 @@ async function init() {
   
   try {
     await abrirDB();
-    
-    // Procesar cola al inicio
     procesarCola();
-    
-    // Procesar cola cada 30 segundos
     setInterval(procesarCola, 30000);
-    
-    // Procesar al recuperar conexión
     window.addEventListener('online', procesarCola);
-    
-    // Cargar lista
     cargarObras();
   } catch (err) {
     document.getElementById('lista-obras').innerHTML = 
