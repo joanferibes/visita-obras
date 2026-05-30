@@ -535,34 +535,31 @@ body {
         </div>
       </div>
 
-      <!-- Acciones disponibles (Paso B → B implementará el contenido) -->
+      <!-- Acciones disponibles -->
       <div class="ss-seccion">
         <h3><span class="icono">📄</span>DOCUMENTOS S+S</h3>
-        <p style="font-size:13px; color:var(--gris-texto); margin-bottom:12px;">
-          Las acciones para generar documentos (acta de aprobación, recibí del libro, etc.) se añadirán en la próxima actualización (Paso B).
-        </p>
-        <button class="ss-accion deshabilitado" onclick="proximamente('Solicitar Plan de S+S')">
+        <button class="ss-accion" onclick="accionSolicitarPlan()">
           <span class="icono-grande">📧</span>
           <div class="texto-accion">
             <div class="titulo-accion">Solicitar Plan de S+S</div>
-            <div class="desc-accion">Correo al constructor pidiéndolo</div>
+            <div class="desc-accion">Crea correo en Gmail al constructor</div>
           </div>
         </button>
-        <button class="ss-accion deshabilitado" onclick="proximamente('Acta Designación Coordinador')">
+        <button class="ss-accion" onclick="accionDocumento('designacion_coordinador')">
           <span class="icono-grande">🧑‍💼</span>
           <div class="texto-accion">
             <div class="titulo-accion">Designación de Coordinador</div>
             <div class="desc-accion">Firma promotor</div>
           </div>
         </button>
-        <button class="ss-accion deshabilitado" onclick="proximamente('Acta Aprobación del Plan')">
+        <button class="ss-accion" onclick="accionDocumento('aprobacion_plan')">
           <span class="icono-grande">✅</span>
           <div class="texto-accion">
             <div class="titulo-accion">Aprobación del Plan de S+S</div>
             <div class="desc-accion">Firma coordinador y constructor</div>
           </div>
         </button>
-        <button class="ss-accion deshabilitado" onclick="proximamente('Recibí Libro de Incidencias')">
+        <button class="ss-accion" onclick="accionDocumento('recibi_libro')">
           <span class="icono-grande">📕</span>
           <div class="texto-accion">
             <div class="titulo-accion">Recibí del Libro de Incidencias</div>
@@ -637,6 +634,91 @@ body {
   </div>
 </div>
 
+<!-- ⭐ NUEVO v1.3.0 — MODAL: ELEGIR QUÉ HACER CON UN DOCUMENTO S+S -->
+<div class="modal-overlay" id="modalDocumento" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo" id="modalDocumentoTitulo">Documento</div>
+    <p class="modal-texto" id="modalDocumentoTexto">¿Cómo quieres proceder?</p>
+    <div class="modal-botones">
+      <button class="ss-accion" id="modalBtnFirmarApp" onclick="modalDocFirmarApp()">
+        <span class="icono-grande">✍️</span>
+        <div class="texto-accion">
+          <div class="titulo-accion">Firmar ahora en la app</div>
+          <div class="desc-accion" id="modalFirmarAppDesc">Firma con el dedo en pantalla</div>
+        </div>
+      </button>
+      <button class="ss-accion" id="modalBtnEnviarCorreo" onclick="modalDocEnviarCorreo()">
+        <span class="icono-grande">📧</span>
+        <div class="texto-accion">
+          <div class="titulo-accion">Enviar a borrador en Gmail</div>
+          <div class="desc-accion" id="modalEnviarCorreoDesc">Para que el destinatario firme y devuelva</div>
+        </div>
+      </button>
+      <button class="btn-secundario" onclick="cerrarModalDocumento()" style="margin-top:8px;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ NUEVO v1.3.0 — MODAL: RESULTADO DEL DOCUMENTO GENERADO -->
+<div class="modal-overlay" id="modalResultado" style="display:none">
+  <div class="modal-caja" style="text-align:center;">
+    <div style="font-size:50px;" id="modalResultadoIcono">✅</div>
+    <div class="modal-titulo" id="modalResultadoTitulo">Documento generado</div>
+    <p class="modal-texto" id="modalResultadoTexto"></p>
+    <div class="modal-botones">
+      <button class="btn-guardar" id="modalResultadoBtn1" onclick="modalResultadoAccion1()">Ver en Drive</button>
+      <button class="btn-secundario" id="modalResultadoBtn2" onclick="modalResultadoAccion2()" style="display:none">—</button>
+      <button class="btn-secundario" onclick="cerrarModalResultado()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Estilos modales v1.3.0 */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-caja {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.modal-titulo {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--azul);
+  margin-bottom: 8px;
+}
+.modal-texto {
+  font-size: 14px;
+  color: var(--gris-texto);
+  margin-bottom: 16px;
+}
+.modal-botones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Botón secundario del modal — mismo estilo de ss-accion pero compacto */
+#modalDocumento .ss-accion,
+#modalResultado .ss-accion {
+  margin-bottom: 0;
+}
+</style>
+
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
@@ -648,7 +730,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2463,6 +2545,386 @@ function pruebaFirma() {
       toast('Firma cancelada');
     }
   );
+}
+
+// ============================================================================
+// ⭐ NUEVO v1.3.0 — PASO B: ACCIONES DE DOCUMENTOS S+S
+// ============================================================================
+
+// Estado del flujo actual del Paso B
+let docSSState = {
+  tipo: null,         // 'designacion_coordinador' | 'aprobacion_plan' | 'recibi_libro'
+  datos: {},          // datos adicionales (fecha, etc.)
+  firmas: {},         // { promotor: dataUrl, constructor: dataUrl, coordinador: dataUrl }
+  firmantesPendientes: [], // cola de firmantes pendientes
+  archivoIdGenerado: null, // archivo Drive id del documento generado
+  nombreGenerado: null,
+};
+
+// Etiquetas legibles por tipo y rol
+const ETIQUETAS_TIPO_DOC = {
+  designacion_coordinador: 'Acta Designación Coordinador',
+  aprobacion_plan: 'Acta Aprobación Plan S+S',
+  recibi_libro: 'Recibí Libro de Incidencias',
+};
+
+const ETIQUETAS_FIRMANTE = {
+  promotor: 'El Promotor',
+  constructor: 'El Constructor',
+  coordinador: 'El Coordinador',
+};
+
+// Firmantes que hay que recoger por tipo (en orden)
+const FIRMANTES_POR_TIPO = {
+  designacion_coordinador: ['promotor', 'coordinador'],
+  aprobacion_plan: ['coordinador', 'constructor'],
+  recibi_libro: ['constructor'],
+};
+
+/**
+ * Acción: solicitar el Plan de S+S al constructor (correo borrador en Gmail)
+ */
+async function accionSolicitarPlan() {
+  const obra = estadoApp.obraActual;
+  if (!obra) return;
+  
+  if (!obra.emailConstructor) {
+    if (!confirm('No hay email del constructor guardado. ¿Quieres añadirlo ahora?\n\nDespués vuelve a S+S y pulsa "Solicitar Plan" otra vez.')) return;
+    irAFormularioEditar();
+    return;
+  }
+  
+  if (!confirm('Voy a crear un correo BORRADOR en tu Gmail (no se enviará) dirigido a:\n\n' + obra.emailConstructor + '\n\nlo podrás revisar y enviar tú mismo desde Gmail. ¿Continuar?')) return;
+  
+  toast('Creando borrador en Gmail...');
+  
+  try {
+    const res = await backendPost({
+      action: 'enviarBorradorCorreoSS',
+      idObra: obra.id,
+      tipo: 'solicitud_plan',
+      datos: {},
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '📧',
+      titulo: 'Borrador creado en Gmail',
+      texto: 'Se ha creado un borrador en tu Gmail.\n\nPara revisarlo y enviarlo:\n1. Abre Gmail\n2. Ve a "Borradores"\n3. Revisa el correo, edita si quieres y envíalo',
+      btn1Texto: '📧 Abrir Gmail',
+      btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+      btn2Texto: null,
+    });
+    
+    // Refrescar estado
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+/**
+ * Acción principal para los 3 documentos firmables:
+ * abre el modal de elección de cómo proceder
+ */
+function accionDocumento(tipo) {
+  const obra = estadoApp.obraActual;
+  if (!obra) return;
+  
+  // Validaciones previas
+  if (tipo === 'designacion_coordinador') {
+    if (!obra.promotor) {
+      toast('⚠️ Falta el promotor en la ficha de la obra', 'error');
+      return;
+    }
+  }
+  if (tipo === 'aprobacion_plan' || tipo === 'recibi_libro') {
+    if (!obra.constructor) {
+      toast('⚠️ Falta el constructor en la ficha de la obra', 'error');
+      return;
+    }
+  }
+  
+  docSSState = {
+    tipo: tipo,
+    datos: {},
+    firmas: {},
+    firmantesPendientes: [],
+    archivoIdGenerado: null,
+    nombreGenerado: null,
+  };
+  
+  // Personalizar texto del modal según tipo
+  const titulo = ETIQUETAS_TIPO_DOC[tipo];
+  let textoCorreo = '';
+  let textoFirmar = 'Firma con el dedo en pantalla';
+  
+  if (tipo === 'designacion_coordinador') {
+    textoCorreo = 'Enviar al promotor (' + (obra.emailPromotor || 'sin email') + ')';
+    textoFirmar = 'Firma promotor + coordinador en pantalla';
+  } else if (tipo === 'aprobacion_plan') {
+    textoCorreo = 'Enviar al constructor (' + (obra.emailConstructor || 'sin email') + ')';
+    textoFirmar = 'Firma coordinador + constructor en pantalla';
+  } else if (tipo === 'recibi_libro') {
+    textoCorreo = 'Enviar al constructor (' + (obra.emailConstructor || 'sin email') + ')';
+    textoFirmar = 'Firma constructor en pantalla';
+  }
+  
+  document.getElementById('modalDocumentoTitulo').textContent = titulo;
+  document.getElementById('modalDocumentoTexto').textContent = '¿Cómo quieres proceder con este documento?';
+  document.getElementById('modalFirmarAppDesc').textContent = textoFirmar;
+  document.getElementById('modalEnviarCorreoDesc').textContent = textoCorreo;
+  
+  document.getElementById('modalDocumento').style.display = 'flex';
+}
+
+function cerrarModalDocumento() {
+  document.getElementById('modalDocumento').style.display = 'none';
+}
+
+/**
+ * Usuario elige: firmar en la app
+ * → Recoger firmas una a una con el sistema de canvas existente
+ */
+function modalDocFirmarApp() {
+  cerrarModalDocumento();
+  
+  // Inicializar cola de firmantes
+  docSSState.firmantesPendientes = FIRMANTES_POR_TIPO[docSSState.tipo].slice();
+  
+  // Empezar a pedir firmas
+  recogerSiguienteFirma();
+}
+
+function recogerSiguienteFirma() {
+  if (docSSState.firmantesPendientes.length === 0) {
+    // Todas recogidas → generar documento
+    generarDocSSFinal();
+    return;
+  }
+  
+  const siguienteFirmante = docSSState.firmantesPendientes[0];
+  const etiqueta = ETIQUETAS_FIRMANTE[siguienteFirmante];
+  
+  // Nombre concreto a mostrar
+  const obra = estadoApp.obraActual;
+  let nombreFirmante = '';
+  if (siguienteFirmante === 'promotor') nombreFirmante = obra.promotor || '';
+  else if (siguienteFirmante === 'constructor') nombreFirmante = obra.constructor || '';
+  else if (siguienteFirmante === 'coordinador') nombreFirmante = 'Juan Felipe Ribes Aranda';
+  
+  const titulo = 'Firma de ' + etiqueta;
+  const quien = nombreFirmante ? '(' + nombreFirmante + ')' : '';
+  
+  pedirFirma(titulo, quien, (dataUrl) => {
+    // Firma aceptada
+    docSSState.firmas[siguienteFirmante] = dataUrl;
+    docSSState.firmantesPendientes.shift(); // quitar este de la cola
+    
+    // Si quedan más, pedirlas. Pero dar un pequeño respiro entre firmas.
+    if (docSSState.firmantesPendientes.length > 0) {
+      toast('✓ Firma recogida. Falta: ' + ETIQUETAS_FIRMANTE[docSSState.firmantesPendientes[0]], 'ok');
+      setTimeout(recogerSiguienteFirma, 800);
+    } else {
+      recogerSiguienteFirma();
+    }
+  }, () => {
+    // Cancelado
+    toast('Proceso cancelado');
+    docSSState = { tipo: null, datos: {}, firmas: {}, firmantesPendientes: [] };
+  });
+}
+
+async function generarDocSSFinal() {
+  toast('Generando documento PDF...');
+  
+  try {
+    const res = await backendPost({
+      action: 'generarDocumentoSS',
+      idObra: estadoApp.obraActual.id,
+      tipo: docSSState.tipo,
+      datos: docSSState.datos,
+      firmas: docSSState.firmas,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    docSSState.archivoIdGenerado = res.archivoId;
+    docSSState.nombreGenerado = res.nombre;
+    
+    // Para el caso especial de aprobacion_plan firmada SOLO por el coordinador
+    // (recibir parcialmente firmado y pendiente de constructor → enviar por correo)
+    // De momento, si está todo firmado, mostrar éxito.
+    
+    const estado = res.estado;
+    const esFirmado = estado === 'firmado';
+    
+    // Si es aprobación firmada del todo, ofrecer enviar al constructor por correo
+    if (docSSState.tipo === 'aprobacion_plan' && esFirmado) {
+      mostrarModalResultado({
+        icono: '✅',
+        titulo: 'Acta de Aprobación firmada',
+        texto: 'El documento se ha guardado en Drive.\n\n¿Quieres enviárselo al constructor por correo (a borrador en Gmail)?',
+        btn1Texto: '📧 Enviar al constructor',
+        btn1Accion: () => enviarAprobacionAlConstructor(res.archivoId),
+        btn2Texto: '📁 Solo ver en Drive',
+        btn2Accion: () => window.open(res.url, '_blank'),
+      });
+    } else {
+      mostrarModalResultado({
+        icono: '✅',
+        titulo: 'Documento generado',
+        texto: 'Se ha guardado en Drive:\n' + res.nombre,
+        btn1Texto: '📁 Ver en Drive',
+        btn1Accion: () => window.open(res.url, '_blank'),
+        btn2Texto: null,
+      });
+    }
+    
+    cargarEstadoSS(); // refrescar estado
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function enviarAprobacionAlConstructor(archivoIdActa) {
+  const obra = estadoApp.obraActual;
+  if (!obra.emailConstructor) {
+    toast('⚠️ Falta email del constructor', 'error');
+    return;
+  }
+  
+  cerrarModalResultado();
+  toast('Creando borrador en Gmail...');
+  
+  try {
+    const res = await backendPost({
+      action: 'enviarBorradorCorreoSS',
+      idObra: obra.id,
+      tipo: 'aprobacion_plan',
+      datos: { archivoIdActa: archivoIdActa },
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '📧',
+      titulo: 'Borrador creado en Gmail',
+      texto: 'Borrador para el constructor preparado en Gmail con el Acta adjunta.\n\nAbre Gmail para revisarlo y enviarlo.',
+      btn1Texto: '📧 Abrir Gmail',
+      btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+      btn2Texto: null,
+    });
+    
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+/**
+ * Usuario elige: enviar a borrador para que firme el destinatario
+ */
+async function modalDocEnviarCorreo() {
+  cerrarModalDocumento();
+  
+  const obra = estadoApp.obraActual;
+  let emailDest = '';
+  let etiquetaDest = '';
+  
+  if (docSSState.tipo === 'designacion_coordinador') {
+    emailDest = obra.emailPromotor;
+    etiquetaDest = 'promotor';
+  } else if (docSSState.tipo === 'aprobacion_plan' || docSSState.tipo === 'recibi_libro') {
+    emailDest = obra.emailConstructor;
+    etiquetaDest = 'constructor';
+  }
+  
+  if (!emailDest) {
+    toast('⚠️ Falta el email del ' + etiquetaDest + '. Añádelo en datos del expediente.', 'error');
+    return;
+  }
+  
+  // Para aprobación y recibí libro, no tiene mucho sentido enviar SIN firmar primero
+  // Pero lo permito si quiere. Para designación es lo más típico.
+  if (docSSState.tipo !== 'designacion_coordinador') {
+    if (!confirm('Vas a enviar este documento al ' + etiquetaDest + ' SIN firmar previamente.\n\nLo habitual sería firmarlo tú (coordinador) primero. ¿Continuar igualmente?')) {
+      return;
+    }
+  }
+  
+  toast('Creando borrador en Gmail...');
+  
+  try {
+    const res = await backendPost({
+      action: 'enviarBorradorCorreoSS',
+      idObra: obra.id,
+      tipo: docSSState.tipo,
+      datos: docSSState.datos,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '📧',
+      titulo: 'Borrador creado en Gmail',
+      texto: 'El documento PDF se ha guardado en Drive y se ha creado un borrador en tu Gmail con el PDF adjunto.\n\nDestinatario: ' + res.destinatario + '\n\nAbre Gmail para revisar el correo y enviarlo.',
+      btn1Texto: '📧 Abrir Gmail',
+      btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+      btn2Texto: null,
+    });
+    
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// ===== Helper modal resultado =====
+
+let modalResultadoCallbacks = { btn1: null, btn2: null };
+
+function mostrarModalResultado({ icono, titulo, texto, btn1Texto, btn1Accion, btn2Texto, btn2Accion }) {
+  document.getElementById('modalResultadoIcono').textContent = icono || '✅';
+  document.getElementById('modalResultadoTitulo').textContent = titulo || '';
+  document.getElementById('modalResultadoTexto').textContent = texto || '';
+  
+  const btn1 = document.getElementById('modalResultadoBtn1');
+  const btn2 = document.getElementById('modalResultadoBtn2');
+  
+  if (btn1Texto) {
+    btn1.textContent = btn1Texto;
+    btn1.style.display = '';
+    modalResultadoCallbacks.btn1 = btn1Accion;
+  } else {
+    btn1.style.display = 'none';
+  }
+  
+  if (btn2Texto) {
+    btn2.textContent = btn2Texto;
+    btn2.style.display = '';
+    modalResultadoCallbacks.btn2 = btn2Accion;
+  } else {
+    btn2.style.display = 'none';
+  }
+  
+  document.getElementById('modalResultado').style.display = 'flex';
+}
+
+function modalResultadoAccion1() {
+  if (modalResultadoCallbacks.btn1) modalResultadoCallbacks.btn1();
+  cerrarModalResultado();
+}
+
+function modalResultadoAccion2() {
+  if (modalResultadoCallbacks.btn2) modalResultadoCallbacks.btn2();
+  cerrarModalResultado();
+}
+
+function cerrarModalResultado() {
+  document.getElementById('modalResultado').style.display = 'none';
+  modalResultadoCallbacks = { btn1: null, btn2: null };
 }
 
 // ============================================================================
