@@ -730,7 +730,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2443,8 +2443,9 @@ function inicializarCanvasFirma() {
   
   const ctx = canvas.getContext('2d');
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2.5;
+  // ⭐ v1.4.0: trazo grueso color azul BIC (memoria permanente del usuario)
+  ctx.strokeStyle = '#1338BE';
+  ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   
@@ -2626,7 +2627,8 @@ async function accionSolicitarPlan() {
 
 /**
  * Acción principal para los 3 documentos firmables:
- * abre el modal de elección de cómo proceder
+ * abre el modal de elección de cómo proceder.
+ * ⭐ v1.4.0: opciones específicas por tipo de documento
  */
 function accionDocumento(tipo) {
   const obra = estadoApp.obraActual;
@@ -2655,26 +2657,40 @@ function accionDocumento(tipo) {
     nombreGenerado: null,
   };
   
+  // ⭐ v1.4.0: Para Recibí del Libro NO hay modal — directamente flujo de firma in situ
+  // (el correo solo tiene sentido después de firmado)
+  if (tipo === 'recibi_libro') {
+    if (!confirm('Vas a firmar el RECIBÍ DEL LIBRO DE INCIDENCIAS con el constructor (' + obra.constructor + ').\n\nDespués podrás enviar el documento firmado al constructor por email.\n\n¿Continuar?')) {
+      return;
+    }
+    modalDocFirmarApp();
+    return;
+  }
+  
   // Personalizar texto del modal según tipo
   const titulo = ETIQUETAS_TIPO_DOC[tipo];
-  let textoCorreo = '';
   let textoFirmar = 'Firma con el dedo en pantalla';
+  let textoCorreoTitulo = 'Enviar a borrador en Gmail';
+  let textoCorreoDesc = '';
   
   if (tipo === 'designacion_coordinador') {
-    textoCorreo = 'Enviar al promotor (' + (obra.emailPromotor || 'sin email') + ')';
     textoFirmar = 'Firma promotor + coordinador en pantalla';
+    textoCorreoTitulo = '📧 Enviar al promotor para firma';
+    textoCorreoDesc = 'Genera el acta sin firmar y crea borrador a ' + (obra.emailPromotor || 'falta email');
   } else if (tipo === 'aprobacion_plan') {
-    textoCorreo = 'Enviar al constructor (' + (obra.emailConstructor || 'sin email') + ')';
-    textoFirmar = 'Firma coordinador + constructor en pantalla';
-  } else if (tipo === 'recibi_libro') {
-    textoCorreo = 'Enviar al constructor (' + (obra.emailConstructor || 'sin email') + ')';
-    textoFirmar = 'Firma constructor en pantalla';
+    textoFirmar = '✍️ Firmar in situ (coordinador + constructor)';
+    textoCorreoTitulo = '📧 Firmar yo y enviar al constructor';
+    textoCorreoDesc = 'Firmas tú (coordinador) y se envía al constructor para que firme y devuelva';
   }
   
   document.getElementById('modalDocumentoTitulo').textContent = titulo;
   document.getElementById('modalDocumentoTexto').textContent = '¿Cómo quieres proceder con este documento?';
   document.getElementById('modalFirmarAppDesc').textContent = textoFirmar;
-  document.getElementById('modalEnviarCorreoDesc').textContent = textoCorreo;
+  
+  // Cambiar el título del segundo botón también
+  const btnCorreo = document.getElementById('modalBtnEnviarCorreo');
+  btnCorreo.querySelector('.titulo-accion').textContent = textoCorreoTitulo;
+  document.getElementById('modalEnviarCorreoDesc').textContent = textoCorreoDesc;
   
   document.getElementById('modalDocumento').style.display = 'flex';
 }
@@ -2753,25 +2769,35 @@ async function generarDocSSFinal() {
     docSSState.archivoIdGenerado = res.archivoId;
     docSSState.nombreGenerado = res.nombre;
     
-    // Para el caso especial de aprobacion_plan firmada SOLO por el coordinador
-    // (recibir parcialmente firmado y pendiente de constructor → enviar por correo)
-    // De momento, si está todo firmado, mostrar éxito.
-    
     const estado = res.estado;
     const esFirmado = estado === 'firmado';
     
-    // Si es aprobación firmada del todo, ofrecer enviar al constructor por correo
+    // ⭐ v1.4.0: comportamiento diferente según tipo
+    
     if (docSSState.tipo === 'aprobacion_plan' && esFirmado) {
+      // Firmada por todos in situ → ofrecer enviar al constructor con texto reforzado
       mostrarModalResultado({
         icono: '✅',
         titulo: 'Acta de Aprobación firmada',
-        texto: 'El documento se ha guardado en Drive.\n\n¿Quieres enviárselo al constructor por correo (a borrador en Gmail)?',
+        texto: 'El documento se ha guardado en Drive.\n\nLo siguiente: enviar copia al constructor recordándole que debe hacer la APERTURA DEL CENTRO DE TRABAJO. ¿Lo envío?',
         btn1Texto: '📧 Enviar al constructor',
-        btn1Accion: () => enviarAprobacionAlConstructor(res.archivoId),
+        btn1Accion: () => enviarAprobacionFirmadaAlConstructor(res.archivoId),
+        btn2Texto: '📁 Solo ver en Drive',
+        btn2Accion: () => window.open(res.url, '_blank'),
+      });
+    } else if (docSSState.tipo === 'recibi_libro' && esFirmado) {
+      // Recibí firmado por el constructor → ofrecer enviar copia
+      mostrarModalResultado({
+        icono: '✅',
+        titulo: 'Recibí del Libro firmado',
+        texto: 'El documento se ha guardado en Drive.\n\n¿Quieres enviar copia al constructor para su registro? El correo recordará sus obligaciones sobre el Libro.',
+        btn1Texto: '📧 Enviar copia al constructor',
+        btn1Accion: () => enviarRecibiFirmadoAlConstructor(res.archivoId),
         btn2Texto: '📁 Solo ver en Drive',
         btn2Accion: () => window.open(res.url, '_blank'),
       });
     } else {
+      // Designación firmada in situ por todos, o cualquier otro caso → solo ver Drive
       mostrarModalResultado({
         icono: '✅',
         titulo: 'Documento generado',
@@ -2788,7 +2814,11 @@ async function generarDocSSFinal() {
   }
 }
 
-async function enviarAprobacionAlConstructor(archivoIdActa) {
+/**
+ * Envía el Acta de Aprobación firmada in situ al constructor con texto reforzado
+ * (apertura centro trabajo, docu en obra)
+ */
+async function enviarAprobacionFirmadaAlConstructor(archivoIdActa) {
   const obra = estadoApp.obraActual;
   if (!obra.emailConstructor) {
     toast('⚠️ Falta email del constructor', 'error');
@@ -2802,7 +2832,7 @@ async function enviarAprobacionAlConstructor(archivoIdActa) {
     const res = await backendPost({
       action: 'enviarBorradorCorreoSS',
       idObra: obra.id,
-      tipo: 'aprobacion_plan',
+      tipo: 'aprobacion_plan_firmada',
       datos: { archivoIdActa: archivoIdActa },
     });
     
@@ -2811,7 +2841,7 @@ async function enviarAprobacionAlConstructor(archivoIdActa) {
     mostrarModalResultado({
       icono: '📧',
       titulo: 'Borrador creado en Gmail',
-      texto: 'Borrador para el constructor preparado en Gmail con el Acta adjunta.\n\nAbre Gmail para revisarlo y enviarlo.',
+      texto: 'Borrador para el constructor preparado en Gmail con el Acta firmada adjunta.\n\nEl correo le recuerda que debe hacer la apertura del centro de trabajo y enviarte el justificante.',
       btn1Texto: '📧 Abrir Gmail',
       btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
       btn2Texto: null,
@@ -2824,44 +2854,24 @@ async function enviarAprobacionAlConstructor(archivoIdActa) {
 }
 
 /**
- * Usuario elige: enviar a borrador para que firme el destinatario
+ * Envía el Recibí del Libro firmado al constructor para registro
  */
-async function modalDocEnviarCorreo() {
-  cerrarModalDocumento();
-  
+async function enviarRecibiFirmadoAlConstructor(archivoIdActa) {
   const obra = estadoApp.obraActual;
-  let emailDest = '';
-  let etiquetaDest = '';
-  
-  if (docSSState.tipo === 'designacion_coordinador') {
-    emailDest = obra.emailPromotor;
-    etiquetaDest = 'promotor';
-  } else if (docSSState.tipo === 'aprobacion_plan' || docSSState.tipo === 'recibi_libro') {
-    emailDest = obra.emailConstructor;
-    etiquetaDest = 'constructor';
-  }
-  
-  if (!emailDest) {
-    toast('⚠️ Falta el email del ' + etiquetaDest + '. Añádelo en datos del expediente.', 'error');
+  if (!obra.emailConstructor) {
+    toast('⚠️ Falta email del constructor', 'error');
     return;
   }
   
-  // Para aprobación y recibí libro, no tiene mucho sentido enviar SIN firmar primero
-  // Pero lo permito si quiere. Para designación es lo más típico.
-  if (docSSState.tipo !== 'designacion_coordinador') {
-    if (!confirm('Vas a enviar este documento al ' + etiquetaDest + ' SIN firmar previamente.\n\nLo habitual sería firmarlo tú (coordinador) primero. ¿Continuar igualmente?')) {
-      return;
-    }
-  }
-  
+  cerrarModalResultado();
   toast('Creando borrador en Gmail...');
   
   try {
     const res = await backendPost({
       action: 'enviarBorradorCorreoSS',
       idObra: obra.id,
-      tipo: docSSState.tipo,
-      datos: docSSState.datos,
+      tipo: 'recibi_libro_firmado',
+      datos: { archivoIdActa: archivoIdActa },
     });
     
     if (!res.ok) throw new Error(res.error);
@@ -2869,7 +2879,7 @@ async function modalDocEnviarCorreo() {
     mostrarModalResultado({
       icono: '📧',
       titulo: 'Borrador creado en Gmail',
-      texto: 'El documento PDF se ha guardado en Drive y se ha creado un borrador en tu Gmail con el PDF adjunto.\n\nDestinatario: ' + res.destinatario + '\n\nAbre Gmail para revisar el correo y enviarlo.',
+      texto: 'Borrador con el Recibí firmado preparado en Gmail. Le recuerda sus obligaciones sobre el Libro de Incidencias.',
       btn1Texto: '📧 Abrir Gmail',
       btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
       btn2Texto: null,
@@ -2879,6 +2889,101 @@ async function modalDocEnviarCorreo() {
   } catch (err) {
     toast('⚠️ Error: ' + err.message, 'error');
   }
+}
+
+/**
+ * ⭐ v1.4.0: Flujos de envío a correo según tipo de documento
+ * - designacion_coordinador: genera sin firmar y manda al promotor
+ * - aprobacion_plan: pide al coordinador su firma, después genera con esa firma
+ *                    y manda al constructor para que firme y devuelva
+ * - recibi_libro: NO debería llegar aquí (se filtra en accionDocumento)
+ */
+async function modalDocEnviarCorreo() {
+  cerrarModalDocumento();
+  
+  const obra = estadoApp.obraActual;
+  
+  if (docSSState.tipo === 'designacion_coordinador') {
+    if (!obra.emailPromotor) {
+      toast('⚠️ Falta el email del promotor. Añádelo en datos del expediente.', 'error');
+      return;
+    }
+    
+    if (!confirm('Voy a generar el Acta de Designación SIN FIRMAR y crear un correo borrador en Gmail dirigido al promotor:\n\n' + obra.emailPromotor + '\n\nÉl deberá firmarlo (digital o escaneado) y devolverlo. ¿Continuar?')) return;
+    
+    toast('Creando borrador en Gmail...');
+    
+    try {
+      const res = await backendPost({
+        action: 'enviarBorradorCorreoSS',
+        idObra: obra.id,
+        tipo: 'designacion_coordinador',
+        datos: docSSState.datos,
+      });
+      
+      if (!res.ok) throw new Error(res.error);
+      
+      mostrarModalResultado({
+        icono: '📧',
+        titulo: 'Borrador creado en Gmail',
+        texto: 'El Acta sin firmar se ha guardado en Drive y se ha creado un borrador a:\n\n' + res.destinatario + '\n\nAbre Gmail para revisar y enviar.',
+        btn1Texto: '📧 Abrir Gmail',
+        btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+        btn2Texto: null,
+      });
+      
+      cargarEstadoSS();
+    } catch (err) {
+      toast('⚠️ Error: ' + err.message, 'error');
+    }
+    return;
+  }
+  
+  if (docSSState.tipo === 'aprobacion_plan') {
+    if (!obra.emailConstructor) {
+      toast('⚠️ Falta el email del constructor. Añádelo en datos del expediente.', 'error');
+      return;
+    }
+    
+    if (!confirm('Vas a FIRMAR el Acta de Aprobación tú mismo (Coordinador) en pantalla.\n\nDespués se generará el PDF con tu firma y se enviará al constructor para que firme y devuelva.\n\n¿Continuar?')) return;
+    
+    // Pedir la firma del coordinador
+    pedirFirma('Firma del Coordinador', 'Juan Felipe Ribes Aranda', async (dataUrlFirma) => {
+      toast('Generando Acta firmada y borrador en Gmail...');
+      
+      try {
+        const res = await backendPost({
+          action: 'enviarBorradorCorreoSS',
+          idObra: obra.id,
+          tipo: 'aprobacion_plan_para_firmar',
+          datos: {
+            firmaCoordinador: dataUrlFirma,
+          },
+        });
+        
+        if (!res.ok) throw new Error(res.error);
+        
+        mostrarModalResultado({
+          icono: '📧',
+          titulo: 'Acta firmada y borrador creado',
+          texto: 'El Acta firmada por ti (Coordinador) está adjunta en un borrador de Gmail para:\n\n' + res.destinatario + '\n\nEl correo le pide que la firme, la devuelva, y haga la apertura del centro de trabajo.',
+          btn1Texto: '📧 Abrir Gmail',
+          btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+          btn2Texto: null,
+        });
+        
+        cargarEstadoSS();
+      } catch (err) {
+        toast('⚠️ Error: ' + err.message, 'error');
+      }
+    }, () => {
+      toast('Proceso cancelado');
+    });
+    return;
+  }
+  
+  // Cualquier otro caso → mensaje (no debería llegar)
+  toast('⚠️ Acción no disponible para este documento', 'error');
 }
 
 // ===== Helper modal resultado =====
