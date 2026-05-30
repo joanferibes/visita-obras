@@ -474,6 +474,11 @@ body {
       <div class="form-group"><label>3. Trabajos en ejecución</label><textarea id="prev-trabajos" rows="8"></textarea></div>
       <div class="form-group"><label>4. Órdenes e indicaciones</label><textarea id="prev-ordenes" rows="8"></textarea></div>
       <div class="form-group"><label>5. Incidencias / observaciones</label><textarea id="prev-incidencias" rows="4"></textarea></div>
+      <div class="form-group" id="prev-seguridad-wrapper" style="display:none">
+        <label>6. Seguridad y Salud <span style="color:var(--azul); font-size:11px; font-weight:normal;">(detectado en el dictado)</span></label>
+        <textarea id="prev-seguridad" rows="5"></textarea>
+        <div class="hint">Si dejas este campo vacío, el apartado NO aparecerá en el PDF</div>
+      </div>
       <div class="form-group">
         <label>6. Firmas</label>
         <div style="font-size:14px;">
@@ -574,11 +579,11 @@ body {
         <div id="ss-empresas-lista">
           <div class="loading-screen" style="padding:20px;"><div class="spinner"></div><div>Cargando...</div></div>
         </div>
-        <button class="ss-accion" onclick="proximamente('Añadir subcontrata')" style="margin-top:8px;">
+        <button class="ss-accion" onclick="abrirFormSubcontrata()" style="margin-top:8px;">
           <span class="icono-grande">➕</span>
           <div class="texto-accion">
             <div class="titulo-accion">Añadir subcontrata</div>
-            <div class="desc-accion">(disponible en Paso D)</div>
+            <div class="desc-accion">Genera acta de adhesión y borrador correo</div>
           </div>
         </button>
       </div>
@@ -719,6 +724,32 @@ body {
 }
 </style>
 
+<!-- ⭐ NUEVO v1.5.0 — MODAL: AÑADIR SUBCONTRATA -->
+<div class="modal-overlay" id="modalSubcontrata" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">➕ Añadir subcontrata</div>
+    <p class="modal-texto">Rellena los datos. Se generará el Acta de Adhesión y un borrador de correo al constructor.</p>
+    
+    <div class="form-group">
+      <label>Nombre de la empresa o autónomo <span class="req">*</span></label>
+      <input type="text" id="sub-nombre" placeholder="Ej: Carpintería Hermanos Pérez SL">
+    </div>
+    <div class="form-group">
+      <label>Actividad en la obra <span class="req">*</span></label>
+      <input type="text" id="sub-actividad" placeholder="Ej: Carpintería de madera">
+    </div>
+    <div class="form-group">
+      <label>CIF / NIF (opcional)</label>
+      <input type="text" id="sub-cif" placeholder="Ej: B12345678">
+    </div>
+    
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="guardarYGenerarSubcontrata()">📄 Generar acta + correo borrador</button>
+      <button class="btn-secundario" onclick="cerrarFormSubcontrata()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
@@ -730,7 +761,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.5.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1786,6 +1817,12 @@ function iniciarNuevaActa() {
   document.querySelector('#btnGrabar .texto').textContent = 'GRABAR';
   document.getElementById('grabacionTiempo').style.display = 'none';
   
+  // ⭐ v1.5.0: resetear visibilidad del apartado S+S (solo aparece si IA detecta contenido)
+  const wrapperSS = document.getElementById('prev-seguridad-wrapper');
+  if (wrapperSS) wrapperSS.style.display = 'none';
+  const ssTextarea = document.getElementById('prev-seguridad');
+  if (ssTextarea) ssTextarea.value = '';
+  
   actualizarMiniaturasActa();
   estadoApp.pantalla = 'acta-dictado';
   mostrarPantalla('screen-acta-dictado');
@@ -2023,6 +2060,17 @@ function irAPreview() {
   document.getElementById('prev-ordenes').value = aTextoEditable(a.ordenesIndicaciones);
   document.getElementById('prev-incidencias').value = aTextoEditable(a.incidenciasObservaciones);
   
+  // ⭐ v1.5.0: apartado S+S — solo se muestra si la IA detectó contenido relacionado
+  const wrapperSS = document.getElementById('prev-seguridad-wrapper');
+  const ssTexto = aTextoEditable(a.seguridadSalud || '');
+  if (ssTexto && ssTexto.trim()) {
+    document.getElementById('prev-seguridad').value = ssTexto;
+    wrapperSS.style.display = '';
+  } else {
+    document.getElementById('prev-seguridad').value = '';
+    wrapperSS.style.display = 'none';
+  }
+  
   const firmas = a.firmas || ['tecnico'];
   document.getElementById('firma-arquitecto').checked = firmas.indexOf('arquitecto') !== -1;
   document.getElementById('firma-constructor').checked = firmas.indexOf('constructor') !== -1;
@@ -2071,11 +2119,23 @@ function recogerActaDelPreview() {
   const ordenes = document.getElementById('prev-ordenes').value.trim();
   const incidencias = document.getElementById('prev-incidencias').value.trim();
   
+  // ⭐ v1.5.0: leer apartado S+S (vacío si el wrapper está oculto o el textarea vacío)
+  const seguridadSaludEl = document.getElementById('prev-seguridad');
+  const seguridadSalud = (seguridadSaludEl && seguridadSaludEl.value || '').trim();
+  
   const firmas = ['tecnico'];
   if (document.getElementById('firma-arquitecto').checked) firmas.unshift('arquitecto');
   if (document.getElementById('firma-constructor').checked) firmas.push('constructor');
   
-  return { asistentes, estadoActual: estado, trabajosEjecucion: trabajos, ordenesIndicaciones: ordenes, incidenciasObservaciones: incidencias, firmas };
+  return {
+    asistentes,
+    estadoActual: estado,
+    trabajosEjecucion: trabajos,
+    ordenesIndicaciones: ordenes,
+    incidenciasObservaciones: incidencias,
+    seguridadSalud: seguridadSalud,
+    firmas,
+  };
 }
 
 let actaGuardadaInfo = null;
@@ -2330,48 +2390,57 @@ function renderEmpresasSS(empresas) {
   const cont = document.getElementById('ss-empresas-lista');
   const obra = estadoApp.obraActual;
   
-  // Si no hay empresas registradas y hay constructor en la ficha, mostrarlo como contratista
-  let empresasMostrar = empresas.slice();
-  if (empresasMostrar.length === 0 && obra.constructor) {
-    empresasMostrar.push({
-      id: 'auto-contratista',
-      nombre: obra.constructor,
-      actividad: 'Contratista principal',
-      tipo: 'contratista',
-      adhesionFirmada: '',
-      _auto: true,
-    });
+  // El contratista principal sale de la ficha de la obra, no se guarda en EmpresasObra
+  let html = '';
+  
+  // Tarjeta del contratista principal (siempre visible si existe)
+  if (obra.constructor) {
+    html += `
+      <div class="ss-empresa-card">
+        <div class="nombre-emp">${escape(obra.constructor)}</div>
+        <div class="actividad-emp">Contratista principal</div>
+        <span class="estado-emp">Contratista principal</span>
+      </div>`;
   }
   
-  if (empresasMostrar.length === 0) {
+  // Subcontratas
+  const subcontratas = empresas.filter(e => e.tipo === 'subcontratista');
+  
+  if (subcontratas.length > 0) {
+    html += '<div style="margin-top:12px; font-size:12px; color:var(--gris-texto); font-weight:600;">SUBCONTRATAS:</div>';
+    
+    subcontratas.forEach(e => {
+      const yaFirmada = e.adhesionFirmada ? true : false;
+      
+      html += `
+        <div class="ss-empresa-card subcontratista">
+          <div class="nombre-emp">${escape(e.nombre)}</div>
+          <div class="actividad-emp">${escape(e.actividad || '(sin actividad)')}</div>
+          
+          <label style="display:flex; align-items:center; gap:8px; margin:8px 0; cursor:pointer;">
+            <input type="checkbox" ${yaFirmada ? 'checked' : ''} 
+                   onchange="cambiarEstadoAdhesion('${e.id}', this.checked)"
+                   style="width:18px; height:18px;">
+            <span style="font-size:13px;">✓ He recibido el Acta de Adhesión firmada</span>
+          </label>
+          
+          <div class="acciones-emp">
+            ${e.carpetaAdhesion ? '<button onclick="verAdhesionEnDrive(\'' + e.carpetaAdhesion + '\')">📁 Ver acta</button>' : ''}
+            <button onclick="reenviarAdhesion('${e.id}')">📧 Reenviar borrador</button>
+            <button onclick="eliminarSubcontrataConfirm('${e.id}', '${escape(e.nombre).replace(/'/g, "\\'")}')">🗑️ Eliminar</button>
+          </div>
+        </div>`;
+    });
+  } else {
+    html += '<p style="color:var(--gris-texto); font-size:13px; padding:8px;">No hay subcontratas registradas.</p>';
+  }
+  
+  if (!obra.constructor && subcontratas.length === 0) {
     cont.innerHTML = '<p style="color:var(--gris-texto); font-size:13px; padding:8px;">No hay empresas registradas. Añade el constructor en los datos del expediente.</p>';
     return;
   }
   
-  cont.innerHTML = empresasMostrar.map(e => {
-    const cls = e.tipo === 'subcontratista' ? 'subcontratista' : '';
-    let estadoTxt = '';
-    let estadoCls = '';
-    if (e.tipo === 'subcontratista') {
-      if (e.adhesionFirmada) {
-        estadoTxt = '✓ Adhesión firmada';
-        estadoCls = 'ok';
-      } else {
-        estadoTxt = '⏳ Sin adhesión';
-        estadoCls = 'pendiente';
-      }
-    } else {
-      estadoTxt = 'Contratista principal';
-    }
-    
-    return `
-      <div class="ss-empresa-card ${cls}">
-        <div class="nombre-emp">${escape(e.nombre)}</div>
-        <div class="actividad-emp">${escape(e.actividad || '(sin actividad)')}</div>
-        <span class="estado-emp ${estadoCls}">${estadoTxt}</span>
-      </div>
-    `;
-  }).join('');
+  cont.innerHTML = html;
 }
 
 async function abrirCarpetaSSDrive() {
@@ -3030,6 +3099,173 @@ function modalResultadoAccion2() {
 function cerrarModalResultado() {
   document.getElementById('modalResultado').style.display = 'none';
   modalResultadoCallbacks = { btn1: null, btn2: null };
+}
+
+// ============================================================================
+// ⭐ NUEVO v1.5.0 — PASO D: GESTIÓN DE SUBCONTRATAS
+// ============================================================================
+
+function abrirFormSubcontrata() {
+  const obra = estadoApp.obraActual;
+  if (!obra) return;
+  
+  if (!obra.emailConstructor) {
+    if (!confirm('Falta el email del constructor. Se necesita para enviar el borrador del correo.\n\n¿Quieres ir a rellenarlo ahora?')) return;
+    irAFormularioEditar();
+    return;
+  }
+  
+  // Limpiar campos
+  document.getElementById('sub-nombre').value = '';
+  document.getElementById('sub-actividad').value = '';
+  document.getElementById('sub-cif').value = '';
+  
+  document.getElementById('modalSubcontrata').style.display = 'flex';
+  
+  // Foco en el primer campo
+  setTimeout(() => document.getElementById('sub-nombre').focus(), 100);
+}
+
+function cerrarFormSubcontrata() {
+  document.getElementById('modalSubcontrata').style.display = 'none';
+}
+
+async function guardarYGenerarSubcontrata() {
+  const obra = estadoApp.obraActual;
+  if (!obra) return;
+  
+  const nombre = document.getElementById('sub-nombre').value.trim();
+  const actividad = document.getElementById('sub-actividad').value.trim();
+  const cif = document.getElementById('sub-cif').value.trim();
+  
+  if (!nombre) {
+    toast('⚠️ El nombre es obligatorio', 'error');
+    return;
+  }
+  if (!actividad) {
+    toast('⚠️ La actividad es obligatoria', 'error');
+    return;
+  }
+  
+  cerrarFormSubcontrata();
+  toast('Añadiendo subcontrata...');
+  
+  try {
+    // 1. Añadir la empresa
+    const addRes = await backendPost({
+      action: 'addEmpresa',
+      empresa: {
+        idObra: obra.id,
+        nombre: nombre,
+        actividad: actividad,
+        cif: cif,
+        email: '',
+        tipo: 'subcontratista',
+      },
+    });
+    
+    if (!addRes.ok) throw new Error(addRes.error);
+    
+    const idEmpresa = addRes.id;
+    
+    toast('Generando acta y borrador en Gmail...');
+    
+    // 2. Generar el Acta de Adhesión + borrador correo al constructor
+    const genRes = await backendPost({
+      action: 'generarAdhesionSubcontrata',
+      idObra: obra.id,
+      idEmpresa: idEmpresa,
+    });
+    
+    if (!genRes.ok) throw new Error(genRes.error);
+    
+    mostrarModalResultado({
+      icono: '✅',
+      titulo: 'Subcontrata añadida',
+      texto: 'Acta de Adhesión generada y guardada en Drive.\n\nSe ha creado un borrador en Gmail dirigido al constructor (' + genRes.destinatario + ') con el acta adjunta y las instrucciones para que la firme con la subcontrata y te la devuelva.',
+      btn1Texto: '📧 Abrir Gmail',
+      btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+      btn2Texto: '📁 Ver acta en Drive',
+      btn2Accion: () => window.open(genRes.url, '_blank'),
+    });
+    
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function cambiarEstadoAdhesion(idEmpresa, firmada) {
+  try {
+    const res = await backendPost({
+      action: 'marcarAdhesionFirmada',
+      idEmpresa: idEmpresa,
+      firmada: firmada,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    toast(firmada ? '✓ Marcada como firmada' : 'Desmarcada', 'ok');
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+    cargarEstadoSS(); // refrescar para corregir checkbox
+  }
+}
+
+function verAdhesionEnDrive(archivoId) {
+  if (!archivoId) {
+    toast('Acta no disponible', 'error');
+    return;
+  }
+  window.open('https://drive.google.com/file/d/' + archivoId + '/view?authuser=0', '_blank');
+}
+
+async function reenviarAdhesion(idEmpresa) {
+  if (!confirm('Voy a regenerar el Acta de Adhesión y crear un nuevo borrador en Gmail al constructor. ¿Continuar?')) return;
+  
+  toast('Regenerando acta y borrador...');
+  
+  try {
+    const res = await backendPost({
+      action: 'generarAdhesionSubcontrata',
+      idObra: estadoApp.obraActual.id,
+      idEmpresa: idEmpresa,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '📧',
+      titulo: 'Borrador creado en Gmail',
+      texto: 'Se ha creado un nuevo borrador con el acta de adhesión adjunta.',
+      btn1Texto: '📧 Abrir Gmail',
+      btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+      btn2Texto: null,
+    });
+    
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+async function eliminarSubcontrataConfirm(idEmpresa, nombre) {
+  if (!confirm('¿Eliminar la subcontrata "' + nombre + '" de la app?\n\n(El Acta de Adhesión que se haya generado seguirá en Drive)')) return;
+  
+  try {
+    const res = await backendPost({
+      action: 'eliminarEmpresa',
+      idEmpresa: idEmpresa,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    toast('✓ Subcontrata eliminada', 'ok');
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
 }
 
 // ============================================================================
