@@ -761,7 +761,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.5.2';
+const APP_VERSION = '1.5.3';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2602,24 +2602,23 @@ function aceptarFirma() {
 }
 
 /**
- * Recorta el canvas al bounding box real del trazo de la firma.
- * Devuelve un dataURL PNG transparente del tamaño justo del trazo + un pequeño margen.
+ * Recorta el canvas al bounding box real del trazo y lo redimensiona
+ * a un tamaño OBJETIVO grande (600px máximo) para que se vea claro en el PDF.
  */
 function recortarFirmaABoundingBox(canvas) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
   
-  // Leer todos los pixels del canvas
   const imgData = ctx.getImageData(0, 0, W, H);
   const data = imgData.data;
   
-  // Buscar bounding box: pixels con alpha > 0
+  // Bounding box del trazo
   let minX = W, minY = H, maxX = -1, maxY = -1;
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const alpha = data[(y * W + x) * 4 + 3];
-      if (alpha > 10) { // umbral por anti-aliasing
+      if (alpha > 10) {
         if (x < minX) minX = x;
         if (x > maxX) maxX = x;
         if (y < minY) minY = y;
@@ -2628,13 +2627,12 @@ function recortarFirmaABoundingBox(canvas) {
     }
   }
   
-  // Si no hay pixels (firma vacía), devolver canvas completo como fallback
   if (maxX < 0) {
     return canvas.toDataURL('image/png');
   }
   
-  // Añadir un pequeño margen alrededor (10px)
-  const padding = 10;
+  // Margen pequeño alrededor del trazo
+  const padding = 8;
   minX = Math.max(0, minX - padding);
   minY = Math.max(0, minY - padding);
   maxX = Math.min(W - 1, maxX + padding);
@@ -2643,14 +2641,37 @@ function recortarFirmaABoundingBox(canvas) {
   const recW = maxX - minX + 1;
   const recH = maxY - minY + 1;
   
-  // Crear canvas nuevo del tamaño del bounding box
+  // ⭐ v1.5.3: Redimensionar a un tamaño OBJETIVO grande
+  // Objetivo: el ancho máximo = 600px, manteniendo proporción
+  const TARGET_W = 600;
+  const TARGET_H = 250;
+  
+  const ratioFirma = recW / recH;
+  const ratioTarget = TARGET_W / TARGET_H;
+  
+  let finalW, finalH;
+  if (ratioFirma > ratioTarget) {
+    // Firma más ancha → limita por ancho
+    finalW = TARGET_W;
+    finalH = Math.round(TARGET_W / ratioFirma);
+  } else {
+    // Firma más alta → limita por alto
+    finalH = TARGET_H;
+    finalW = Math.round(TARGET_H * ratioFirma);
+  }
+  
+  // Crear canvas final con la firma escalada
   const cropped = document.createElement('canvas');
-  cropped.width = recW;
-  cropped.height = recH;
+  cropped.width = finalW;
+  cropped.height = finalH;
   const cctx = cropped.getContext('2d');
   
-  // Copiar la región recortada
-  cctx.drawImage(canvas, minX, minY, recW, recH, 0, 0, recW, recH);
+  // Calidad de escalado
+  cctx.imageSmoothingEnabled = true;
+  cctx.imageSmoothingQuality = 'high';
+  
+  // Dibujar la región recortada estirada al tamaño objetivo
+  cctx.drawImage(canvas, minX, minY, recW, recH, 0, 0, finalW, finalH);
   
   return cropped.toDataURL('image/png');
 }
