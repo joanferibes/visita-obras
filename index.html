@@ -761,7 +761,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.5.2';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2589,8 +2589,9 @@ function aceptarFirma() {
     return;
   }
   
-  // Generar PNG transparente recortado
-  const dataUrl = firmaState.canvas.toDataURL('image/png');
+  // ⭐ v1.5.2: Recortar el PNG al bounding box real del trazo
+  // (eliminar el espacio en blanco alrededor para que la firma se vea grande en el PDF)
+  const dataUrl = recortarFirmaABoundingBox(firmaState.canvas);
   
   document.getElementById('firmaPantalla').classList.remove('active');
   
@@ -2598,6 +2599,60 @@ function aceptarFirma() {
   firmaState.callbackAceptar = null;
   firmaState.callbackCancelar = null;
   if (cb) cb(dataUrl);
+}
+
+/**
+ * Recorta el canvas al bounding box real del trazo de la firma.
+ * Devuelve un dataURL PNG transparente del tamaño justo del trazo + un pequeño margen.
+ */
+function recortarFirmaABoundingBox(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  
+  // Leer todos los pixels del canvas
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const data = imgData.data;
+  
+  // Buscar bounding box: pixels con alpha > 0
+  let minX = W, minY = H, maxX = -1, maxY = -1;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const alpha = data[(y * W + x) * 4 + 3];
+      if (alpha > 10) { // umbral por anti-aliasing
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  
+  // Si no hay pixels (firma vacía), devolver canvas completo como fallback
+  if (maxX < 0) {
+    return canvas.toDataURL('image/png');
+  }
+  
+  // Añadir un pequeño margen alrededor (10px)
+  const padding = 10;
+  minX = Math.max(0, minX - padding);
+  minY = Math.max(0, minY - padding);
+  maxX = Math.min(W - 1, maxX + padding);
+  maxY = Math.min(H - 1, maxY + padding);
+  
+  const recW = maxX - minX + 1;
+  const recH = maxY - minY + 1;
+  
+  // Crear canvas nuevo del tamaño del bounding box
+  const cropped = document.createElement('canvas');
+  cropped.width = recW;
+  cropped.height = recH;
+  const cctx = cropped.getContext('2d');
+  
+  // Copiar la región recortada
+  cctx.drawImage(canvas, minX, minY, recW, recH, 0, 0, recW, recH);
+  
+  return cropped.toDataURL('image/png');
 }
 
 // Función de prueba para verificar que el sistema de firma funciona
