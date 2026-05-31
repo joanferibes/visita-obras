@@ -646,6 +646,9 @@ body {
           <br><br>
           La IA convertirá tu dictado en una anotación formal estilo Libro de Órdenes. <strong>No inventará nada que tú no hayas dicho.</strong>
         </div>
+        <div style="background: #fff8e1; border-left: 3px solid #f0ad4e; padding: 8px 10px; margin-top: 10px; font-size: 12.5px; line-height: 1.4;">
+          📅 <strong>Si la anotación NO es de hoy</strong> y quieres registrarla con fecha distinta, dilo al dictar. Ejemplo: <em>"esto fue del 29 de mayo"</em> o <em>"anótalo con fecha del 15"</em>. La IA pondrá esa fecha en la cabecera del PDF. Si no lo dices, se pondrá la de hoy.
+        </div>
       </div>
       
       <div id="libroTranscripcionWrapper" style="display:none;">
@@ -677,6 +680,9 @@ body {
         <label>📅 Fecha de la anotación</label>
         <input type="date" id="libro-fecha">
         <div class="hint">Puedes cambiarla si quieres anotarla con fecha distinta a hoy</div>
+        <div id="libro-aviso-fecha" style="display:none; background:#fff8e1; border-left:3px solid #f0ad4e; padding:8px 10px; margin-top:6px; font-size:12.5px;">
+          ✓ La IA ha detectado en el dictado que la anotación es de una fecha distinta de hoy. Si no es correcta, ajústala arriba.
+        </div>
       </div>
       
       <div class="form-group">
@@ -863,7 +869,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.6.3';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -3485,6 +3491,7 @@ function iniciarNuevaAnotacionLibro() {
     tiempoInicio: 0,
     intervaloTiempo: null,
     textoGenerado: '',
+    fechaDetectada: null, // ⭐ v1.6.3
     anotacionEditandoId: null,
     ultimoDictadoActa: '',
   };
@@ -3621,6 +3628,7 @@ async function generarAnotacionLibroIA() {
     if (!res.ok) throw new Error(res.error);
     
     libroState.textoGenerado = res.texto;
+    libroState.fechaDetectada = res.fechaDetectada || null; // ⭐ v1.6.3
     libroState.anotacionEditandoId = null;
     irAPreviewLibro();
   } catch (err) {
@@ -3629,14 +3637,28 @@ async function generarAnotacionLibroIA() {
 }
 
 function irAPreviewLibro() {
-  // Fecha por defecto: hoy
-  const hoy = new Date();
-  const hoyStr = hoy.getFullYear() + '-' + 
-                 String(hoy.getMonth() + 1).padStart(2, '0') + '-' + 
-                 String(hoy.getDate()).padStart(2, '0');
+  // ⭐ v1.6.3: Fecha por defecto = la detectada por la IA si la hay, si no hoy
+  let fechaInicial;
+  if (libroState.fechaDetectada) {
+    fechaInicial = libroState.fechaDetectada; // ya viene en formato YYYY-MM-DD
+  } else {
+    const hoy = new Date();
+    fechaInicial = hoy.getFullYear() + '-' + 
+                   String(hoy.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(hoy.getDate()).padStart(2, '0');
+  }
   
-  document.getElementById('libro-fecha').value = hoyStr;
+  document.getElementById('libro-fecha').value = fechaInicial;
   document.getElementById('libro-texto').value = libroState.textoGenerado || '';
+  
+  // Aviso visible si se ha detectado fecha distinta de hoy
+  const hoyStr = new Date().toISOString().substring(0, 10);
+  const avisoEl = document.getElementById('libro-aviso-fecha');
+  if (libroState.fechaDetectada && libroState.fechaDetectada !== hoyStr) {
+    if (avisoEl) avisoEl.style.display = 'block';
+  } else {
+    if (avisoEl) avisoEl.style.display = 'none';
+  }
   
   estadoApp.pantalla = 'libro-preview';
   mostrarPantalla('screen-libro-preview');
