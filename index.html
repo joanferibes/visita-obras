@@ -309,6 +309,11 @@ body {
           <span class="icon">🎙️</span><span class="label">Acta de visita</span><span class="arrow">›</span>
         </button>
         
+        <!-- ⭐ NUEVO v1.6.0 — Botón Libro de Órdenes -->
+        <button class="btn-accion" onclick="irALibroOrdenes()">
+          <span class="icon">📕</span><span class="label">Libro de Órdenes</span><span class="arrow">›</span>
+        </button>
+        
         <!-- ⭐ NUEVO v1.2.0 — Botón Seguridad y Salud -->
         <button class="btn-accion btn-ss" onclick="irASeguridadSalud()">
           <span class="icon">🦺</span><span class="label">Seguridad y Salud</span><span class="arrow">›</span>
@@ -602,6 +607,89 @@ body {
     </div>
   </div>
 
+  <!-- ⭐ NUEVO v1.6.0 — PANTALLA: LIBRO DE ÓRDENES (LISTADO) -->
+  <div class="screen" id="screen-libro">
+    <div class="header">
+      <button class="back" onclick="salirLibro()">←</button>
+      <h1>📕 Libro de Órdenes</h1>
+    </div>
+    <div class="content">
+      <div class="ss-info-card" style="margin-bottom: 12px;">
+        <div style="font-size: 13px; color: var(--gris-texto); line-height: 1.4;">
+          Aquí registras tus anotaciones para el Libro de Órdenes y Asistencias. Al final de obra, podrás compilarlas todas en un solo PDF para copiarlas a mano en el libro oficial.
+        </div>
+      </div>
+      
+      <button class="btn-principal" onclick="iniciarNuevaAnotacionLibro()" style="margin-bottom:12px;">
+        <span class="icon">➕</span><span>NUEVA ANOTACIÓN</span>
+      </button>
+      
+      <button class="btn-secundario" onclick="compilarLibroTodo()" style="margin-bottom:16px;">
+        📄 Compilar todas en un PDF
+      </button>
+      
+      <div id="libro-lista"></div>
+    </div>
+  </div>
+
+  <!-- ⭐ NUEVO v1.6.0 — PANTALLA: DICTAR NUEVA ANOTACIÓN -->
+  <div class="screen" id="screen-libro-dictado">
+    <div class="header">
+      <button class="back" onclick="cancelarDictadoLibro()">←</button>
+      <h1>📕 Dictar anotación</h1>
+    </div>
+    <div class="content">
+      <div class="acta-guion">
+        <div class="guion-titulo">📝 ¿QUÉ DICTAR?</div>
+        <div style="font-size: 13.5px; line-height: 1.5; color: var(--texto);">
+          Cuéntale a la IA lo que quieres anotar en el Libro de Órdenes. Por ejemplo: <em>"Hemos revisado el armado del forjado de techo de planta baja, todo conforme al proyecto. He autorizado el hormigonado pero he pedido a la contrata que tengan en obra el albarán del hormigón. He recordado que tienen que poner protección perimetral antes de empezar."</em>
+          <br><br>
+          La IA convertirá tu dictado en una anotación formal estilo Libro de Órdenes. <strong>No inventará nada que tú no hayas dicho.</strong>
+        </div>
+      </div>
+      
+      <div id="libroTranscripcionWrapper" style="display:none;">
+        <div class="transcripcion-titulo">🎙️ Transcripción</div>
+        <textarea id="libroTranscripcion" rows="6" placeholder="Aquí aparecerá lo que dictes..."></textarea>
+      </div>
+      
+      <div id="libroBotonGrabar" class="acta-grabar-wrapper">
+        <button class="btn-grabar" id="btnGrabarLibro" onclick="toggleGrabacionLibro()">
+          <span class="icon">🎙️</span><span class="texto">GRABAR</span>
+        </button>
+        <div class="grabacion-tiempo" id="grabacionTiempoLibro" style="display:none;">00:00</div>
+      </div>
+      
+      <div id="libroAccionesPost" style="display:none;">
+        <button class="btn-guardar" onclick="generarAnotacionLibroIA()">✨ Generar anotación</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⭐ NUEVO v1.6.0 — PANTALLA: REVISAR Y GUARDAR ANOTACIÓN -->
+  <div class="screen" id="screen-libro-preview">
+    <div class="header">
+      <button class="back" onclick="volverADictadoLibro()">←</button>
+      <h1>📝 Revisar anotación</h1>
+    </div>
+    <div class="content">
+      <div class="form-group">
+        <label>📅 Fecha de la anotación</label>
+        <input type="date" id="libro-fecha">
+        <div class="hint">Puedes cambiarla si quieres anotarla con fecha distinta a hoy</div>
+      </div>
+      
+      <div class="form-group">
+        <label>📕 Texto de la anotación <span class="req">*</span></label>
+        <textarea id="libro-texto" rows="14" placeholder="Texto generado por la IA..."></textarea>
+        <div class="hint">Puedes editarlo libremente antes de guardar</div>
+      </div>
+      
+      <button class="btn-guardar" onclick="guardarAnotacionLibroFinal()">💾 Guardar y generar PDF</button>
+      <button class="btn-secundario" onclick="volverADictadoLibro()">← Volver al dictado</button>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== CÁMARA ===== -->
@@ -750,6 +838,20 @@ body {
   </div>
 </div>
 
+<!-- ⭐ NUEVO v1.6.0 — MODAL: GENERAR ANOTACIÓN DEL LIBRO DESDE ACTA -->
+<div class="modal-overlay" id="modalActaALibro" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">📕 ¿Generar también anotación del Libro?</div>
+    <p class="modal-texto">Has guardado el acta de visita. ¿Quieres que genere una anotación del Libro de Órdenes basada en este mismo dictado?</p>
+    <p class="modal-texto" style="font-size: 12px;">La IA reescribirá el dictado en estilo formal del Libro de Órdenes. No inventará nada nuevo, solo adaptará lo que has dicho.</p>
+    
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="confirmarConvertirActaALibro()">📕 Sí, generar anotación</button>
+      <button class="btn-secundario" onclick="cerrarModalActaALibro()">No, gracias</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
@@ -761,7 +863,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.5.3';
+const APP_VERSION = '1.6.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2154,6 +2256,16 @@ async function finalizarActa() {
     estadoApp.pantalla = 'acta-guardada';
     mostrarPantalla('screen-acta-guardada');
     document.getElementById('acta-guardada-nombre').textContent = res.nombre;
+    
+    // ⭐ v1.6.0: ofrecer crear también una anotación en el Libro de Órdenes
+    // basada en el mismo dictado, después de un pequeño retraso para que el usuario
+    // vea primero la pantalla de "Acta guardada"
+    setTimeout(() => {
+      const dictado = actaState.transcripcion || '';
+      if (dictado && dictado.trim().length > 20) {
+        ofrecerConvertirActaALibro(dictado);
+      }
+    }, 1200);
   } catch (err) {
     toast('⚠️ Error al guardar: ' + err.message, 'error');
   }
@@ -2589,9 +2701,8 @@ function aceptarFirma() {
     return;
   }
   
-  // ⭐ v1.5.2: Recortar el PNG al bounding box real del trazo
-  // (eliminar el espacio en blanco alrededor para que la firma se vea grande en el PDF)
-  const dataUrl = recortarFirmaABoundingBox(firmaState.canvas);
+  // Generar PNG transparente recortado
+  const dataUrl = firmaState.canvas.toDataURL('image/png');
   
   document.getElementById('firmaPantalla').classList.remove('active');
   
@@ -2599,81 +2710,6 @@ function aceptarFirma() {
   firmaState.callbackAceptar = null;
   firmaState.callbackCancelar = null;
   if (cb) cb(dataUrl);
-}
-
-/**
- * Recorta el canvas al bounding box real del trazo y lo redimensiona
- * a un tamaño OBJETIVO grande (600px máximo) para que se vea claro en el PDF.
- */
-function recortarFirmaABoundingBox(canvas) {
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width;
-  const H = canvas.height;
-  
-  const imgData = ctx.getImageData(0, 0, W, H);
-  const data = imgData.data;
-  
-  // Bounding box del trazo
-  let minX = W, minY = H, maxX = -1, maxY = -1;
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const alpha = data[(y * W + x) * 4 + 3];
-      if (alpha > 10) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
-    }
-  }
-  
-  if (maxX < 0) {
-    return canvas.toDataURL('image/png');
-  }
-  
-  // Margen pequeño alrededor del trazo
-  const padding = 8;
-  minX = Math.max(0, minX - padding);
-  minY = Math.max(0, minY - padding);
-  maxX = Math.min(W - 1, maxX + padding);
-  maxY = Math.min(H - 1, maxY + padding);
-  
-  const recW = maxX - minX + 1;
-  const recH = maxY - minY + 1;
-  
-  // ⭐ v1.5.3: Redimensionar a un tamaño OBJETIVO grande
-  // Objetivo: el ancho máximo = 600px, manteniendo proporción
-  const TARGET_W = 600;
-  const TARGET_H = 250;
-  
-  const ratioFirma = recW / recH;
-  const ratioTarget = TARGET_W / TARGET_H;
-  
-  let finalW, finalH;
-  if (ratioFirma > ratioTarget) {
-    // Firma más ancha → limita por ancho
-    finalW = TARGET_W;
-    finalH = Math.round(TARGET_W / ratioFirma);
-  } else {
-    // Firma más alta → limita por alto
-    finalH = TARGET_H;
-    finalW = Math.round(TARGET_H * ratioFirma);
-  }
-  
-  // Crear canvas final con la firma escalada
-  const cropped = document.createElement('canvas');
-  cropped.width = finalW;
-  cropped.height = finalH;
-  const cctx = cropped.getContext('2d');
-  
-  // Calidad de escalado
-  cctx.imageSmoothingEnabled = true;
-  cctx.imageSmoothingQuality = 'high';
-  
-  // Dibujar la región recortada estirada al tamaño objetivo
-  cctx.drawImage(canvas, minX, minY, recW, recH, 0, 0, finalW, finalH);
-  
-  return cropped.toDataURL('image/png');
 }
 
 // Función de prueba para verificar que el sistema de firma funciona
@@ -3339,6 +3375,459 @@ async function eliminarSubcontrataConfirm(idEmpresa, nombre) {
     
     toast('✓ Subcontrata eliminada', 'ok');
     cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// ============================================================================
+// ⭐ v1.6.0 — LIBRO DE ÓRDENES Y ASISTENCIAS
+// ============================================================================
+
+let libroState = {
+  transcripcion: '',
+  recognition: null,
+  grabando: false,
+  tiempoInicio: 0,
+  intervaloTiempo: null,
+  textoGenerado: '',
+  anotacionEditandoId: null,
+  ultimoDictadoActa: '', // para conversión acta→libro
+};
+
+// ENTRADA — desde la ficha de obra
+function irALibroOrdenes() {
+  if (!estadoApp.obraActual) return;
+  estadoApp.pantalla = 'libro';
+  mostrarPantalla('screen-libro');
+  cargarLibroOrdenes();
+}
+
+function salirLibro() {
+  estadoApp.pantalla = 'obra';
+  mostrarPantalla('screen-obra');
+}
+
+async function cargarLibroOrdenes() {
+  const cont = document.getElementById('libro-lista');
+  cont.innerHTML = '<div style="text-align:center; padding:20px; color:var(--gris-texto);">Cargando...</div>';
+  
+  try {
+    const res = await backendPost({
+      action: 'listLibroOrdenes',
+      idObra: estadoApp.obraActual.id,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    renderLibroOrdenes(res.anotaciones);
+  } catch (err) {
+    cont.innerHTML = '<div style="color:#c00; padding:12px; font-size:13px;">Error: ' + escape(err.message) + '</div>';
+  }
+}
+
+function renderLibroOrdenes(anotaciones) {
+  const cont = document.getElementById('libro-lista');
+  
+  if (!anotaciones || anotaciones.length === 0) {
+    cont.innerHTML = '<div style="text-align:center; padding:30px; color:var(--gris-texto); font-size:14px;">Aún no hay anotaciones.<br>Pulsa <strong>NUEVA ANOTACIÓN</strong> para crear la primera.</div>';
+    return;
+  }
+  
+  // Ordenar de más reciente a más antigua por número
+  const ordenadas = anotaciones.slice().sort((a, b) => (b.numero || 0) - (a.numero || 0));
+  
+  let html = '<div style="font-size:13px; color:var(--gris-texto); margin-bottom:8px;">' + anotaciones.length + ' anotaci' + (anotaciones.length === 1 ? 'ón' : 'ones') + ' registradas:</div>';
+  
+  ordenadas.forEach(a => {
+    const numeroStr = String(a.numero || 0).padStart(2, '0');
+    const fechaStr = a.fecha ? formatearFechaCorta(a.fecha) : '(sin fecha)';
+    const previewTexto = (a.texto || '').substring(0, 140) + ((a.texto || '').length > 140 ? '...' : '');
+    
+    html += `
+      <div class="ss-empresa-card" style="margin-bottom: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-weight:bold; color:var(--azul); font-size:14px;">N.º ${escape(numeroStr)} · ${escape(fechaStr)}</div>
+        </div>
+        <div style="font-size:13px; line-height:1.4; color:var(--texto); margin-bottom:8px;">${escape(previewTexto)}</div>
+        <div class="acciones-emp">
+          ${a.archivoDriveId ? '<button onclick="verAnotacionEnDrive(\'' + a.archivoDriveId + '\')">📁 Ver PDF</button>' : ''}
+          <button onclick="editarAnotacion('${a.id}')">✏️ Editar</button>
+          <button onclick="eliminarAnotacionConfirm('${a.id}', ${a.numero || 0})">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+  });
+  
+  cont.innerHTML = html;
+}
+
+function formatearFechaCorta(fecha) {
+  const d = new Date(fecha);
+  if (isNaN(d.getTime())) return '(sin fecha)';
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function verAnotacionEnDrive(archivoId) {
+  if (!archivoId) {
+    toast('PDF no disponible', 'error');
+    return;
+  }
+  window.open('https://drive.google.com/file/d/' + archivoId + '/view?authuser=0', '_blank');
+}
+
+// === FLUJO NUEVA ANOTACIÓN ===
+
+function iniciarNuevaAnotacionLibro() {
+  libroState = {
+    transcripcion: '',
+    recognition: null,
+    grabando: false,
+    tiempoInicio: 0,
+    intervaloTiempo: null,
+    textoGenerado: '',
+    anotacionEditandoId: null,
+    ultimoDictadoActa: '',
+  };
+  
+  document.getElementById('libroTranscripcion').value = '';
+  document.getElementById('libroTranscripcionWrapper').style.display = 'none';
+  document.getElementById('libroAccionesPost').style.display = 'none';
+  document.getElementById('libroBotonGrabar').style.display = 'flex';
+  document.getElementById('btnGrabarLibro').classList.remove('grabando');
+  document.querySelector('#btnGrabarLibro .texto').textContent = 'GRABAR';
+  document.getElementById('grabacionTiempoLibro').style.display = 'none';
+  
+  estadoApp.pantalla = 'libro-dictado';
+  mostrarPantalla('screen-libro-dictado');
+}
+
+function cancelarDictadoLibro() {
+  if (libroState.grabando) detenerGrabacionLibro();
+  estadoApp.pantalla = 'libro';
+  mostrarPantalla('screen-libro');
+}
+
+function toggleGrabacionLibro() {
+  if (libroState.grabando) {
+    detenerGrabacionLibro();
+  } else {
+    iniciarGrabacionLibro();
+  }
+}
+
+function iniciarGrabacionLibro() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    toast('⚠️ Tu navegador no soporta reconocimiento de voz', 'error');
+    return;
+  }
+  
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'es-ES';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  
+  let textoFinal = libroState.transcripcion || '';
+  
+  recognition.onresult = (event) => {
+    let textoTemporal = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        textoFinal += transcript + ' ';
+      } else {
+        textoTemporal += transcript;
+      }
+    }
+    document.getElementById('libroTranscripcion').value = textoFinal + textoTemporal;
+  };
+  
+  recognition.onerror = (event) => {
+    if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      toast('Error reconocimiento: ' + event.error, 'error');
+    }
+  };
+  
+  recognition.onend = () => {
+    if (libroState.grabando) {
+      try { recognition.start(); } catch (e) {}
+    }
+  };
+  
+  try {
+    recognition.start();
+  } catch (e) {
+    toast('Error iniciando grabación', 'error');
+    return;
+  }
+  
+  libroState.recognition = recognition;
+  libroState.grabando = true;
+  libroState.tiempoInicio = Date.now();
+  
+  document.getElementById('btnGrabarLibro').classList.add('grabando');
+  document.querySelector('#btnGrabarLibro .texto').textContent = 'PARAR';
+  document.querySelector('#btnGrabarLibro .icon').textContent = '⏹️';
+  document.getElementById('libroTranscripcionWrapper').style.display = 'block';
+  
+  const tiempoEl = document.getElementById('grabacionTiempoLibro');
+  tiempoEl.style.display = 'block';
+  libroState.intervaloTiempo = setInterval(() => {
+    const seg = Math.floor((Date.now() - libroState.tiempoInicio) / 1000);
+    const min = Math.floor(seg / 60);
+    const s = seg % 60;
+    tiempoEl.textContent = String(min).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }, 1000);
+}
+
+function detenerGrabacionLibro() {
+  libroState.grabando = false;
+  if (libroState.recognition) {
+    try { libroState.recognition.stop(); } catch (e) {}
+  }
+  if (libroState.intervaloTiempo) {
+    clearInterval(libroState.intervaloTiempo);
+    libroState.intervaloTiempo = null;
+  }
+  
+  document.getElementById('btnGrabarLibro').classList.remove('grabando');
+  document.querySelector('#btnGrabarLibro .texto').textContent = 'GRABAR';
+  document.querySelector('#btnGrabarLibro .icon').textContent = '🎙️';
+  
+  const transcripcion = document.getElementById('libroTranscripcion').value.trim();
+  libroState.transcripcion = transcripcion;
+  
+  if (transcripcion) {
+    document.getElementById('libroAccionesPost').style.display = 'block';
+  }
+}
+
+async function generarAnotacionLibroIA() {
+  const transcripcion = document.getElementById('libroTranscripcion').value.trim();
+  if (!transcripcion) {
+    toast('⚠️ No hay transcripción', 'error');
+    return;
+  }
+  
+  toast('Generando anotación con IA...');
+  
+  try {
+    const res = await backendPost({
+      action: 'generarAnotacionLibro',
+      idObra: estadoApp.obraActual.id,
+      dictado: transcripcion,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    libroState.textoGenerado = res.texto;
+    libroState.anotacionEditandoId = null;
+    irAPreviewLibro();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+function irAPreviewLibro() {
+  // Fecha por defecto: hoy
+  const hoy = new Date();
+  const hoyStr = hoy.getFullYear() + '-' + 
+                 String(hoy.getMonth() + 1).padStart(2, '0') + '-' + 
+                 String(hoy.getDate()).padStart(2, '0');
+  
+  document.getElementById('libro-fecha').value = hoyStr;
+  document.getElementById('libro-texto').value = libroState.textoGenerado || '';
+  
+  estadoApp.pantalla = 'libro-preview';
+  mostrarPantalla('screen-libro-preview');
+}
+
+function volverADictadoLibro() {
+  // Guardar el texto editado en el state por si vuelve
+  libroState.textoGenerado = document.getElementById('libro-texto').value;
+  estadoApp.pantalla = 'libro-dictado';
+  mostrarPantalla('screen-libro-dictado');
+}
+
+async function guardarAnotacionLibroFinal() {
+  const texto = document.getElementById('libro-texto').value.trim();
+  const fecha = document.getElementById('libro-fecha').value;
+  
+  if (!texto) {
+    toast('⚠️ El texto está vacío', 'error');
+    return;
+  }
+  if (!fecha) {
+    toast('⚠️ Falta la fecha', 'error');
+    return;
+  }
+  
+  toast('Guardando y generando PDF...');
+  
+  try {
+    const res = await backendPost({
+      action: 'guardarAnotacionLibro',
+      idObra: estadoApp.obraActual.id,
+      id: libroState.anotacionEditandoId,
+      texto: texto,
+      fecha: fecha,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '✅',
+      titulo: 'Anotación guardada',
+      texto: 'N.º ' + String(res.numero).padStart(2, '0') + ' guardada en el Libro de Órdenes.\n\nPDF: ' + res.nombre,
+      btn1Texto: '📁 Ver PDF',
+      btn1Accion: () => window.open(res.url, '_blank'),
+      btn2Texto: '📕 Volver al Libro',
+      btn2Accion: () => {
+        estadoApp.pantalla = 'libro';
+        mostrarPantalla('screen-libro');
+        cargarLibroOrdenes();
+      },
+    });
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// === EDITAR ANOTACIÓN EXISTENTE ===
+
+async function editarAnotacion(id) {
+  try {
+    const res = await backendPost({
+      action: 'listLibroOrdenes',
+      idObra: estadoApp.obraActual.id,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    const anotacion = res.anotaciones.find(a => a.id === id);
+    if (!anotacion) {
+      toast('Anotación no encontrada', 'error');
+      return;
+    }
+    
+    libroState.anotacionEditandoId = id;
+    libroState.textoGenerado = anotacion.texto;
+    
+    // Ir al preview con los datos cargados
+    const fecha = anotacion.fecha ? new Date(anotacion.fecha) : new Date();
+    const fechaStr = fecha.getFullYear() + '-' +
+                     String(fecha.getMonth() + 1).padStart(2, '0') + '-' +
+                     String(fecha.getDate()).padStart(2, '0');
+    
+    document.getElementById('libro-fecha').value = fechaStr;
+    document.getElementById('libro-texto').value = anotacion.texto;
+    
+    estadoApp.pantalla = 'libro-preview';
+    mostrarPantalla('screen-libro-preview');
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// === ELIMINAR ===
+
+async function eliminarAnotacionConfirm(id, numero) {
+  const numeroStr = String(numero).padStart(2, '0');
+  if (!confirm('¿Eliminar la anotación N.º ' + numeroStr + ' del Libro de Órdenes?\n\nEl PDF también se moverá a la papelera de Drive.')) return;
+  
+  try {
+    const res = await backendPost({
+      action: 'eliminarAnotacionLibro',
+      id: id,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    toast('✓ Anotación eliminada', 'ok');
+    cargarLibroOrdenes();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// === COMPILAR TODAS ===
+
+async function compilarLibroTodo() {
+  if (!confirm('Voy a generar un PDF compilatorio con TODAS las anotaciones del Libro de Órdenes de esta obra.\n\nÉste se guardará en la carpeta "Libro de Ordenes" de la obra.\n\n¿Continuar?')) return;
+  
+  toast('Compilando todas las anotaciones...');
+  
+  try {
+    const res = await backendPost({
+      action: 'compilarLibroOrdenes',
+      idObra: estadoApp.obraActual.id,
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '📄',
+      titulo: 'Compilatorio generado',
+      texto: 'PDF compilatorio con ' + res.numAnotaciones + ' anotaciones generado correctamente.\n\nÚtil para imprimir al final de obra y copiar al Libro de Órdenes oficial.',
+      btn1Texto: '📁 Ver PDF',
+      btn1Accion: () => window.open(res.url, '_blank'),
+      btn2Texto: null,
+    });
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+// === CONVERSIÓN ACTA → LIBRO DE ÓRDENES ===
+
+/**
+ * Llamada desde el flujo de guardado de acta para preguntar
+ * si se quiere generar también la anotación del Libro.
+ * El dictado del acta se guarda temporalmente.
+ */
+function ofrecerConvertirActaALibro(dictadoActa) {
+  libroState.ultimoDictadoActa = dictadoActa || '';
+  if (!libroState.ultimoDictadoActa) return; // no hay dictado, no se ofrece
+  document.getElementById('modalActaALibro').style.display = 'flex';
+}
+
+function cerrarModalActaALibro() {
+  document.getElementById('modalActaALibro').style.display = 'none';
+}
+
+async function confirmarConvertirActaALibro() {
+  cerrarModalActaALibro();
+  
+  if (!libroState.ultimoDictadoActa) {
+    toast('No hay dictado disponible', 'error');
+    return;
+  }
+  
+  toast('Generando anotación del Libro de Órdenes...');
+  
+  try {
+    const res = await backendPost({
+      action: 'convertirActaALibro',
+      idObra: estadoApp.obraActual.id,
+      dictado: libroState.ultimoDictadoActa,
+      fecha: new Date().toISOString(),
+    });
+    
+    if (!res.ok) throw new Error(res.error);
+    
+    mostrarModalResultado({
+      icono: '📕',
+      titulo: 'Anotación del Libro generada',
+      texto: 'Anotación N.º ' + String(res.numero).padStart(2, '0') + ' guardada en el Libro de Órdenes de la obra.',
+      btn1Texto: '📕 Ver el Libro',
+      btn1Accion: () => {
+        estadoApp.pantalla = 'libro';
+        mostrarPantalla('screen-libro');
+        cargarLibroOrdenes();
+      },
+      btn2Texto: '📁 Ver PDF',
+      btn2Accion: () => window.open(res.url, '_blank'),
+    });
   } catch (err) {
     toast('⚠️ Error: ' + err.message, 'error');
   }
