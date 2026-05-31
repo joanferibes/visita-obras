@@ -869,7 +869,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.6.3';
+const APP_VERSION = '1.6.4';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1954,6 +1954,60 @@ function toggleGrabacion() {
   else iniciarGrabacion();
 }
 
+// ============================================================================
+// ⭐ v1.6.4 — WAKE LOCK API (mantener pantalla encendida durante grabación)
+// ============================================================================
+
+const wakeLockState = { acta: null, libro: null };
+
+async function pedirWakeLock(contexto) {
+  if (!('wakeLock' in navigator)) {
+    // Navegador sin soporte (iOS antiguo, etc.) → mostrar aviso suave
+    toast('🔋 Mantén la pantalla encendida durante la grabación', 'ok');
+    return;
+  }
+  
+  try {
+    const sentinel = await navigator.wakeLock.request('screen');
+    wakeLockState[contexto] = sentinel;
+    
+    // Si el sistema libera el lock automáticamente (cambio de pestaña, etc.),
+    // re-pedirlo si seguimos grabando
+    sentinel.addEventListener('release', () => {
+      wakeLockState[contexto] = null;
+      const sigueGrabando = (contexto === 'acta' && actaState && actaState.grabando) ||
+                            (contexto === 'libro' && libroState && libroState.grabando);
+      if (sigueGrabando) {
+        // Intentar re-adquirir tras pequeño retraso
+        setTimeout(() => pedirWakeLock(contexto), 500);
+      }
+    });
+  } catch (err) {
+    // Aunque falle, no es crítico — solo avisamos
+    toast('🔋 Mantén la pantalla encendida durante la grabación', 'ok');
+  }
+}
+
+async function liberarWakeLock(contexto) {
+  const sentinel = wakeLockState[contexto];
+  if (sentinel) {
+    try { await sentinel.release(); } catch (e) {}
+    wakeLockState[contexto] = null;
+  }
+}
+
+// Re-pedir Wake Lock cuando la pestaña vuelve al frente, si seguimos grabando
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (actaState && actaState.grabando && !wakeLockState.acta) {
+      pedirWakeLock('acta');
+    }
+    if (libroState && libroState.grabando && !wakeLockState.libro) {
+      pedirWakeLock('libro');
+    }
+  }
+});
+
 function iniciarGrabacion() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
@@ -1967,6 +2021,8 @@ function iniciarGrabacion() {
   reco.interimResults = true;
   
   let textoConfirmado = actaState.transcripcion || '';
+  // ⭐ v1.6.4: contador de sesión + IDs únicos entre reinicios
+  let sesionGrabacion = 0;
   let resultadosProcesados = new Set();
   
   reco.onresult = (event) => {
@@ -1977,7 +2033,8 @@ function iniciarGrabacion() {
       const result = event.results[i];
       const transcript = result[0].transcript;
       if (result.isFinal) {
-        const id = i + ':' + transcript;
+        // ⭐ v1.6.4: el ID incluye la sesión, así NUNCA colisiona aunque se reinicie el reconocimiento
+        const id = sesionGrabacion + ':' + i + ':' + transcript;
         if (!resultadosProcesados.has(id)) {
           resultadosProcesados.add(id);
           nuevoTextoFinal += transcript;
@@ -2010,7 +2067,15 @@ function iniciarGrabacion() {
   
   reco.onend = () => {
     if (actaState.grabando) {
-      resultadosProcesados = new Set();
+      // ⭐ v1.6.4: tope máximo de 2 horas de grabación continua
+      const tiempoTranscurrido = Date.now() - actaState.tiempoInicio;
+      if (tiempoTranscurrido > 2 * 60 * 60 * 1000) {
+        toast('⏰ Grabación detenida automáticamente tras 2 horas', 'ok');
+        detenerGrabacion();
+        return;
+      }
+      // ⭐ Incrementar sesión para que los nuevos IDs no colisionen
+      sesionGrabacion++;
       setTimeout(() => {
         if (actaState.grabando) {
           try { reco.start(); } catch(e) {}
@@ -2029,6 +2094,9 @@ function iniciarGrabacion() {
   actaState.recognition = reco;
   actaState.grabando = true;
   actaState.tiempoInicio = Date.now();
+  
+  // ⭐ v1.6.4: Wake Lock — intenta mantener la pantalla encendida durante la grabación
+  pedirWakeLock('acta');
   
   document.getElementById('actaTranscripcionWrapper').style.display = 'block';
   
@@ -2057,6 +2125,9 @@ function detenerGrabacion() {
     clearInterval(actaState.intervaloTiempo);
     actaState.intervaloTiempo = null;
   }
+  
+  // ⭐ v1.6.4: liberar el Wake Lock
+  liberarWakeLock('acta');
   
   const btn = document.getElementById('btnGrabar');
   btn.classList.remove('grabando');
@@ -2132,13 +2203,26 @@ function quitarFotoActa(fotoId) {
 }
 
 async function generarActa() {
-  const texto = document.getElementById('actaTranscripcion').value.trim();
+  let texto = document.getElementById('actaTranscripcion').value.trim();
   if (!texto) {
     toast('⚠️ El dictado está vacío', 'error');
     return;
   }
   
   if (actaState.grabando) detenerGrabacion();
+  
+  // ⭐ v1.6.4: detectar y avisar si hay texto repetido (típico de pantalla bloqueada)
+  const duplicado = detectarTextoDuplicado(texto);
+  if (duplicado) {
+    if (!confirm('Parece que en la transcripción hay texto repetido (puede haber pasado por bloquearse la pantalla durante la grabación).\n\n¿Quieres editar el texto antes de generar el acta?\n\n- Aceptar = abrir editor de texto\n- Cancelar = generar el acta con el texto tal cual')) {
+      // Continúa con el texto tal cual
+    } else {
+      // Volver al textarea para que edite
+      document.getElementById('actaTranscripcion').focus();
+      toast('Edita la transcripción y pulsa GENERAR de nuevo', 'ok');
+      return;
+    }
+  }
   
   toast('Generando acta...');
   document.getElementById('btnGrabar').disabled = true;
@@ -2152,6 +2236,27 @@ async function generarActa() {
     toast('⚠️ Error: ' + err.message, 'error');
     document.getElementById('btnGrabar').disabled = false;
   }
+}
+
+/**
+ * ⭐ v1.6.4: Detecta texto duplicado en la transcripción
+ * Busca frases largas (10+ palabras) que aparezcan 3 o más veces consecutivas
+ */
+function detectarTextoDuplicado(texto) {
+  if (!texto || texto.length < 200) return false;
+  
+  // Partir en frases con cierta longitud
+  const frases = texto.split(/[.!?]\s+/).filter(f => f.split(/\s+/).length >= 10);
+  if (frases.length < 3) return false;
+  
+  // Contar frases similares (normalizadas)
+  const conteos = {};
+  for (const f of frases) {
+    const clave = f.toLowerCase().replace(/\s+/g, ' ').substring(0, 80);
+    conteos[clave] = (conteos[clave] || 0) + 1;
+    if (conteos[clave] >= 3) return true;
+  }
+  return false;
 }
 
 function aTextoEditable(valor) {
@@ -3534,30 +3639,66 @@ function iniciarGrabacionLibro() {
   recognition.continuous = true;
   recognition.interimResults = true;
   
-  let textoFinal = libroState.transcripcion || '';
+  let textoConfirmado = libroState.transcripcion || '';
+  // ⭐ v1.6.4: contador de sesión + IDs únicos entre reinicios (igual que el acta)
+  let sesionGrabacion = 0;
+  let resultadosProcesados = new Set();
   
   recognition.onresult = (event) => {
-    let textoTemporal = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        textoFinal += transcript + ' ';
+    let textoInterim = '';
+    let nuevoTextoFinal = '';
+    
+    for (let i = 0; i < event.results.length; i++) {
+      const result = event.results[i];
+      const transcript = result[0].transcript;
+      if (result.isFinal) {
+        const id = sesionGrabacion + ':' + i + ':' + transcript;
+        if (!resultadosProcesados.has(id)) {
+          resultadosProcesados.add(id);
+          nuevoTextoFinal += transcript;
+          if (!nuevoTextoFinal.endsWith(' ') && !nuevoTextoFinal.endsWith('.')) {
+            nuevoTextoFinal += ' ';
+          }
+        }
       } else {
-        textoTemporal += transcript;
+        textoInterim += transcript;
       }
     }
-    document.getElementById('libroTranscripcion').value = textoFinal + textoTemporal;
+    
+    if (nuevoTextoFinal) {
+      textoConfirmado += nuevoTextoFinal;
+      libroState.transcripcion = textoConfirmado;
+    }
+    
+    document.getElementById('libroTranscripcion').value = textoConfirmado + textoInterim;
+    const ta = document.getElementById('libroTranscripcion');
+    ta.scrollTop = ta.scrollHeight;
   };
   
   recognition.onerror = (event) => {
-    if (event.error !== 'no-speech' && event.error !== 'aborted') {
-      toast('Error reconocimiento: ' + event.error, 'error');
+    if (event.error === 'no-speech' || event.error === 'aborted') return;
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      toast('⚠️ Necesitas dar permiso al micrófono', 'error');
+      detenerGrabacionLibro();
     }
   };
   
   recognition.onend = () => {
     if (libroState.grabando) {
-      try { recognition.start(); } catch (e) {}
+      // ⭐ Tope máximo 2 horas
+      const tiempoTranscurrido = Date.now() - libroState.tiempoInicio;
+      if (tiempoTranscurrido > 2 * 60 * 60 * 1000) {
+        toast('⏰ Grabación detenida automáticamente tras 2 horas', 'ok');
+        detenerGrabacionLibro();
+        return;
+      }
+      // ⭐ Incrementar sesión
+      sesionGrabacion++;
+      setTimeout(() => {
+        if (libroState.grabando) {
+          try { recognition.start(); } catch (e) {}
+        }
+      }, 100);
     }
   };
   
@@ -3571,6 +3712,9 @@ function iniciarGrabacionLibro() {
   libroState.recognition = recognition;
   libroState.grabando = true;
   libroState.tiempoInicio = Date.now();
+  
+  // ⭐ v1.6.4: Wake Lock
+  pedirWakeLock('libro');
   
   document.getElementById('btnGrabarLibro').classList.add('grabando');
   document.querySelector('#btnGrabarLibro .texto').textContent = 'PARAR';
@@ -3597,6 +3741,9 @@ function detenerGrabacionLibro() {
     libroState.intervaloTiempo = null;
   }
   
+  // ⭐ v1.6.4: liberar Wake Lock
+  liberarWakeLock('libro');
+  
   document.getElementById('btnGrabarLibro').classList.remove('grabando');
   document.querySelector('#btnGrabarLibro .texto').textContent = 'GRABAR';
   document.querySelector('#btnGrabarLibro .icon').textContent = '🎙️';
@@ -3610,10 +3757,19 @@ function detenerGrabacionLibro() {
 }
 
 async function generarAnotacionLibroIA() {
-  const transcripcion = document.getElementById('libroTranscripcion').value.trim();
+  let transcripcion = document.getElementById('libroTranscripcion').value.trim();
   if (!transcripcion) {
     toast('⚠️ No hay transcripción', 'error');
     return;
+  }
+  
+  // ⭐ v1.6.4: detectar texto duplicado
+  if (detectarTextoDuplicado(transcripcion)) {
+    if (confirm('Parece que en la transcripción hay texto repetido (puede haber pasado por bloquearse la pantalla durante la grabación).\n\n¿Quieres editar el texto antes de generar la anotación?\n\n- Aceptar = volver a editar\n- Cancelar = generar con el texto tal cual')) {
+      document.getElementById('libroTranscripcion').focus();
+      toast('Edita la transcripción y pulsa GENERAR de nuevo', 'ok');
+      return;
+    }
   }
   
   toast('Generando anotación con IA...');
