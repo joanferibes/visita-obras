@@ -489,6 +489,7 @@ body {
         <div style="font-size:14px;">
           <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-arquitecto"> Arquitecto</label>
           <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-constructor"> Constructor</label>
+          <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-promotor"> Promotor</label>
           <label style="display:flex; align-items:center; gap:8px; margin:6px 0;"><input type="checkbox" id="firma-tecnico" checked disabled> Director de Ejecución (tú, siempre)</label>
         </div>
       </div>
@@ -869,7 +870,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.6.4';
+const APP_VERSION = '1.6.5';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2287,6 +2288,7 @@ function irAPreview() {
   const firmas = a.firmas || ['tecnico'];
   document.getElementById('firma-arquitecto').checked = firmas.indexOf('arquitecto') !== -1;
   document.getElementById('firma-constructor').checked = firmas.indexOf('constructor') !== -1;
+  document.getElementById('firma-promotor').checked = firmas.indexOf('promotor') !== -1;
   
   actualizarMiniaturasPreview();
   estadoApp.pantalla = 'acta-preview';
@@ -2339,6 +2341,7 @@ function recogerActaDelPreview() {
   const firmas = ['tecnico'];
   if (document.getElementById('firma-arquitecto').checked) firmas.unshift('arquitecto');
   if (document.getElementById('firma-constructor').checked) firmas.push('constructor');
+  if (document.getElementById('firma-promotor').checked) firmas.push('promotor');
   
   return {
     asistentes,
