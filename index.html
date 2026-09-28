@@ -973,7 +973,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.8.1';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2371,41 +2371,17 @@ function iniciarGrabacion() {
   reco.continuous = true;
   reco.interimResults = true;
   
-  let textoConfirmado = actaState.transcripcion || '';
-  // ⭐ v1.6.4: contador de sesión + IDs únicos entre reinicios
-  let sesionGrabacion = 0;
-  let resultadosProcesados = new Set();
+  // ⭐ v1.8.1: acumulador que corrige las repeticiones de Chrome en Android
+  const acc = crearAcumuladorDictado(actaState.transcripcion || '');
   
   reco.onresult = (event) => {
-    let textoInterim = '';
-    let nuevoTextoFinal = '';
-    
-    for (let i = 0; i < event.results.length; i++) {
-      const result = event.results[i];
-      const transcript = result[0].transcript;
-      if (result.isFinal) {
-        // ⭐ v1.6.4: el ID incluye la sesión, así NUNCA colisiona aunque se reinicie el reconocimiento
-        const id = sesionGrabacion + ':' + i + ':' + transcript;
-        if (!resultadosProcesados.has(id)) {
-          resultadosProcesados.add(id);
-          nuevoTextoFinal += transcript;
-          if (!nuevoTextoFinal.endsWith(' ') && !nuevoTextoFinal.endsWith('.')) {
-            nuevoTextoFinal += ' ';
-          }
-        }
-      } else {
-        textoInterim += transcript;
-      }
+    const r = acumuladorProcesar(acc, event);
+    if (r.cambio) {
+      actaState.transcripcion = r.confirmado;
+      guardarDictadoLocal('acta', r.confirmado, actaState.fotosIds);
     }
-    
-    if (nuevoTextoFinal) {
-      textoConfirmado += nuevoTextoFinal;
-      actaState.transcripcion = textoConfirmado;
-      guardarDictadoLocal('acta', textoConfirmado, actaState.fotosIds); // ⭐ v1.7.0
-    }
-    
-    document.getElementById('actaTranscripcion').value = textoConfirmado + textoInterim;
     const ta = document.getElementById('actaTranscripcion');
+    ta.value = r.mostrar;
     ta.scrollTop = ta.scrollHeight;
   };
   
@@ -2427,7 +2403,7 @@ function iniciarGrabacion() {
         return;
       }
       // ⭐ Incrementar sesión para que los nuevos IDs no colisionen
-      sesionGrabacion++;
+      acumuladorNuevaSesion(acc);
       setTimeout(() => {
         if (actaState.grabando) {
           try { reco.start(); } catch(e) {}
@@ -4259,40 +4235,17 @@ function iniciarGrabacionLibro() {
   recognition.continuous = true;
   recognition.interimResults = true;
   
-  let textoConfirmado = libroState.transcripcion || '';
-  // ⭐ v1.6.4: contador de sesión + IDs únicos entre reinicios (igual que el acta)
-  let sesionGrabacion = 0;
-  let resultadosProcesados = new Set();
+  // ⭐ v1.8.1: acumulador que corrige las repeticiones de Chrome en Android
+  const acc = crearAcumuladorDictado(libroState.transcripcion || '');
   
   recognition.onresult = (event) => {
-    let textoInterim = '';
-    let nuevoTextoFinal = '';
-    
-    for (let i = 0; i < event.results.length; i++) {
-      const result = event.results[i];
-      const transcript = result[0].transcript;
-      if (result.isFinal) {
-        const id = sesionGrabacion + ':' + i + ':' + transcript;
-        if (!resultadosProcesados.has(id)) {
-          resultadosProcesados.add(id);
-          nuevoTextoFinal += transcript;
-          if (!nuevoTextoFinal.endsWith(' ') && !nuevoTextoFinal.endsWith('.')) {
-            nuevoTextoFinal += ' ';
-          }
-        }
-      } else {
-        textoInterim += transcript;
-      }
+    const r = acumuladorProcesar(acc, event);
+    if (r.cambio) {
+      libroState.transcripcion = r.confirmado;
+      guardarDictadoLocal('libro', r.confirmado, []);
     }
-    
-    if (nuevoTextoFinal) {
-      textoConfirmado += nuevoTextoFinal;
-      libroState.transcripcion = textoConfirmado;
-      guardarDictadoLocal('libro', textoConfirmado, []); // ⭐ v1.7.0
-    }
-    
-    document.getElementById('libroTranscripcion').value = textoConfirmado + textoInterim;
     const ta = document.getElementById('libroTranscripcion');
+    ta.value = r.mostrar;
     ta.scrollTop = ta.scrollHeight;
   };
   
@@ -4314,7 +4267,7 @@ function iniciarGrabacionLibro() {
         return;
       }
       // ⭐ Incrementar sesión
-      sesionGrabacion++;
+      acumuladorNuevaSesion(acc);
       setTimeout(() => {
         if (libroState.grabando) {
           try { recognition.start(); } catch (e) {}
@@ -4849,6 +4802,107 @@ async function generarActaReplanteo() {
 
 function verPdfReplanteo() {
   if (replanteoState.acta && replanteoState.acta.url) window.open(replanteoState.acta.url, '_blank');
+}
+
+// ============================================================================
+// ⭐ v1.8.1 — DICTADO: corrección de las repeticiones de Chrome en Android
+// ============================================================================
+// En Android, Chrome reenvía la frase entera cada vez que se añade una
+// palabra ("se", "se ha", "se ha revisado"...). Si un resultado nuevo es
+// continuación del anterior, lo SUSTITUYE en lugar de añadirse; si es un
+// trozo repetido más corto, se descarta. En ordenador no cambia nada.
+
+function palabrasDictado(t) {
+  return String(t || '').toLowerCase().replace(/[.,;:¡!¿?"«»]/g, ' ').split(/\s+/).filter(Boolean);
+}
+
+function prefijoComun(a, b) {
+  let n = 0;
+  while (n < a.length && n < b.length && a[n] === b[n]) n++;
+  return n;
+}
+
+/**
+ * El nuevo resultado es la misma frase ampliada. Con permitirCorreccion
+ * también cuenta si solo cambia la última palabra (Android corrige así
+ * mientras hablas: "el batacho" → "el batallo número uno").
+ */
+function esContinuacionDictado(anterior, nuevo, permitirCorreccion) {
+  const a = palabrasDictado(anterior), n = palabrasDictado(nuevo);
+  if (!a.length || !n.length) return false;
+  const cp = prefijoComun(a, n);
+  if (cp === a.length && n.length >= a.length) return true;
+  if (permitirCorreccion && a.length >= 3 && cp === a.length - 1 && n.length >= a.length) return true;
+  return false;
+}
+
+/** El nuevo resultado es un trozo ya incluido al principio del anterior */
+function esRepeticionDictado(anterior, nuevo) {
+  const a = palabrasDictado(anterior), n = palabrasDictado(nuevo);
+  if (!n.length) return true;
+  return prefijoComun(a, n) === n.length && n.length <= a.length;
+}
+
+function anadirFinalDictado(finales, texto, permitirCorreccion) {
+  const t = String(texto || '').trim();
+  if (!t) return;
+  const ultimo = finales[finales.length - 1];
+  if (ultimo !== undefined) {
+    if (esRepeticionDictado(ultimo, t)) return;
+    if (esContinuacionDictado(ultimo, t, permitirCorreccion)) { finales[finales.length - 1] = t; return; }
+  }
+  finales.push(t);
+}
+
+function unirTextoDictado(a, b) {
+  return [a, b].map(x => String(x || '').trim()).filter(Boolean).join(' ');
+}
+
+function crearAcumuladorDictado(textoInicial) {
+  const android = (window.DICTADO_ANDROID !== undefined) ? window.DICTADO_ANDROID : /Android/i.test(navigator.userAgent);
+  return { base: String(textoInicial || '').trim(), finales: [], vistos: new Set(), sesion: 0, ultimo: null,
+           android: android, tUltimoFinal: 0 };
+}
+
+function acumuladorProcesar(acc, event) {
+  let interim = '';
+  for (let i = 0; i < event.results.length; i++) {
+    const res = event.results[i];
+    const t = res[0].transcript;
+    if (res.isFinal) {
+      const id = acc.sesion + ':' + i + ':' + t;
+      if (!acc.vistos.has(id)) {
+        acc.vistos.add(id);
+        const ahora = Date.now();
+        // La corrección de la última palabra solo en Android y con resultados muy seguidos
+        const permitir = acc.android && (ahora - acc.tUltimoFinal) < 2500;
+        anadirFinalDictado(acc.finales, t, permitir);
+        acc.tUltimoFinal = ahora;
+      }
+    } else {
+      interim = t; // solo el último provisional (en Android también llegan acumulados)
+    }
+  }
+  const confirmado = unirTextoDictado(acc.base, acc.finales.join(' '));
+  let mostrar = confirmado;
+  const it = interim.trim();
+  if (it) {
+    const ultimo = acc.finales[acc.finales.length - 1];
+    if (ultimo && esContinuacionDictado(ultimo, it, acc.android)) {
+      mostrar = unirTextoDictado(acc.base, acc.finales.slice(0, -1).concat([it]).join(' '));
+    } else if (!(ultimo && esRepeticionDictado(ultimo, it))) {
+      mostrar = unirTextoDictado(confirmado, it);
+    }
+  }
+  const cambio = confirmado !== acc.ultimo;
+  acc.ultimo = confirmado;
+  return { confirmado: confirmado, mostrar: mostrar, cambio: cambio };
+}
+
+function acumuladorNuevaSesion(acc) {
+  acc.base = unirTextoDictado(acc.base, acc.finales.join(' '));
+  acc.finales = [];
+  acc.sesion++;
 }
 
 /**
