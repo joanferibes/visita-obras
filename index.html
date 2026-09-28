@@ -266,6 +266,18 @@ body {
 #modalError .modal-titulo { color: var(--rojo); }
 #modalErrorTexto { white-space: pre-line; color: var(--texto); }
 
+/* ⭐ v1.8.0 — acta de replanteo */
+.rep-datos p { margin: 3px 0; font-size: 14px; }
+.rep-datos .etq { font-weight: 600; color: var(--gris-texto); }
+.rep-firma { display: flex; align-items: center; gap: 10px; background: white; border-radius: 10px; padding: 12px 14px; box-shadow: var(--sombra); margin-bottom: 8px; }
+.rep-firma .rep-info { flex: 1; min-width: 0; }
+.rep-firma .rep-cargo { font-weight: 600; font-size: 14px; }
+.rep-firma .rep-nombre { font-size: 13px; color: var(--gris-texto); }
+.rep-firma .rep-estado { font-size: 13px; white-space: nowrap; }
+.rep-firma label { display: flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; }
+.rep-firma input[type=checkbox] { width: 20px; height: 20px; }
+.rep-titulo { font-size: 14px; color: var(--gris-texto); margin: 16px 0 8px; font-weight: 600; }
+
 /* ⭐ v1.7.0 — tarjeta informativa y estado S+S pulsable */
 .ss-info-card { background: white; border-radius: 10px; padding: 12px 14px; box-shadow: var(--sombra); }
 .ss-estado-item.pendiente { cursor: pointer; }
@@ -315,6 +327,9 @@ body {
         <div class="aviso">
           ⚠️ Esta obra no tiene carpeta Drive asignada. Las fotos se guardan en _PENDIENTES.
           <br><a href="#" onclick="irAFormularioEditar(); return false;" style="color:#856404; font-weight:600;">Asignar carpeta ahora →</a>
+          <div id="aviso-buscar-gestion" style="display:none; margin-top:8px;">
+            <a href="#" onclick="buscarCarpetaGestion(); return false;" style="color:#856404; font-weight:600;">🔍 Buscar la carpeta del programa de gestión →</a>
+          </div>
         </div>
       </div>
 
@@ -333,6 +348,11 @@ body {
         </button>
         <button class="btn-accion" onclick="irAActa()">
           <span class="icon">🎙️</span><span class="label">Acta de visita</span><span class="arrow">›</span>
+        </button>
+        
+        <!-- ⭐ v1.8.0 — Acta de replanteo -->
+        <button class="btn-accion" onclick="irAActaReplanteo()">
+          <span class="icon">📏</span><span class="label">Acta de replanteo</span><span class="arrow">›</span>
         </button>
         
         <!-- ⭐ NUEVO v1.6.0 — Botón Libro de Órdenes -->
@@ -674,12 +694,14 @@ body {
       <div class="acta-guion">
         <div class="guion-titulo">📝 ¿QUÉ DICTAR?</div>
         <div style="font-size: 13.5px; line-height: 1.5; color: var(--texto);">
-          Cuéntale a la IA lo que quieres anotar en el Libro de Órdenes. Por ejemplo: <em>"Hemos revisado el armado del forjado de techo de planta baja, todo conforme al proyecto. He autorizado el hormigonado pero he pedido a la contrata que tengan en obra el albarán del hormigón. He recordado que tienen que poner protección perimetral antes de empezar."</em>
+          Dicta la anotación tal como quieres que quede. <strong>Se copia literalmente</strong>, sin cambiar tus palabras.
           <br><br>
-          La IA convertirá tu dictado en una anotación formal estilo Libro de Órdenes. <strong>No inventará nada que tú no hayas dicho.</strong>
+          Para pasar al <strong>punto siguiente</strong> di <em>«punto y aparte»</em> o <em>«siguiente punto»</em>. Cada punto sale como una viñeta en el Libro.
+          <br><br>
+          Ejemplo: <em>"Se revisa el armado del forjado de planta baja conforme a proyecto <strong>punto y aparte</strong> se autoriza el hormigonado <strong>siguiente punto</strong> se ordena colocar la protección perimetral."</em>
         </div>
         <div style="background: #fff8e1; border-left: 3px solid #f0ad4e; padding: 8px 10px; margin-top: 10px; font-size: 12.5px; line-height: 1.4;">
-          📅 <strong>Si la anotación NO es de hoy</strong> y quieres registrarla con fecha distinta, dilo al dictar. Ejemplo: <em>"esto fue del 29 de mayo"</em> o <em>"anótalo con fecha del 15"</em>. La IA pondrá esa fecha en la cabecera del PDF. Si no lo dices, se pondrá la de hoy.
+          📅 La fecha será la de hoy. Si la anotación es de otro día, la cambias en la pantalla siguiente.
         </div>
       </div>
       
@@ -696,7 +718,7 @@ body {
       </div>
       
       <div id="libroAccionesPost" style="display:none;">
-        <button class="btn-guardar" onclick="generarAnotacionLibroIA()">✨ Generar anotación</button>
+        <button class="btn-guardar" onclick="generarAnotacionLibroIA()">📋 Preparar anotación</button>
       </div>
     </div>
   </div>
@@ -719,12 +741,40 @@ body {
       
       <div class="form-group">
         <label>📕 Texto de la anotación <span class="req">*</span></label>
-        <textarea id="libro-texto" rows="14" placeholder="Texto generado por la IA..."></textarea>
-        <div class="hint">Puedes editarlo libremente antes de guardar</div>
+        <textarea id="libro-texto" rows="14" placeholder="Un punto por línea, empezando por guion (-)"></textarea>
+        <div class="hint">Cada línea que empieza por guion (-) es un punto. Puedes corregir lo que quieras antes de guardar.</div>
       </div>
       
       <button class="btn-guardar" onclick="guardarAnotacionLibroFinal()">💾 Guardar y generar PDF</button>
       <button class="btn-secundario" onclick="volverADictadoLibro()">← Volver al dictado</button>
+    </div>
+  </div>
+
+  <!-- ⭐ v1.8.0 — PANTALLA: ACTA DE REPLANTEO Y DE COMIENZO DE OBRA -->
+  <div class="screen" id="screen-replanteo">
+    <div class="header">
+      <button class="back" onclick="irAObra()">←</button>
+      <h1>📏 Acta de replanteo</h1>
+    </div>
+    <div class="content">
+      <div id="rep-cargando" style="color:var(--gris-texto); text-align:center; padding:30px 0;">Cargando...</div>
+      <div id="rep-contenido" style="display:none;">
+        <div id="rep-avisos"></div>
+        <div class="ss-info-card rep-datos" id="rep-datos"></div>
+        <div id="rep-estado-acta"></div>
+
+        <div class="form-group" style="margin-top:14px;">
+          <label>📅 Fecha del acta</label>
+          <input type="date" id="rep-fecha">
+          <div class="hint" id="rep-fecha-hint">Por defecto, la de hoy.</div>
+        </div>
+
+        <div class="rep-titulo">✍️ FIRMAS</div>
+        <div id="rep-firmas"></div>
+
+        <button class="btn-guardar" id="rep-btn-generar" onclick="generarActaReplanteo()">✍️ Firmar y generar acta</button>
+        <button class="btn-secundario" id="rep-btn-ver" style="display:none;" onclick="verPdfReplanteo()">📁 Ver PDF del acta</button>
+      </div>
     </div>
   </div>
 
@@ -923,7 +973,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.8.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1063,6 +1113,9 @@ const ACCIONES_LARGAS = {
   compilarLibroOrdenes: 'Compilando el Libro de Órdenes...',
   generarDocumentoSS: 'Generando el documento firmado...',
   enviarBorradorCorreoSS: 'Preparando el borrador en Gmail...',
+  getActaReplanteo: 'Cargando el acta de replanteo...',
+  guardarActaReplanteo: 'Generando el acta de replanteo...',
+  buscarCarpetaGestion: 'Buscando la carpeta en Drive...',
   generarAdhesionSubcontrata: 'Generando el acta de adhesión y el borrador...',
 };
 
@@ -1403,6 +1456,26 @@ function renderObra() {
   document.getElementById('obra-titulo-direccion').textContent = [o.direccion, o.municipio].filter(Boolean).join(', ');
   document.getElementById('obra-titulo-expediente').textContent = o.numExpediente ? 'Exp. ' + o.numExpediente : '';
   document.getElementById('aviso-pendiente').style.display = o.estado === 'Pendiente' ? 'block' : 'none';
+  document.getElementById('aviso-buscar-gestion').style.display = (o.estado === 'Pendiente' && o.rutaGestion) ? 'block' : 'none';
+}
+
+/** ⭐ v1.8.0: vuelve a buscar en Drive la carpeta de una obra enviada desde gestión */
+async function buscarCarpetaGestion() {
+  const o = estadoApp.obraActual;
+  try {
+    const res = await backendPost({ action: 'buscarCarpetaGestion', idObra: o.id });
+    if (!res.ok) throw new Error(res.error);
+    if (!res.encontrada) {
+      toast(res.mensaje, 'error');
+      return;
+    }
+    o.carpetaDriveId = res.carpetaDriveId;
+    o.estado = 'Activa';
+    renderObra();
+    toast('✓ Carpeta de Drive encontrada y asignada', 'ok');
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
 }
 
 // ============================================================================
@@ -2695,13 +2768,6 @@ async function finalizarActa() {
     mostrarPantalla('screen-acta-guardada');
     document.getElementById('acta-guardada-nombre').textContent = res.nombre;
     
-    // Ofrecer también la anotación del Libro de Órdenes con el mismo dictado
-    setTimeout(() => {
-      const dictado = actaState.transcripcion || '';
-      if (dictado && dictado.trim().length > 20) {
-        ofrecerConvertirActaALibro(dictado, acta.fecha);
-      }
-    }, 1200);
   } catch (err) {
     toast('⚠️ Error al guardar el acta: ' + err.message + '\n\nNo se ha perdido nada: puedes volver a pulsar «Finalizar y guardar» o guardar un borrador.', 'error');
   }
@@ -4312,53 +4378,6 @@ function detenerGrabacionLibro() {
   }
 }
 
-async function generarAnotacionLibroIA() {
-  let transcripcion = document.getElementById('libroTranscripcion').value.trim();
-  if (!transcripcion) {
-    toast('El dictado está vacío. Pulsa GRABAR y dicta la anotación.', 'error');
-    return;
-  }
-  
-  if (libroState.grabando) detenerGrabacionLibro();
-  libroState.transcripcion = transcripcion;
-  guardarDictadoLocal('libro', transcripcion, []);
-  
-  if (detectarTextoDuplicado(transcripcion)) {
-    if (confirm('Parece que en la transcripción hay texto repetido (puede pasar si la pantalla se bloqueó durante la grabación).\n\n¿Quieres corregirlo antes de generar la anotación?\n\nAceptar = corregir · Cancelar = generar igualmente')) {
-      document.getElementById('libroTranscripcion').focus();
-      toast('Corrige la transcripción y pulsa «Generar» de nuevo', 'ok');
-      return;
-    }
-  }
-  
-  try {
-    const res = await backendPost({
-      action: 'generarAnotacionLibro',
-      idObra: estadoApp.obraActual.id,
-      dictado: transcripcion,
-    });
-    
-    if (!res.ok) {
-      if (res.todosFallan) {
-        // ⭐ v1.7.0: sin IA disponible → el dictado pasa a la anotación para corregirlo a mano
-        if (!confirm('Ninguna IA ha respondido ahora mismo.\n\n¿Quieres redactar la anotación a mano a partir de tu dictado?\n\nAceptar = redactar a mano · Cancelar = volver al dictado (queda guardado)')) return;
-        libroState.textoGenerado = '- ' + transcripcion;
-        libroState.fechaDetectada = null;
-        libroState.anotacionEditandoId = null;
-        irAPreviewLibro();
-        return;
-      }
-      throw new Error(res.error);
-    }
-    
-    libroState.textoGenerado = res.texto;
-    libroState.fechaDetectada = res.fechaDetectada || null;
-    libroState.anotacionEditandoId = null;
-    irAPreviewLibro();
-  } catch (err) {
-    toast('⚠️ Error: ' + err.message + '\n\nTu dictado está guardado: puedes volver a pulsar «Generar».', 'error');
-  }
-}
 
 function irAPreviewLibro() {
   // ⭐ v1.6.3: Fecha por defecto = la detectada por la IA si la hay, si no hoy
@@ -4586,6 +4605,251 @@ async function confirmarConvertirActaALibro() {
 // ============================================================================
 // INICIALIZACIÓN
 // ============================================================================
+
+// ============================================================================
+// ⭐ v1.8.0 — LIBRO DE ÓRDENES SIN IA: el dictado se divide en viñetas
+// ============================================================================
+
+/**
+ * Separa el dictado en puntos sin cambiar las palabras.
+ * Separadores: «punto y aparte», «siguiente punto», el punto final que ponga
+ * el dictado (no los decimales como 2.5) y los saltos de línea.
+ * Solo se añade mayúscula inicial y punto final a cada viñeta.
+ */
+function dividirEnVinetas(texto) {
+  let t = String(texto || '');
+  t = t.replace(/[,.;:]?\s*\b(punto\s+y\s+aparte|siguiente\s+punto)\b\s*[,.;:]?/gi, '\n');
+  t = t.replace(/\.(\s+|$)/g, '.\n');
+  return t.split('\n')
+    .map(linea => linea.replace(/^[\s\-•*,;:.]+/, '').trim())
+    .filter(linea => /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]/.test(linea))
+    .map(linea => {
+      let l = linea.charAt(0).toLocaleUpperCase('es-ES') + linea.slice(1);
+      if (!/[.!?…]$/.test(l)) l += '.';
+      return '- ' + l;
+    })
+    .join('\n');
+}
+
+function generarAnotacionLibroIA() {
+  const transcripcion = document.getElementById('libroTranscripcion').value.trim();
+  if (!transcripcion) {
+    toast('El dictado está vacío. Pulsa GRABAR y dicta la anotación.', 'error');
+    return;
+  }
+  if (libroState.grabando) detenerGrabacionLibro();
+  libroState.transcripcion = transcripcion;
+  guardarDictadoLocal('libro', transcripcion, []);
+
+  if (detectarTextoDuplicado(transcripcion)) {
+    if (confirm('Parece que en la transcripción hay texto repetido (puede pasar si la pantalla se bloqueó durante la grabación).\n\n¿Quieres corregirlo antes de continuar?\n\nAceptar = corregir · Cancelar = continuar igualmente')) {
+      document.getElementById('libroTranscripcion').focus();
+      return;
+    }
+  }
+
+  libroState.textoGenerado = dividirEnVinetas(transcripcion);
+  libroState.fechaDetectada = null;
+  libroState.anotacionEditandoId = null;
+  irAPreviewLibro();
+}
+
+// ============================================================================
+// ⭐ v1.8.0 — ACTA DE REPLANTEO Y DE COMIENZO DE OBRA
+// ============================================================================
+
+let replanteoState = { acta: null, planAprobado: false, firmaTecnicoGuardada: false };
+
+const ROLES_REPLANTEO = [
+  { rol: 'constructorObra', cargo: 'El Constructor', campo: 'constructor' },
+  { rol: 'directorObra', cargo: 'El Director de la Obra', campo: 'arquitecto' },
+  { rol: 'promotor', cargo: 'El Promotor (diligencia de conformidad)', campo: 'promotor' },
+];
+
+async function irAActaReplanteo() {
+  estadoApp.pantalla = 'replanteo';
+  mostrarPantalla('screen-replanteo');
+  document.getElementById('rep-cargando').style.display = 'block';
+  document.getElementById('rep-contenido').style.display = 'none';
+  try {
+    const res = await backendPost({ action: 'getActaReplanteo', idObra: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    replanteoState = { acta: res.acta, planAprobado: !!res.planAprobado, firmaTecnicoGuardada: !!res.firmaTecnicoGuardada };
+    renderReplanteo();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+    irAObra();
+  }
+}
+
+function fechaCorta(iso) {
+  if (!iso) return '';
+  const p = String(iso).substring(0, 10).split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+}
+
+function renderReplanteo() {
+  const o = estadoApp.obraActual;
+  const acta = replanteoState.acta;
+  const firmas = Object.assign(Object.create(null), (acta && acta.firmas) || {});
+
+  // Avisos
+  let avisos = '';
+  const faltan = [];
+  if (!o.promotor) faltan.push('promotor');
+  if (!o.constructor) faltan.push('constructor');
+  if (!o.arquitecto) faltan.push('arquitecto (director de obra)');
+  if (faltan.length) {
+    avisos += '<div class="aviso">⚠️ Faltan datos en la ficha: <strong>' + escape(faltan.join(', ')) +
+      '</strong>. Saldrán en blanco en el acta. <a href="#" onclick="irAFormularioEditar(); return false;" style="color:#856404; font-weight:600;">Completar ahora →</a></div>';
+  }
+  if (!replanteoState.planAprobado) {
+    avisos += '<div class="aviso">⚠️ En esta obra <strong>no consta firmada el Acta de aprobación del Plan de Seguridad y Salud</strong>. El punto 4 del acta dice que el plan está aprobado.</div>';
+  }
+  if (!o.carpetaDriveId) {
+    avisos += '<div class="aviso">⚠️ La obra no tiene carpeta de Drive. Asígnala antes de generar el acta.</div>';
+  }
+  document.getElementById('rep-avisos').innerHTML = avisos;
+
+  // Datos
+  const empl = [o.direccion, o.municipio].filter(Boolean).join('. ');
+  document.getElementById('rep-datos').innerHTML =
+    '<p><span class="etq">Obra:</span> ' + escape(o.tituloOficial || o.nombreCorto || '') + '</p>' +
+    '<p><span class="etq">Emplazamiento:</span> ' + escape(empl) + '</p>' +
+    '<p><span class="etq">Promotor:</span> ' + escape(o.promotor || '—') + '</p>' +
+    '<p><span class="etq">Constructor (jefe de obra):</span> ' + escape(o.constructor || '—') + '</p>' +
+    '<p><span class="etq">Director de obra:</span> ' + escape(o.arquitecto || '—') + '</p>' +
+    '<p><span class="etq">DEM y Coordinador S+S:</span> Juan Felipe Ribes Aranda</p>';
+
+  // Estado del acta
+  const estadoEl = document.getElementById('rep-estado-acta');
+  if (acta) {
+    const pendientes = ROLES_REPLANTEO.filter(r => !firmas[r.rol]).map(r => r.cargo.replace(/ \(.*\)$/, '').toLowerCase());
+    estadoEl.innerHTML = acta.estado === 'completa'
+      ? '<div class="aviso" style="background:#d4edda; color:#155724; border-left-color:var(--verde-ok); margin-top:12px;">✅ Acta completa: firmada por todos.</div>'
+      : '<div class="aviso" style="margin-top:12px;">⏳ Acta generada. Pendiente de firma: <strong>' + escape(pendientes.join(', ')) + '</strong>.</div>';
+  } else {
+    estadoEl.innerHTML = '';
+  }
+
+  // Fecha: fija en cuanto ha firmado alguien más
+  const fechaEl = document.getElementById('rep-fecha');
+  const hint = document.getElementById('rep-fecha-hint');
+  const bloqueada = acta && ROLES_REPLANTEO.some(r => firmas[r.rol]);
+  fechaEl.value = (acta && acta.fecha) || fechaHoyISO();
+  fechaEl.disabled = !!bloqueada;
+  hint.textContent = bloqueada
+    ? 'La fecha ya no se puede cambiar porque el acta tiene firmas.'
+    : 'Por defecto, la de hoy. Cámbiala si hace falta.';
+
+  // Firmas
+  let html = '';
+  ROLES_REPLANTEO.forEach(r => {
+    const firmada = firmas[r.rol];
+    html += '<div class="rep-firma"><div class="rep-info">' +
+      '<div class="rep-cargo">' + escape(r.cargo) + '</div>' +
+      '<div class="rep-nombre">' + escape(o[r.campo] || '(sin nombre en la ficha)') + '</div></div>' +
+      (firmada
+        ? '<div class="rep-estado">✅ Firmada ' + fechaCorta(firmada.fecha) + '</div>'
+        : '<label><input type="checkbox" id="rep-chk-' + r.rol + '" checked> Firma ahora</label>') +
+      '</div>';
+  });
+  html += '<div class="rep-firma"><div class="rep-info">' +
+    '<div class="rep-cargo">Director de Ejecución y Coordinador de S+S</div>' +
+    '<div class="rep-nombre">Juan Felipe Ribes Aranda</div></div>' +
+    '<div class="rep-estado">' + ((replanteoState.firmaTecnicoGuardada || leerFirmaLocal()) ? '✅ Firma guardada' : '✍️ Firmarás una vez') + '</div></div>';
+  html += '<div class="hint" style="margin-bottom:12px;">Desmarca a quien no esté hoy: quedará pendiente y podrás recoger su firma otro día desde esta misma pantalla.</div>';
+  document.getElementById('rep-firmas').innerHTML = html;
+
+  // Botones
+  const btn = document.getElementById('rep-btn-generar');
+  if (acta && acta.estado === 'completa') {
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = 'block';
+    btn.textContent = acta ? '✍️ Recoger firmas pendientes' : '✍️ Firmar y generar acta';
+  }
+  document.getElementById('rep-btn-ver').style.display = (acta && acta.url) ? 'block' : 'none';
+
+  document.getElementById('rep-cargando').style.display = 'none';
+  document.getElementById('rep-contenido').style.display = 'block';
+}
+
+function pedirFirmaPromesa(titulo, quien, opciones) {
+  return new Promise(resolve => pedirFirma(titulo, quien, d => resolve(d), () => resolve(null), opciones));
+}
+
+async function generarActaReplanteo() {
+  const o = estadoApp.obraActual;
+  const acta = replanteoState.acta;
+  const firmas = Object.assign(Object.create(null), (acta && acta.firmas) || {});
+
+  if (!o.carpetaDriveId) {
+    toast('La obra no tiene carpeta de Drive. Asígnala antes de generar el acta.', 'error');
+    return;
+  }
+  const quienes = ROLES_REPLANTEO.filter(r => !firmas[r.rol] && document.getElementById('rep-chk-' + r.rol) &&
+    document.getElementById('rep-chk-' + r.rol).checked);
+
+  if (acta && quienes.length === 0) {
+    toast('Marca quién firma ahora.', 'error');
+    return;
+  }
+  if (!acta && !replanteoState.planAprobado) {
+    if (!confirm('En esta obra no consta firmada el Acta de aprobación del Plan de Seguridad y Salud.\n\n¿Generar el acta de replanteo igualmente?')) return;
+  }
+
+  // Tu firma: la guardada, o se pide una vez y se guarda
+  let firmaTecnico = null;
+  if (!replanteoState.firmaTecnicoGuardada && !leerFirmaLocal()) {
+    firmaTecnico = await pedirFirmaPromesa('Tu firma (se guardará)', 'Juan Felipe Ribes Aranda — DEM y Coordinador S+S', { esTecnico: true });
+    if (!firmaTecnico) { toast('Proceso cancelado'); return; }
+  } else if (!replanteoState.firmaTecnicoGuardada) {
+    firmaTecnico = leerFirmaLocal();
+  }
+
+  // Firmas de los presentes, una detrás de otra
+  const nuevas = {};
+  for (const r of quienes) {
+    const d = await pedirFirmaPromesa('Acta de replanteo', r.cargo.replace(/ \(.*\)$/, '') + (o[r.campo] ? ' — ' + o[r.campo] : ''));
+    if (!d) { toast('Proceso cancelado: no se ha guardado nada.'); return; }
+    nuevas[r.rol] = d;
+  }
+
+  try {
+    const res = await backendPost({
+      action: 'guardarActaReplanteo',
+      idObra: o.id,
+      fecha: document.getElementById('rep-fecha').value || fechaHoyISO(),
+      firmas: nuevas,
+      firmaTecnico: firmaTecnico,
+    });
+    if (!res.ok) throw new Error(res.error);
+
+    replanteoState.acta = { id: null, fecha: res.fecha, estado: res.estado, archivoId: res.archivoId, url: res.url, firmas: res.firmas };
+    replanteoState.firmaTecnicoGuardada = true;
+    o.fechaInicio = res.fecha;
+    renderReplanteo();
+
+    mostrarModalResultado({
+      icono: res.estado === 'completa' ? '✅' : '📏',
+      titulo: res.estado === 'completa' ? 'Acta de replanteo completa' : 'Acta de replanteo guardada',
+      texto: 'Guardada en Drive: DOCUMENTACION / ACTA DE REPLANTEO.\n\n' + (res.pendientes.length
+        ? 'Pendiente de firma: ' + res.pendientes.join(', ') + '.\nCuando estén, entra otra vez en «Acta de replanteo» y pulsa «Recoger firmas pendientes».'
+        : 'Han firmado todos.'),
+      btn1Texto: '📁 Ver PDF',
+      btn1Accion: () => window.open(res.url, '_blank'),
+      btn2Texto: 'Cerrar',
+      btn2Accion: () => {},
+    });
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message + '\n\nNo se ha guardado nada: vuelve a intentarlo.', 'error');
+  }
+}
+
+function verPdfReplanteo() {
+  if (replanteoState.acta && replanteoState.acta.url) window.open(replanteoState.acta.url, '_blank');
+}
 
 /**
  * ⭐ v1.7.0: avisa si la app y el servidor no tienen la misma versión
