@@ -600,18 +600,18 @@ body {
       <!-- Acciones disponibles -->
       <div class="ss-seccion">
         <h3><span class="icono">📄</span>DOCUMENTOS S+S</h3>
+        <button class="ss-accion" onclick="accionDocumento('designacion_coordinador')">
+          <span class="icono-grande">🧑‍💼</span>
+          <div class="texto-accion">
+            <div class="titulo-accion">Designación de Coordinador</div>
+            <div class="desc-accion">Firma promotor · fecha a elegir</div>
+          </div>
+        </button>
         <button class="ss-accion" onclick="accionSolicitarPlan()">
           <span class="icono-grande">📧</span>
           <div class="texto-accion">
             <div class="titulo-accion">Solicitar Plan de S+S</div>
             <div class="desc-accion">Crea correo en Gmail al constructor</div>
-          </div>
-        </button>
-        <button class="ss-accion" onclick="accionDocumento('designacion_coordinador')">
-          <span class="icono-grande">🧑‍💼</span>
-          <div class="texto-accion">
-            <div class="titulo-accion">Designación de Coordinador</div>
-            <div class="desc-accion">Firma promotor</div>
           </div>
         </button>
         <button class="ss-accion" onclick="accionDocumento('aprobacion_plan')">
@@ -824,6 +824,12 @@ body {
   <div class="modal-caja">
     <div class="modal-titulo" id="modalDocumentoTitulo">Documento</div>
     <p class="modal-texto" id="modalDocumentoTexto">¿Cómo quieres proceder?</p>
+    <!-- ⭐ v1.8.3: fecha de la designación (normalmente anterior a hoy) -->
+    <div class="form-group" id="modalDocFechaWrap" style="display:none; margin-bottom:14px; text-align:left;">
+      <label for="modalDocFecha">📅 Fecha de la designación</label>
+      <input type="date" id="modalDocFecha">
+      <div class="hint">Por defecto, hoy. Pulsa para elegir otro día en el calendario.</div>
+    </div>
     <div class="modal-botones">
       <button class="ss-accion" id="modalBtnFirmarApp" onclick="modalDocFirmarApp()">
         <span class="icono-grande">✍️</span>
@@ -973,7 +979,9 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.8.2';
+const APP_VERSION = '1.8.3';
+// Versión del Code.gs que necesita esta app (v1.8.3 solo cambia la app)
+const SERVIDOR_REQUERIDO = '1.8.2';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -2997,9 +3005,9 @@ function renderEstadoSS(estado, documentos) {
   
   // Resumen tipo checklist
   const items = [
+    { hecho: estado.coordinadorDesignado, label: 'Coordinador designado por el promotor', icono: '🧑‍💼', tipo: 'designacion_coordinador' },
     { hecho: estado.planSolicitado, label: 'Plan de S+S solicitado al constructor', icono: '📧', tipo: 'solicitud_plan' },
     { hecho: estado.planAprobado, label: 'Plan de S+S aprobado y firmado', icono: '✅', tipo: 'aprobacion_plan' },
-    { hecho: estado.coordinadorDesignado, label: 'Coordinador designado por el promotor', icono: '🧑‍💼', tipo: 'designacion_coordinador' },
     { hecho: estado.libroEntregado, label: 'Libro de Incidencias entregado', icono: '📕', tipo: 'recibi_libro' },
   ];
   
@@ -3516,6 +3524,15 @@ function accionDocumento(tipo) {
   
   document.getElementById('modalDocumentoTitulo').textContent = titulo;
   document.getElementById('modalDocumentoTexto').textContent = '¿Cómo quieres proceder con este documento?';
+  
+  // ⭐ v1.8.3: la designación lleva fecha elegible (por defecto hoy)
+  const conFecha = tipo === 'designacion_coordinador';
+  document.getElementById('modalDocFechaWrap').style.display = conFecha ? 'block' : 'none';
+  if (conFecha) {
+    const inputFecha = document.getElementById('modalDocFecha');
+    inputFecha.value = fechaHoyISO();
+    inputFecha.max = fechaHoyISO();
+  }
   document.getElementById('modalFirmarAppDesc').textContent = textoFirmar;
   
   // Cambiar el título del segundo botón también
@@ -3534,7 +3551,26 @@ function cerrarModalDocumento() {
  * Usuario elige: firmar en la app
  * → Recoger firmas una a una con el sistema de canvas existente
  */
+/** ⭐ v1.8.3: guarda la fecha elegida en la ventana (solo si se muestra). Devuelve false si falta. */
+function leerFechaModalDoc() {
+  if (document.getElementById('modalDocFechaWrap').style.display === 'none') return true;
+  const fecha = document.getElementById('modalDocFecha').value;
+  if (!fecha) {
+    toast('Elige la fecha de la designación en el calendario.', 'error');
+    return false;
+  }
+  docSSState.datos.fecha = fecha;
+  return true;
+}
+
+/** '2026-05-29' → '29/05/2026' */
+function fechaISOaTexto(iso) {
+  const p = String(iso || '').split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+}
+
 function modalDocFirmarApp() {
+  if (!leerFechaModalDoc()) return;
   cerrarModalDocumento();
   
   // Inicializar cola de firmantes
@@ -3772,6 +3808,7 @@ async function enviarRecibiFirmadoAlConstructor(archivoIdActa) {
  * - recibi_libro: NO debería llegar aquí (se filtra en accionDocumento)
  */
 async function modalDocEnviarCorreo() {
+  if (!leerFechaModalDoc()) return;
   cerrarModalDocumento();
   
   const obra = estadoApp.obraActual;
@@ -3782,7 +3819,7 @@ async function modalDocEnviarCorreo() {
       return;
     }
     
-    if (!confirm('Voy a generar el Acta de Designación SIN FIRMAR y crear un correo borrador en Gmail dirigido al promotor:\n\n' + obra.emailPromotor + '\n\nÉl deberá firmarlo (digital o escaneado) y devolverlo. ¿Continuar?')) return;
+    if (!confirm('Voy a generar el Acta de Designación SIN FIRMAR, con fecha ' + fechaISOaTexto(docSSState.datos.fecha) + ', y crear un correo borrador en Gmail dirigido al promotor:\n\n' + obra.emailPromotor + '\n\nÉl deberá firmarlo (digital o escaneado) y devolverlo. ¿Continuar?')) return;
     
     toast('Creando borrador en Gmail...');
     
@@ -4921,9 +4958,9 @@ function acumuladorNuevaSesion(acc) {
 async function comprobarVersionServidor() {
   try {
     const res = await backendGet('ping');
-    if (res && res.version && res.version !== APP_VERSION) {
+    if (res && res.version && res.version !== SERVIDOR_REQUERIDO) {
       const banner = document.getElementById('configBanner');
-      banner.textContent = '⚠️ La app es la v' + APP_VERSION + ' pero el servidor es la v' + res.version +
+      banner.textContent = '⚠️ La app necesita el servidor v' + SERVIDOR_REQUERIDO + ' pero tiene la v' + res.version +
         '. Implementa la nueva versión del Code.gs en Apps Script (o recarga la app si ya lo hiciste).';
       banner.classList.add('visible', 'aviso-version');
     }
