@@ -694,14 +694,14 @@ body {
       <div class="acta-guion">
         <div class="guion-titulo">📝 ¿QUÉ DICTAR?</div>
         <div style="font-size: 13.5px; line-height: 1.5; color: var(--texto);">
-          Dicta la anotación tal como quieres que quede. <strong>Se copia literalmente</strong>, sin cambiar tus palabras.
+          Dicta la anotación tal como quieres que quede. La IA <strong>solo limpia</strong> los errores del reconocimiento de voz (repeticiones, palabras mal entendidas, puntuación). <strong>No redacta ni añade nada.</strong>
           <br><br>
           Para pasar al <strong>punto siguiente</strong> di <em>«punto y aparte»</em> o <em>«siguiente punto»</em>. Cada punto sale como una viñeta en el Libro.
           <br><br>
           Ejemplo: <em>"Se revisa el armado del forjado de planta baja conforme a proyecto <strong>punto y aparte</strong> se autoriza el hormigonado <strong>siguiente punto</strong> se ordena colocar la protección perimetral."</em>
         </div>
         <div style="background: #fff8e1; border-left: 3px solid #f0ad4e; padding: 8px 10px; margin-top: 10px; font-size: 12.5px; line-height: 1.4;">
-          📅 La fecha será la de hoy. Si la anotación es de otro día, la cambias en la pantalla siguiente.
+          📅 La fecha será la de hoy. Si es de otro día, dilo al dictar («esto fue ayer») o cámbiala en la pantalla siguiente.
         </div>
       </div>
       
@@ -973,7 +973,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.8.1';
+const APP_VERSION = '1.8.2';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1107,7 +1107,7 @@ function fotoLocalDelete(id) {
 const ACCIONES_LARGAS = {
   generarActa: 'Redactando el acta con IA...',
   guardarActa: 'Generando el PDF del acta...',
-  generarAnotacionLibro: 'Redactando la anotación con IA...',
+  generarAnotacionLibro: 'Limpiando el dictado con IA...',
   guardarAnotacionLibro: 'Generando el PDF de la anotación...',
   convertirActaALibro: 'Creando la anotación del Libro de Órdenes...',
   compilarLibroOrdenes: 'Compilando el Libro de Órdenes...',
@@ -4584,7 +4584,7 @@ function dividirEnVinetas(texto) {
     .join('\n');
 }
 
-function generarAnotacionLibroIA() {
+async function generarAnotacionLibroIA() {
   const transcripcion = document.getElementById('libroTranscripcion').value.trim();
   if (!transcripcion) {
     toast('El dictado está vacío. Pulsa GRABAR y dicta la anotación.', 'error');
@@ -4594,15 +4594,23 @@ function generarAnotacionLibroIA() {
   libroState.transcripcion = transcripcion;
   guardarDictadoLocal('libro', transcripcion, []);
 
-  if (detectarTextoDuplicado(transcripcion)) {
-    if (confirm('Parece que en la transcripción hay texto repetido (puede pasar si la pantalla se bloqueó durante la grabación).\n\n¿Quieres corregirlo antes de continuar?\n\nAceptar = corregir · Cancelar = continuar igualmente')) {
-      document.getElementById('libroTranscripcion').focus();
-      return;
+  // ⭐ v1.8.2: la IA solo LIMPIA el dictado (repeticiones y errores de voz), no redacta
+  try {
+    const res = await backendPost({ action: 'generarAnotacionLibro', idObra: estadoApp.obraActual.id, dictado: transcripcion });
+    if (res.ok) {
+      libroState.textoGenerado = res.texto;
+      libroState.fechaDetectada = res.fechaDetectada || null;
+    } else if (res.todosFallan) {
+      toast('Ninguna IA responde ahora: se separa tu dictado en puntos tal cual. Revísalo antes de guardar.', 'ok');
+      libroState.textoGenerado = dividirEnVinetas(transcripcion);
+      libroState.fechaDetectada = null;
+    } else {
+      throw new Error(res.error);
     }
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message + '\n\nTu dictado está guardado: puedes volver a pulsar «Preparar anotación».', 'error');
+    return;
   }
-
-  libroState.textoGenerado = dividirEnVinetas(transcripcion);
-  libroState.fechaDetectada = null;
   libroState.anotacionEditandoId = null;
   irAPreviewLibro();
 }
@@ -4860,6 +4868,8 @@ function unirTextoDictado(a, b) {
 
 function crearAcumuladorDictado(textoInicial) {
   const android = (window.DICTADO_ANDROID !== undefined) ? window.DICTADO_ANDROID : /Android/i.test(navigator.userAgent);
+  // Las frases de todas las escuchas van en la misma lista: en Android Chrome
+  // reinicia la escucha entre palabras y la repetición llega en la escucha siguiente.
   return { base: String(textoInicial || '').trim(), finales: [], vistos: new Set(), sesion: 0, ultimo: null,
            android: android, tUltimoFinal: 0 };
 }
@@ -4900,8 +4910,7 @@ function acumuladorProcesar(acc, event) {
 }
 
 function acumuladorNuevaSesion(acc) {
-  acc.base = unirTextoDictado(acc.base, acc.finales.join(' '));
-  acc.finales = [];
+  // No se vacía la lista: la primera frase de la nueva escucha se compara con la última de la anterior
   acc.sesion++;
 }
 
