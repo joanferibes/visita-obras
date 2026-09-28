@@ -246,6 +246,32 @@ body {
 .firma-btn-cancelar { background: white; color: var(--gris-texto); border: 1px solid var(--gris-medio) !important; }
 .firma-btn-aceptar { background: var(--verde-ok); color: white; }
 
+/* ⭐ v1.7.0 — firma guardada del técnico */
+.firma-tecnico-opciones { display: none; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 0 2px; }
+.firma-tecnico-opciones.visible { display: flex; }
+.firma-tecnico-opciones label { font-size: 14px; display: flex; align-items: center; gap: 6px; color: var(--gris-texto); }
+.firma-tecnico-opciones input { width: 18px; height: 18px; }
+.btn-usar-firma { background: var(--azul); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-usar-firma:disabled { opacity: 0.5; }
+
+/* ⭐ v1.7.0 — pantalla de espera para operaciones largas */
+.cargando-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.88); z-index: 650; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center; }
+.cargando-overlay.visible { display: flex; }
+.cargando-overlay .spinner { width: 42px; height: 42px; border: 4px solid rgba(74,138,128,0.25); border-top-color: var(--azul); }
+.cargando-texto { font-size: 16px; color: var(--texto); font-weight: 600; max-width: 320px; }
+.cargando-sub { font-size: 13px; color: var(--gris-texto); max-width: 320px; }
+
+/* ⭐ v1.7.0 — ventana de error (no desaparece sola) */
+#modalError { z-index: 700; }
+#modalError .modal-titulo { color: var(--rojo); }
+#modalErrorTexto { white-space: pre-line; color: var(--texto); }
+
+/* ⭐ v1.7.0 — tarjeta informativa y estado S+S pulsable */
+.ss-info-card { background: white; border-radius: 10px; padding: 12px 14px; box-shadow: var(--sombra); }
+.ss-estado-item.pendiente { cursor: pointer; }
+.ss-estado-item .accion-marcar { margin-left: auto; font-size: 12px; text-decoration: underline; color: #856404; white-space: nowrap; }
+.aviso-version { background: #fff3cd; color: #856404; }
+
 </style>
 </head>
 <body>
@@ -377,8 +403,8 @@ body {
       <!-- ⭐ NUEVO v1.2.0 -->
       <div class="form-group">
         <label>📧 Email del promotor</label>
-        <input type="email" id="f-emailPromotor" placeholder="ejemplo@correo.com">
-        <div class="hint">Para correos de Seguridad y Salud</div>
+        <input type="text" inputmode="email" autocapitalize="off" autocorrect="off" id="f-emailPromotor" placeholder="ejemplo@correo.com">
+        <div class="hint">Para correos de Seguridad y Salud. Si hay varios, sepáralos con coma.</div>
       </div>
       
       <div class="form-group"><label>Arquitecto</label><input type="text" id="f-arquitecto"></div>
@@ -391,7 +417,7 @@ body {
       <!-- ⭐ NUEVO v1.2.0 -->
       <div class="form-group">
         <label>📧 Email del constructor</label>
-        <input type="email" id="f-emailConstructor" placeholder="ejemplo@correo.com">
+        <input type="text" inputmode="email" autocapitalize="off" autocorrect="off" id="f-emailConstructor" placeholder="ejemplo@correo.com">
         <div class="hint">Para correos de Seguridad y Salud</div>
       </div>
       
@@ -474,6 +500,11 @@ body {
     <div class="header"><button class="back" onclick="volverADictado()">←</button><h1>📝 Revisar acta</h1></div>
     <div class="content">
       <div class="aviso" style="margin-bottom:16px;">💡 Puedes editar cualquier campo antes de finalizar</div>
+      <div class="form-group">
+        <label>📅 Fecha de la visita</label>
+        <input type="date" id="prev-fecha">
+        <div class="hint" id="prev-fecha-hint">Por defecto, la de hoy. Cámbiala si la visita fue otro día.</div>
+      </div>
       <div class="form-group"><label>1. Asistentes (uno por línea)</label><textarea id="prev-asistentes" rows="3"></textarea></div>
       <div class="form-group"><label>2. Estado actual de la obra</label><textarea id="prev-estado" rows="6"></textarea></div>
       <div class="form-group"><label>3. Trabajos en ejecución</label><textarea id="prev-trabajos" rows="8"></textarea></div>
@@ -657,7 +688,7 @@ body {
         <textarea id="libroTranscripcion" rows="6" placeholder="Aquí aparecerá lo que dictes..."></textarea>
       </div>
       
-      <div id="libroBotonGrabar" class="acta-grabar-wrapper">
+      <div id="libroBotonGrabar" class="acta-boton-grabar">
         <button class="btn-grabar" id="btnGrabarLibro" onclick="toggleGrabacionLibro()">
           <span class="icon">🎙️</span><span class="texto">GRABAR</span>
         </button>
@@ -722,6 +753,10 @@ body {
   </div>
   <div class="firma-contenido">
     <p class="firma-instrucciones">Firme con el dedo o lápiz en el recuadro</p>
+    <div class="firma-tecnico-opciones" id="firmaTecnicoOpciones">
+      <button class="btn-usar-firma" id="btnUsarFirmaGuardada" onclick="usarFirmaGuardada()" disabled>✍️ Usar mi firma guardada</button>
+      <label><input type="checkbox" id="chkGuardarFirma"> Guardar como mi firma</label>
+    </div>
     <div class="firma-canvas-wrapper">
       <canvas id="firmaCanvas"></canvas>
       <div class="firma-canvas-vacio" id="firmaVacio">✍️ Toque aquí para firmar</div>
@@ -859,6 +894,24 @@ body {
   </div>
 </div>
 
+<!-- ⭐ v1.7.0 — VENTANA DE ERROR (no desaparece sola) -->
+<div class="modal-overlay" id="modalError" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">⚠️ No se ha podido completar</div>
+    <p class="modal-texto" id="modalErrorTexto"></p>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="cerrarModalError()">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.7.0 — PANTALLA DE ESPERA -->
+<div class="cargando-overlay" id="cargandoOverlay" role="status" aria-live="polite">
+  <div class="spinner"></div>
+  <div class="cargando-texto" id="cargandoTexto">Procesando...</div>
+  <div class="cargando-sub" id="cargandoSub">No cierres la app.</div>
+</div>
+
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
@@ -870,7 +923,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.6.5';
+const APP_VERSION = '1.7.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1000,23 +1053,74 @@ function fotoLocalDelete(id) {
 // COMUNICACIÓN BACKEND
 // ============================================================================
 
+// ⭐ v1.7.0: operaciones largas → pantalla de espera con texto claro
+const ACCIONES_LARGAS = {
+  generarActa: 'Redactando el acta con IA...',
+  guardarActa: 'Generando el PDF del acta...',
+  generarAnotacionLibro: 'Redactando la anotación con IA...',
+  guardarAnotacionLibro: 'Generando el PDF de la anotación...',
+  convertirActaALibro: 'Creando la anotación del Libro de Órdenes...',
+  compilarLibroOrdenes: 'Compilando el Libro de Órdenes...',
+  generarDocumentoSS: 'Generando el documento firmado...',
+  enviarBorradorCorreoSS: 'Preparando el borrador en Gmail...',
+  generarAdhesionSubcontrata: 'Generando el acta de adhesión y el borrador...',
+};
+
+const TIEMPO_MAXIMO_MS = 180000; // 3 minutos
+
+async function fetchConTiempoMaximo(url, opciones) {
+  const control = new AbortController();
+  const temporizador = setTimeout(() => control.abort(), TIEMPO_MAXIMO_MS);
+  try {
+    return await fetch(url, Object.assign({}, opciones || {}, { signal: control.signal }));
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('El servidor ha tardado demasiado en responder. Comprueba la conexión y vuelve a intentarlo.');
+    }
+    if (!navigator.onLine) {
+      throw new Error('No hay conexión a internet. Vuelve a intentarlo cuando tengas cobertura.');
+    }
+    throw new Error('No se ha podido conectar con el servidor (' + err.message + ').');
+  } finally {
+    clearTimeout(temporizador);
+  }
+}
+
 async function backendGet(action, params = {}) {
   const url = new URL(BACKEND_URL);
   url.searchParams.set('action', action);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const res = await fetchConTiempoMaximo(url.toString());
+  if (!res.ok) throw new Error('El servidor ha respondido con un error (HTTP ' + res.status + ').');
   return res.json();
 }
 
 async function backendPost(payload) {
-  const res = await fetch(BACKEND_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'text/plain' }
-  });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
+  const textoEspera = ACCIONES_LARGAS[payload && payload.action];
+  if (textoEspera) mostrarCargando(textoEspera);
+  try {
+    const res = await fetchConTiempoMaximo(BACKEND_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    if (!res.ok) throw new Error('El servidor ha respondido con un error (HTTP ' + res.status + ').');
+    return await res.json();
+  } finally {
+    if (textoEspera) ocultarCargando();
+  }
+}
+
+let cargandoContador = 0;
+function mostrarCargando(texto, sub) {
+  cargandoContador++;
+  document.getElementById('cargandoTexto').textContent = texto || 'Procesando...';
+  document.getElementById('cargandoSub').textContent = sub || 'No cierres la app.';
+  document.getElementById('cargandoOverlay').classList.add('visible');
+}
+function ocultarCargando() {
+  cargandoContador = Math.max(0, cargandoContador - 1);
+  if (cargandoContador === 0) document.getElementById('cargandoOverlay').classList.remove('visible');
 }
 
 // ============================================================================
@@ -1331,6 +1435,16 @@ function rellenarFormulario(obra) {
   document.getElementById('f-emailConstructor').value = obra.emailConstructor || '';
 }
 
+/** Devuelve un mensaje de error si algún email no es válido, o null */
+function comprobarEmails(texto, quien) {
+  const partes = String(texto || '').split(/[\s,;\/]+/).map(x => x.trim()).filter(x => x);
+  const malos = partes.filter(x => !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(x));
+  if (malos.length) {
+    return 'El email ' + quien + ' no es válido: "' + malos.join(' ') + '".\n\nRevisa que tenga @ y dominio (ejemplo@correo.com). Si hay varios, sepáralos con coma.';
+  }
+  return null;
+}
+
 async function guardarFormulario() {
   const datos = {
     nombreCorto: document.getElementById('f-nombreCorto').value.trim(),
@@ -1353,6 +1467,13 @@ async function guardarFormulario() {
     return;
   }
   
+  // ⭐ v1.7.0: comprobar los emails antes de enviarlos (el servidor vuelve a comprobarlos)
+  const errorEmail = comprobarEmails(datos.emailPromotor, 'del promotor') || comprobarEmails(datos.emailConstructor, 'del constructor');
+  if (errorEmail) {
+    toast(errorEmail, 'error');
+    return;
+  }
+  
   toast('Guardando...');
   
   try {
@@ -1365,6 +1486,10 @@ async function guardarFormulario() {
     
     if (!res.ok) throw new Error(res.error);
     toast('✓ Guardado correctamente', 'ok');
+    
+    // El servidor devuelve los emails ya limpios (minúsculas, separados por coma)
+    if (res.emailPromotor !== undefined) datos.emailPromotor = res.emailPromotor;
+    if (res.emailConstructor !== undefined) datos.emailConstructor = res.emailConstructor;
     
     if (estadoApp.modoEdicion) {
       Object.assign(estadoApp.obraActual, datos);
@@ -1848,11 +1973,27 @@ async function abrirCarpetaCC() {
 
 let toastTimeout = null;
 function toast(msg, tipo) {
+  // ⭐ v1.7.0: los errores se muestran en una ventana que no desaparece sola
+  if (tipo === 'error') {
+    mostrarError(String(msg || '').replace(/^⚠️\s*(Error:\s*)?/, ''));
+    return;
+  }
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast visible' + (tipo ? ' ' + tipo : '');
   if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => el.classList.remove('visible'), 2500);
+  toastTimeout = setTimeout(() => el.classList.remove('visible'), 3000);
+}
+
+function mostrarError(mensaje) {
+  const el = document.getElementById('toast');
+  if (el) el.classList.remove('visible');
+  document.getElementById('modalErrorTexto').textContent = mensaje || 'Error desconocido.';
+  document.getElementById('modalError').style.display = 'flex';
+}
+
+function cerrarModalError() {
+  document.getElementById('modalError').style.display = 'none';
 }
 
 document.getElementById('buscador').addEventListener('input', (e) => {
@@ -1875,6 +2016,7 @@ let actaState = {
   intervaloTiempo: null,
   acta: null,
   borradorEditandoId: null,
+  borradorNubeId: null,
 };
 
 function irAActa() {
@@ -1883,39 +2025,84 @@ function irAActa() {
   cargarBorradores();
 }
 
+let borradoresNubeCache = {};
+
 async function cargarBorradores() {
   const cont = document.getElementById('acta-borradores');
   const obraId = estadoApp.obraActual.id;
+  cont.innerHTML = '<p style="color:var(--gris-texto); text-align:center; padding:20px 0;">Cargando borradores...</p>';
   
+  // ⭐ v1.7.0: subir primero los borradores que quedaron solo en este dispositivo
+  await subirBorradoresLocales(obraId);
+  
+  let nube = [];
+  let local = [];
+  let avisoNube = '';
   try {
-    const borradores = await actaBorradoresByObra(obraId);
-    
-    if (borradores.length === 0) {
-      cont.innerHTML = '<p style="color:var(--gris-texto); text-align:center; padding:20px 0;">No hay borradores guardados</p>';
-      return;
-    }
-    
-    let html = '<h3 style="font-size:14px; color:var(--gris-texto); margin-bottom:10px;">📝 BORRADORES (' + borradores.length + ')</h3>';
-    borradores.forEach(b => {
-      const fecha = new Date(b.fecha).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-      html += `
-        <div class="borrador-card">
-          <div class="info" onclick="abrirBorrador(${b.id})">
-            <div class="nombre">Acta del ${fecha}</div>
-            <div class="fecha">${(b.acta && b.acta.estadoActual ? String(b.acta.estadoActual).substring(0,80) + '...' : 'Sin contenido')}</div>
-          </div>
-          <button class="btn-borrar" onclick="event.stopPropagation(); borrarBorrador(${b.id})">🗑️</button>
-        </div>
-      `;
-    });
-    cont.innerHTML = html;
+    const res = await backendPost({ action: 'listBorradoresActa', idObra: obraId });
+    if (!res.ok) throw new Error(res.error);
+    nube = res.borradores || [];
   } catch (err) {
-    cont.innerHTML = '<p style="color:var(--rojo);">Error: ' + err.message + '</p>';
+    avisoNube = '<p style="color:var(--gris-texto); font-size:13px; margin-bottom:8px;">Sin conexión: solo se muestran los borradores de este dispositivo.</p>';
+  }
+  try { local = await actaBorradoresByObra(obraId); } catch (e) {}
+  
+  borradoresNubeCache = {};
+  nube.forEach(b => { borradoresNubeCache[b.id] = b.datos || {}; });
+  
+  const todos = nube.map(b => ({ origen: 'N', id: b.id, fecha: b.actualizado, acta: (b.datos || {}).acta }))
+    .concat(local.map(b => ({ origen: 'L', id: b.id, fecha: b.fecha, acta: b.acta })));
+  
+  if (todos.length === 0) {
+    cont.innerHTML = avisoNube + '<p style="color:var(--gris-texto); text-align:center; padding:20px 0;">No hay borradores guardados</p>';
+    return;
+  }
+  
+  let html = avisoNube + '<h3 style="font-size:14px; color:var(--gris-texto); margin-bottom:10px;">📝 Borradores (' + todos.length + ')</h3>';
+  todos.forEach(b => {
+    const fecha = new Date(b.fecha).toLocaleString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const resumen = b.acta && b.acta.estadoActual ? String(b.acta.estadoActual).substring(0, 80) + '...' : 'Sin contenido';
+    const donde = b.origen === 'L' ? ' · solo en este dispositivo' : '';
+    html += `
+      <div class="borrador-card">
+        <div class="info" onclick="abrirBorrador('${b.origen}', '${b.id}')">
+          <div class="nombre">Acta del ${fecha}</div>
+          <div class="fecha">${escape(resumen)}${donde}</div>
+        </div>
+        <button class="btn-borrar" onclick="event.stopPropagation(); borrarBorrador('${b.origen}', '${b.id}')">🗑️</button>
+      </div>
+    `;
+  });
+  cont.innerHTML = html;
+}
+
+async function subirBorradoresLocales(obraId) {
+  let locales = [];
+  try { locales = await actaBorradoresByObra(obraId); } catch (e) { return; }
+  for (const b of locales) {
+    try {
+      const res = await backendPost({
+        action: 'guardarBorradorActa',
+        borrador: {
+          idObra: obraId,
+          datos: {
+            acta: b.acta,
+            fotosIds: (b.fotosIds || []).filter(id => String(id).indexOf('temp-') !== 0),
+            transcripcion: b.transcripcion || '',
+            fecha: b.fecha,
+          },
+        },
+      });
+      if (!res.ok) return;
+      await actaBorradorDelete(b.id);
+    } catch (e) {
+      return; // sin conexión: se intentará la próxima vez
+    }
   }
 }
 
 function iniciarNuevaActa() {
-  actaState = { fotosIds: [], fotosBlobs: {}, transcripcion: '', recognition: null, grabando: false, tiempoInicio: 0, intervaloTiempo: null, acta: null, borradorEditandoId: null };
+  actaState = nuevoActaState();
   
   document.getElementById('actaTranscripcion').value = '';
   document.getElementById('actaTranscripcionWrapper').style.display = 'none';
@@ -1923,18 +2110,108 @@ function iniciarNuevaActa() {
   document.getElementById('actaGuion').style.display = 'block';
   document.getElementById('actaBotonGrabar').style.display = 'flex';
   document.getElementById('btnGrabar').classList.remove('grabando');
+  document.getElementById('btnGrabar').disabled = false;
+  document.querySelector('#btnGrabar .icon').textContent = '🎙️';
   document.querySelector('#btnGrabar .texto').textContent = 'GRABAR';
   document.getElementById('grabacionTiempo').style.display = 'none';
   
-  // ⭐ v1.5.0: resetear visibilidad del apartado S+S (solo aparece si IA detecta contenido)
   const wrapperSS = document.getElementById('prev-seguridad-wrapper');
   if (wrapperSS) wrapperSS.style.display = 'none';
   const ssTextarea = document.getElementById('prev-seguridad');
   if (ssTextarea) ssTextarea.value = '';
   
+  // ⭐ v1.7.0: recuperar un dictado que se quedó a medias (app cerrada, recarga...)
+  const pendiente = leerDictadoLocal('acta');
+  if (pendiente && pendiente.texto && pendiente.texto.trim()) {
+    const cuando = new Date(pendiente.fecha).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    if (confirm('Tienes un dictado de acta sin terminar (' + cuando + ').\n\n¿Quieres recuperarlo?\n\nAceptar = recuperarlo · Cancelar = empezar de cero')) {
+      actaState.transcripcion = pendiente.texto;
+      actaState.fotosIds = (pendiente.fotosIds || []).slice();
+      document.getElementById('actaTranscripcion').value = pendiente.texto;
+      document.getElementById('actaTranscripcionWrapper').style.display = 'block';
+      document.getElementById('actaAccionesPost').style.display = 'flex';
+      document.querySelector('#btnGrabar .texto').textContent = 'CONTINUAR';
+    } else {
+      borrarDictadoLocal('acta');
+    }
+  }
+  
   actualizarMiniaturasActa();
   estadoApp.pantalla = 'acta-dictado';
   mostrarPantalla('screen-acta-dictado');
+}
+
+/** Estado vacío del acta (un solo sitio para no olvidar campos) */
+function nuevoActaState() {
+  return {
+    fotosIds: [],
+    fotosBlobs: {},
+    transcripcion: '',
+    recognition: null,
+    grabando: false,
+    tiempoInicio: 0,
+    intervaloTiempo: null,
+    acta: null,
+    borradorEditandoId: null, // borrador guardado solo en este dispositivo
+    borradorNubeId: null,     // ⭐ v1.7.0: borrador guardado en el Sheet
+  };
+}
+
+// ============================================================================
+// ⭐ v1.7.0 — DICTADO GUARDADO MIENTRAS SE HABLA
+// ============================================================================
+
+function claveDictado(tipo) {
+  const id = estadoApp.obraActual ? estadoApp.obraActual.id : 'sin-obra';
+  return 'visitaobras_dictado_' + tipo + '_' + id;
+}
+
+function guardarDictadoLocal(tipo, texto, fotosIds) {
+  try {
+    if (!texto || !texto.trim()) return;
+    localStorage.setItem(claveDictado(tipo), JSON.stringify({
+      texto: texto,
+      fotosIds: (fotosIds || []).filter(id => String(id).indexOf('temp-') !== 0),
+      fecha: Date.now(),
+    }));
+  } catch (e) {}
+}
+
+function leerDictadoLocal(tipo) {
+  try {
+    const v = localStorage.getItem(claveDictado(tipo));
+    return v ? JSON.parse(v) : null;
+  } catch (e) { return null; }
+}
+
+function borrarDictadoLocal(tipo) {
+  try { localStorage.removeItem(claveDictado(tipo)); } catch (e) {}
+}
+
+/**
+ * ⭐ v1.7.0: espera a que suban las fotos del acta (máx. 90 s).
+ * Devuelve el número de fotos que siguen sin subir.
+ */
+async function esperarFotosSubidas() {
+  const pendientes = () => actaState.fotosIds.filter(id => String(id).indexOf('temp-') === 0).length;
+  if (pendientes() === 0) return 0;
+  const limite = Date.now() + 90000;
+  mostrarCargando('Subiendo fotos del acta...', 'Quedan ' + pendientes() + '. No cierres la app.');
+  try {
+    while (pendientes() > 0 && Date.now() < limite) {
+      procesarCola();
+      await new Promise(r => setTimeout(r, 2000));
+      document.getElementById('cargandoSub').textContent = 'Quedan ' + pendientes() + '. No cierres la app.';
+    }
+  } finally {
+    ocultarCargando();
+  }
+  return pendientes();
+}
+
+function fechaHoyISO() {
+  const hoy = new Date();
+  return hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
 }
 
 function salirActa() {
@@ -1945,7 +2222,7 @@ function salirActa() {
 function cancelarDictado() {
   if (actaState.grabando) detenerGrabacion();
   if (actaState.transcripcion || actaState.fotosIds.length > 0) {
-    if (!confirm('¿Salir? Se perderá el dictado actual y las fotos añadidas.')) return;
+    if (!confirm('¿Salir del dictado?\n\nNo se pierde: la próxima vez que pulses NUEVA ACTA podrás recuperarlo.')) return;
   }
   irAActa();
 }
@@ -2051,6 +2328,7 @@ function iniciarGrabacion() {
     if (nuevoTextoFinal) {
       textoConfirmado += nuevoTextoFinal;
       actaState.transcripcion = textoConfirmado;
+      guardarDictadoLocal('acta', textoConfirmado, actaState.fotosIds); // ⭐ v1.7.0
     }
     
     document.getElementById('actaTranscripcion').value = textoConfirmado + textoInterim;
@@ -2127,7 +2405,6 @@ function detenerGrabacion() {
     actaState.intervaloTiempo = null;
   }
   
-  // ⭐ v1.6.4: liberar el Wake Lock
   liberarWakeLock('acta');
   
   const btn = document.getElementById('btnGrabar');
@@ -2137,11 +2414,13 @@ function detenerGrabacion() {
   
   document.getElementById('actaAccionesPost').style.display = 'flex';
   actaState.transcripcion = document.getElementById('actaTranscripcion').value;
+  guardarDictadoLocal('acta', actaState.transcripcion, actaState.fotosIds);
 }
 
 function reiniciarDictado() {
   if (!confirm('¿Borrar el dictado actual y empezar de nuevo?')) return;
   actaState.transcripcion = '';
+  borrarDictadoLocal('acta');
   document.getElementById('actaTranscripcion').value = '';
   document.getElementById('actaTranscripcionWrapper').style.display = 'none';
   document.getElementById('actaGuion').style.display = 'block';
@@ -2206,37 +2485,62 @@ function quitarFotoActa(fotoId) {
 async function generarActa() {
   let texto = document.getElementById('actaTranscripcion').value.trim();
   if (!texto) {
-    toast('⚠️ El dictado está vacío', 'error');
+    toast('El dictado está vacío. Pulsa GRABAR y cuenta la visita.', 'error');
     return;
   }
   
   if (actaState.grabando) detenerGrabacion();
+  actaState.transcripcion = texto;
+  guardarDictadoLocal('acta', texto, actaState.fotosIds); // ⭐ v1.7.0: se guarda ANTES de llamar a la IA
   
-  // ⭐ v1.6.4: detectar y avisar si hay texto repetido (típico de pantalla bloqueada)
-  const duplicado = detectarTextoDuplicado(texto);
-  if (duplicado) {
-    if (!confirm('Parece que en la transcripción hay texto repetido (puede haber pasado por bloquearse la pantalla durante la grabación).\n\n¿Quieres editar el texto antes de generar el acta?\n\n- Aceptar = abrir editor de texto\n- Cancelar = generar el acta con el texto tal cual')) {
-      // Continúa con el texto tal cual
-    } else {
-      // Volver al textarea para que edite
+  if (detectarTextoDuplicado(texto)) {
+    if (confirm('Parece que en la transcripción hay texto repetido (puede pasar si la pantalla se bloqueó durante la grabación).\n\n¿Quieres corregirlo antes de generar el acta?\n\nAceptar = corregir · Cancelar = generar igualmente')) {
       document.getElementById('actaTranscripcion').focus();
-      toast('Edita la transcripción y pulsa GENERAR de nuevo', 'ok');
+      toast('Corrige la transcripción y pulsa «Generar acta» de nuevo', 'ok');
       return;
     }
   }
   
-  toast('Generando acta...');
-  document.getElementById('btnGrabar').disabled = true;
+  const btnGrabar = document.getElementById('btnGrabar');
+  btnGrabar.disabled = true;
   
   try {
     const res = await backendPost({ action: 'generarActa', id: estadoApp.obraActual.id, dictado: texto });
-    if (!res.ok) throw new Error(res.error);
+    if (!res.ok) {
+      if (res.todosFallan) {
+        ofrecerActaManual(texto);
+        return;
+      }
+      throw new Error(res.error);
+    }
     actaState.acta = res.acta;
     irAPreview();
+    if (res.modeloUsado) console.log('Acta redactada con ' + res.modeloUsado);
   } catch (err) {
-    toast('⚠️ Error: ' + err.message, 'error');
-    document.getElementById('btnGrabar').disabled = false;
+    toast('⚠️ Error: ' + err.message + '\n\nTu dictado está guardado: puedes volver a pulsar «Generar acta».', 'error');
+  } finally {
+    btnGrabar.disabled = false;
   }
+}
+
+/**
+ * ⭐ v1.7.0: si ninguna IA responde, la visita no se pierde:
+ * el dictado pasa al acta para repartirlo y corregirlo a mano.
+ */
+function ofrecerActaManual(texto) {
+  if (!confirm('Ninguna IA ha respondido ahora mismo.\n\n¿Quieres continuar redactando el acta a mano?\nTu dictado se copiará en «Estado actual de la obra» para que lo repartas y corrijas.\n\nAceptar = redactar a mano · Cancelar = volver al dictado (queda guardado)')) {
+    return;
+  }
+  actaState.acta = {
+    asistentes: ['Director de Ejecución Material: Juan Felipe Ribes Aranda'],
+    estadoActual: texto,
+    trabajosEjecucion: '',
+    ordenesIndicaciones: '',
+    incidenciasObservaciones: '',
+    seguridadSalud: '',
+    firmas: ['tecnico'],
+  };
+  irAPreview();
 }
 
 /**
@@ -2267,14 +2571,23 @@ function aTextoEditable(valor) {
 }
 
 function irAPreview() {
-  const a = actaState.acta;
+  const a = actaState.acta || {};
   document.getElementById('prev-asistentes').value = (a.asistentes || []).join('\n');
   document.getElementById('prev-estado').value = aTextoEditable(a.estadoActual);
   document.getElementById('prev-trabajos').value = aTextoEditable(a.trabajosEjecucion);
   document.getElementById('prev-ordenes').value = aTextoEditable(a.ordenesIndicaciones);
   document.getElementById('prev-incidencias').value = aTextoEditable(a.incidenciasObservaciones);
   
-  // ⭐ v1.5.0: apartado S+S — solo se muestra si la IA detectó contenido relacionado
+  // ⭐ v1.7.0: fecha de la visita (guardada en borrador > detectada en el dictado > hoy)
+  const hint = document.getElementById('prev-fecha-hint');
+  let fecha = a.fecha || a.fechaDetectada || fechaHoyISO();
+  document.getElementById('prev-fecha').value = fecha;
+  if (!a.fecha && a.fechaDetectada && a.fechaDetectada !== fechaHoyISO()) {
+    hint.textContent = '✓ Fecha tomada de tu dictado. Revísala antes de finalizar.';
+  } else {
+    hint.textContent = 'Por defecto, la de hoy. Cámbiala si la visita fue otro día.';
+  }
+  
   const wrapperSS = document.getElementById('prev-seguridad-wrapper');
   const ssTexto = aTextoEditable(a.seguridadSalud || '');
   if (ssTexto && ssTexto.trim()) {
@@ -2329,14 +2642,7 @@ function volverADictado() {
 
 function recogerActaDelPreview() {
   const asistentes = document.getElementById('prev-asistentes').value.split('\n').map(s => s.trim()).filter(s => s);
-  const estado = document.getElementById('prev-estado').value.trim();
-  const trabajos = document.getElementById('prev-trabajos').value.trim();
-  const ordenes = document.getElementById('prev-ordenes').value.trim();
-  const incidencias = document.getElementById('prev-incidencias').value.trim();
-  
-  // ⭐ v1.5.0: leer apartado S+S (vacío si el wrapper está oculto o el textarea vacío)
   const seguridadSaludEl = document.getElementById('prev-seguridad');
-  const seguridadSalud = (seguridadSaludEl && seguridadSaludEl.value || '').trim();
   
   const firmas = ['tecnico'];
   if (document.getElementById('firma-arquitecto').checked) firmas.unshift('arquitecto');
@@ -2345,12 +2651,13 @@ function recogerActaDelPreview() {
   
   return {
     asistentes,
-    estadoActual: estado,
-    trabajosEjecucion: trabajos,
-    ordenesIndicaciones: ordenes,
-    incidenciasObservaciones: incidencias,
-    seguridadSalud: seguridadSalud,
+    estadoActual: document.getElementById('prev-estado').value.trim(),
+    trabajosEjecucion: document.getElementById('prev-trabajos').value.trim(),
+    ordenesIndicaciones: document.getElementById('prev-ordenes').value.trim(),
+    incidenciasObservaciones: document.getElementById('prev-incidencias').value.trim(),
+    seguridadSalud: (seguridadSaludEl && seguridadSaludEl.value || '').trim(),
     firmas,
+    fecha: document.getElementById('prev-fecha').value || fechaHoyISO(), // ⭐ v1.7.0
   };
 }
 
@@ -2358,68 +2665,135 @@ let actaGuardadaInfo = null;
 
 async function finalizarActa() {
   const acta = recogerActaDelPreview();
-  toast('Guardando acta y generando PDF...');
+  
+  // ⭐ v1.7.0: no finalizar con fotos a medio subir (se perdían sin avisar)
+  const sinSubir = await esperarFotosSubidas();
+  if (sinSubir > 0) {
+    if (!confirm(sinSubir + ' foto(s) no se han podido subir todavía (¿sin cobertura?).\n\n¿Generar el acta SIN esas fotos?\n\nAceptar = generar sin ellas · Cancelar = esperar y reintentar más tarde (guarda antes un borrador)')) {
+      return;
+    }
+    actaState.fotosIds = actaState.fotosIds.filter(id => String(id).indexOf('temp-') !== 0);
+  }
   
   try {
     const res = await backendPost({ action: 'guardarActa', id: estadoApp.obraActual.id, acta: acta, fotosIds: actaState.fotosIds });
     if (!res.ok) throw new Error(res.error);
     
     actaGuardadaInfo = res;
-    if (actaState.borradorEditandoId) await actaBorradorDelete(actaState.borradorEditandoId);
+    actaGuardadaInfo.fecha = acta.fecha;
+    
+    // Limpiar borradores y dictado guardado de esta acta
+    if (actaState.borradorEditandoId) {
+      try { await actaBorradorDelete(actaState.borradorEditandoId); } catch (e) {}
+    }
+    if (actaState.borradorNubeId) {
+      backendPost({ action: 'eliminarBorradorActa', idBorrador: actaState.borradorNubeId }).catch(() => {});
+    }
+    borrarDictadoLocal('acta');
     
     estadoApp.pantalla = 'acta-guardada';
     mostrarPantalla('screen-acta-guardada');
     document.getElementById('acta-guardada-nombre').textContent = res.nombre;
     
-    // ⭐ v1.6.0: ofrecer crear también una anotación en el Libro de Órdenes
-    // basada en el mismo dictado, después de un pequeño retraso para que el usuario
-    // vea primero la pantalla de "Acta guardada"
+    // Ofrecer también la anotación del Libro de Órdenes con el mismo dictado
     setTimeout(() => {
       const dictado = actaState.transcripcion || '';
       if (dictado && dictado.trim().length > 20) {
-        ofrecerConvertirActaALibro(dictado);
+        ofrecerConvertirActaALibro(dictado, acta.fecha);
       }
     }, 1200);
   } catch (err) {
-    toast('⚠️ Error al guardar: ' + err.message, 'error');
+    toast('⚠️ Error al guardar el acta: ' + err.message + '\n\nNo se ha perdido nada: puedes volver a pulsar «Finalizar y guardar» o guardar un borrador.', 'error');
   }
 }
 
 async function guardarBorrador() {
   const acta = recogerActaDelPreview();
+  await esperarFotosSubidas();
+  const datos = {
+    acta: acta,
+    fotosIds: actaState.fotosIds.filter(id => String(id).indexOf('temp-') !== 0),
+    transcripcion: actaState.transcripcion || '',
+    fecha: Date.now(),
+  };
+  
+  // ⭐ v1.7.0: primero en el Sheet (visible en todos los dispositivos)
   try {
+    const res = await backendPost({
+      action: 'guardarBorradorActa',
+      borrador: { id: actaState.borradorNubeId, idObra: estadoApp.obraActual.id, datos: datos },
+    });
+    if (!res.ok) throw new Error(res.error);
+    actaState.borradorNubeId = res.id;
     if (actaState.borradorEditandoId) {
-      await actaBorradorUpdate(actaState.borradorEditandoId, { obraId: estadoApp.obraActual.id, acta, fotosIds: actaState.fotosIds, fecha: Date.now() });
-    } else {
-      await actaBorradorAdd({ obraId: estadoApp.obraActual.id, acta, fotosIds: actaState.fotosIds, fecha: Date.now() });
+      try { await actaBorradorDelete(actaState.borradorEditandoId); } catch (e) {}
+      actaState.borradorEditandoId = null;
     }
-    toast('✓ Borrador guardado', 'ok');
+    borrarDictadoLocal('acta');
+    toast('✓ Borrador guardado. Lo verás en todos tus dispositivos.', 'ok');
     irAActa();
+    return;
   } catch (err) {
-    toast('⚠️ Error: ' + err.message, 'error');
+    // Sin conexión: se guarda en este dispositivo y se sube más tarde
+    try {
+      const local = { obraId: estadoApp.obraActual.id, acta: acta, fotosIds: datos.fotosIds, transcripcion: datos.transcripcion, fecha: Date.now() };
+      if (actaState.borradorEditandoId) await actaBorradorUpdate(actaState.borradorEditandoId, local);
+      else actaState.borradorEditandoId = await actaBorradorAdd(local);
+      borrarDictadoLocal('acta');
+      toast('Sin conexión: borrador guardado en este dispositivo. Se subirá solo cuando haya conexión.', 'ok');
+      irAActa();
+    } catch (e2) {
+      toast('⚠️ Error: no se ha podido guardar el borrador (' + err.message + ').', 'error');
+    }
   }
 }
 
 async function descartarActa() {
   if (!confirm('¿Descartar este acta? Se perderá todo lo dictado.')) return;
-  if (actaState.borradorEditandoId) await actaBorradorDelete(actaState.borradorEditandoId);
+  if (actaState.borradorEditandoId) {
+    try { await actaBorradorDelete(actaState.borradorEditandoId); } catch (e) {}
+  }
+  if (actaState.borradorNubeId) {
+    try { await backendPost({ action: 'eliminarBorradorActa', idBorrador: actaState.borradorNubeId }); } catch (e) {}
+  }
+  borrarDictadoLocal('acta');
   irAActa();
 }
 
-async function abrirBorrador(borradorId) {
+async function abrirBorrador(origen, borradorId) {
   try {
-    const b = await actaBorradorGet(borradorId);
-    if (!b) throw new Error('Borrador no encontrado');
-    actaState = { fotosIds: b.fotosIds || [], fotosBlobs: {}, transcripcion: '', recognition: null, grabando: false, tiempoInicio: 0, intervaloTiempo: null, acta: b.acta, borradorEditandoId: b.id };
+    let datos;
+    if (origen === 'N') {
+      datos = borradoresNubeCache[borradorId];
+      if (!datos) throw new Error('Borrador no encontrado. Vuelve a entrar en «Acta de visita».');
+    } else {
+      datos = await actaBorradorGet(Number(borradorId));
+      if (!datos) throw new Error('Borrador no encontrado');
+    }
+    actaState = nuevoActaState();
+    actaState.acta = datos.acta || {};
+    actaState.fotosIds = (datos.fotosIds || []).slice();
+    actaState.transcripcion = datos.transcripcion || '';
+    if (origen === 'N') actaState.borradorNubeId = borradorId;
+    else actaState.borradorEditandoId = Number(borradorId);
     irAPreview();
   } catch (err) {
     toast('⚠️ Error: ' + err.message, 'error');
   }
 }
 
-async function borrarBorrador(borradorId) {
+async function borrarBorrador(origen, borradorId) {
   if (!confirm('¿Borrar este borrador definitivamente?')) return;
-  await actaBorradorDelete(borradorId);
+  try {
+    if (origen === 'N') {
+      const res = await backendPost({ action: 'eliminarBorradorActa', idBorrador: borradorId });
+      if (!res.ok) throw new Error(res.error);
+    } else {
+      await actaBorradorDelete(Number(borradorId));
+    }
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
   cargarBorradores();
 }
 
@@ -2581,20 +2955,23 @@ function renderEstadoSS(estado, documentos) {
   
   // Resumen tipo checklist
   const items = [
-    { hecho: estado.planSolicitado, label: 'Plan de S+S solicitado al constructor', icono: '📧' },
-    { hecho: estado.planAprobado, label: 'Plan de S+S aprobado y firmado', icono: '✅' },
-    { hecho: estado.coordinadorDesignado, label: 'Coordinador designado por el promotor', icono: '🧑‍💼' },
-    { hecho: estado.libroEntregado, label: 'Libro de Incidencias entregado', icono: '📕' },
+    { hecho: estado.planSolicitado, label: 'Plan de S+S solicitado al constructor', icono: '📧', tipo: 'solicitud_plan' },
+    { hecho: estado.planAprobado, label: 'Plan de S+S aprobado y firmado', icono: '✅', tipo: 'aprobacion_plan' },
+    { hecho: estado.coordinadorDesignado, label: 'Coordinador designado por el promotor', icono: '🧑‍💼', tipo: 'designacion_coordinador' },
+    { hecho: estado.libroEntregado, label: 'Libro de Incidencias entregado', icono: '📕', tipo: 'recibi_libro' },
   ];
   
   let html = '<div class="ss-estado-grid">';
   items.forEach(item => {
     const cls = item.hecho ? 'hecho' : 'pendiente';
     const icon = item.hecho ? '✅' : '⏳';
+    // ⭐ v1.7.0: los pasos pendientes se pueden marcar a mano (p. ej. acta devuelta firmada por email)
+    const accion = item.hecho ? '' : ` onclick="marcarHechoSS('${item.tipo}', '${escape(item.label).replace(/'/g, "\\'")}')"`;
     html += `
-      <div class="ss-estado-item ${cls}">
+      <div class="ss-estado-item ${cls}"${accion}>
         <span class="estado-icon">${icon}</span>
         <span>${item.icono} ${escape(item.label)}</span>
+        ${item.hecho ? '' : '<span class="accion-marcar">Marcar hecho</span>'}
       </div>
     `;
   });
@@ -2669,6 +3046,18 @@ function renderEmpresasSS(empresas) {
   cont.innerHTML = html;
 }
 
+async function marcarHechoSS(tipo, etiqueta) {
+  if (!confirm('¿Marcar como hecho?\n\n«' + etiqueta + '»\n\nÚsalo cuando lo hayas resuelto fuera de la app (por ejemplo, si te han devuelto el acta firmada por email).')) return;
+  try {
+    const res = await backendPost({ action: 'marcarEstadoSS', idObra: estadoApp.obraActual.id, tipo: tipo });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ Marcado como hecho', 'ok');
+    cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
 async function abrirCarpetaSSDrive() {
   if (!subcarpetasSSObra) await cargarSubcarpetasSS();
   
@@ -2709,12 +3098,18 @@ let firmaState = {
  *     console.log('firma recibida', dataUrl);
  *   });
  */
-function pedirFirma(titulo, quien, callbackAceptar, callbackCancelar) {
+function pedirFirma(titulo, quien, callbackAceptar, callbackCancelar, opciones) {
   firmaState.callbackAceptar = callbackAceptar || (() => {});
   firmaState.callbackCancelar = callbackCancelar || (() => {});
+  firmaState.esTecnico = !!(opciones && opciones.esTecnico);
   
   document.getElementById('firmaTitulo').textContent = titulo || 'Firma';
   document.getElementById('firmaQuien').textContent = quien || '';
+  
+  // ⭐ v1.7.0: opciones de firma guardada solo cuando firma el técnico
+  const panel = document.getElementById('firmaTecnicoOpciones');
+  panel.classList.toggle('visible', firmaState.esTecnico);
+  if (firmaState.esTecnico) prepararFirmaGuardada();
   
   const pantalla = document.getElementById('firmaPantalla');
   pantalla.classList.add('active');
@@ -2811,19 +3206,118 @@ function cancelarFirma() {
 
 function aceptarFirma() {
   if (firmaState.vacia) {
-    toast('⚠️ La firma está vacía', 'error');
+    toast('La firma está vacía. Firma en el recuadro o pulsa Cancelar.', 'error');
     return;
   }
   
-  // Generar PNG transparente recortado
-  const dataUrl = firmaState.canvas.toDataURL('image/png');
+  // ⭐ v1.7.0 (recuperado de v1.5.3): recortar al trazo y escalar a tamaño fijo,
+  // para que la firma salga grande en el PDF y la petición pese poco.
+  const dataUrl = recortarFirmaABoundingBox(firmaState.canvas);
   
+  if (firmaState.esTecnico && document.getElementById('chkGuardarFirma').checked) {
+    guardarFirmaTecnicoEnServidor(dataUrl);
+  }
+  
+  entregarFirma(dataUrl);
+}
+
+function entregarFirma(dataUrl) {
   document.getElementById('firmaPantalla').classList.remove('active');
-  
   const cb = firmaState.callbackAceptar;
   firmaState.callbackAceptar = null;
   firmaState.callbackCancelar = null;
   if (cb) cb(dataUrl);
+}
+
+/**
+ * Recorta el canvas al rectángulo que ocupa el trazo y lo escala a un
+ * máximo de 600 × 250 px manteniendo la proporción.
+ */
+function recortarFirmaABoundingBox(canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  const data = ctx.getImageData(0, 0, W, H).data;
+  
+  let minX = W, minY = H, maxX = -1, maxY = -1;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (data[(y * W + x) * 4 + 3] > 10) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return canvas.toDataURL('image/png');
+  
+  const margen = 8;
+  minX = Math.max(0, minX - margen);
+  minY = Math.max(0, minY - margen);
+  maxX = Math.min(W - 1, maxX + margen);
+  maxY = Math.min(H - 1, maxY + margen);
+  const recW = maxX - minX + 1;
+  const recH = maxY - minY + 1;
+  
+  const MAX_W = 600, MAX_H = 250;
+  const escala = Math.min(MAX_W / recW, MAX_H / recH);
+  const finalW = Math.max(1, Math.round(recW * escala));
+  const finalH = Math.max(1, Math.round(recH * escala));
+  
+  const destino = document.createElement('canvas');
+  destino.width = finalW;
+  destino.height = finalH;
+  const dctx = destino.getContext('2d');
+  dctx.imageSmoothingEnabled = true;
+  dctx.imageSmoothingQuality = 'high';
+  dctx.drawImage(canvas, minX, minY, recW, recH, 0, 0, finalW, finalH);
+  return destino.toDataURL('image/png');
+}
+
+// ============================================================================
+// ⭐ v1.7.0 — FIRMA GUARDADA DEL TÉCNICO
+// ============================================================================
+
+const CLAVE_FIRMA_LOCAL = 'visitaobras_firma_tecnico';
+
+function leerFirmaLocal() {
+  try { return localStorage.getItem(CLAVE_FIRMA_LOCAL) || null; } catch (e) { return null; }
+}
+
+async function prepararFirmaGuardada() {
+  const btn = document.getElementById('btnUsarFirmaGuardada');
+  const chk = document.getElementById('chkGuardarFirma');
+  let firma = leerFirmaLocal();
+  btn.disabled = !firma;
+  chk.checked = !firma; // si aún no hay firma guardada, se propone guardarla
+  if (!firma) {
+    try {
+      const res = await backendPost({ action: 'getFirmaTecnico' });
+      if (res.ok && res.dataUrl) {
+        try { localStorage.setItem(CLAVE_FIRMA_LOCAL, res.dataUrl); } catch (e) {}
+        btn.disabled = false;
+        chk.checked = false;
+      }
+    } catch (e) { /* sin conexión: se puede firmar igualmente */ }
+  }
+}
+
+function usarFirmaGuardada() {
+  const firma = leerFirmaLocal();
+  if (!firma) {
+    toast('Aún no hay ninguna firma guardada. Firma en el recuadro y marca "Guardar como mi firma".', 'error');
+    return;
+  }
+  entregarFirma(firma);
+}
+
+async function guardarFirmaTecnicoEnServidor(dataUrl) {
+  try { localStorage.setItem(CLAVE_FIRMA_LOCAL, dataUrl); } catch (e) {}
+  try {
+    const res = await backendPost({ action: 'guardarFirmaTecnico', dataUrl: dataUrl });
+    if (res.ok) toast('✓ Firma guardada para próximas veces', 'ok');
+  } catch (e) { /* se queda guardada en este dispositivo */ }
 }
 
 // Función de prueba para verificar que el sistema de firma funciona
@@ -3044,7 +3538,7 @@ function recogerSiguienteFirma() {
     // Cancelado
     toast('Proceso cancelado');
     docSSState = { tipo: null, datos: {}, firmas: {}, firmantesPendientes: [] };
-  });
+  }, { esTecnico: siguienteFirmante === 'coordinador' });
 }
 
 async function generarDocSSFinal() {
@@ -3091,8 +3585,19 @@ async function generarDocSSFinal() {
         btn2Texto: '📁 Solo ver en Drive',
         btn2Accion: () => window.open(res.url, '_blank'),
       });
+    } else if (docSSState.tipo === 'designacion_coordinador' && esFirmado) {
+      // ⭐ v1.7.0: designación firmada en obra → copia al promotor para su archivo
+      mostrarModalResultado({
+        icono: '✅',
+        titulo: 'Designación firmada',
+        texto: 'El acta se ha guardado en Drive (Seguridad y Salud / Actas y nombramientos).\n\n¿Preparo un borrador en Gmail para enviar al promotor su copia firmada?',
+        btn1Texto: '📧 Enviar copia al promotor',
+        btn1Accion: () => enviarDesignacionFirmadaAlPromotor(res.archivoId),
+        btn2Texto: '📁 Solo ver en Drive',
+        btn2Accion: () => window.open(res.url, '_blank'),
+      });
     } else {
-      // Designación firmada in situ por todos, o cualquier otro caso → solo ver Drive
+      // Cualquier otro caso → solo ver Drive
       mostrarModalResultado({
         icono: '✅',
         titulo: 'Documento generado',
@@ -3143,6 +3648,37 @@ async function enviarAprobacionFirmadaAlConstructor(archivoIdActa) {
     });
     
     cargarEstadoSS();
+  } catch (err) {
+    toast('⚠️ Error: ' + err.message, 'error');
+  }
+}
+
+/**
+ * ⭐ v1.7.0: copia firmada de la Designación al promotor
+ */
+async function enviarDesignacionFirmadaAlPromotor(archivoIdActa) {
+  const obra = estadoApp.obraActual;
+  cerrarModalResultado();
+  if (!obra.emailPromotor) {
+    toast('Falta el email del promotor. Añádelo en "Datos del expediente" y vuelve a enviar la copia desde Drive.', 'error');
+    return;
+  }
+  try {
+    const res = await backendPost({
+      action: 'enviarBorradorCorreoSS',
+      idObra: obra.id,
+      tipo: 'designacion_firmada',
+      datos: { archivoIdActa: archivoIdActa },
+    });
+    if (!res.ok) throw new Error(res.error);
+    mostrarModalResultado({
+      icono: '📧',
+      titulo: 'Borrador creado en Gmail',
+      texto: 'Borrador para el promotor (' + res.destinatario + ') con la Designación firmada adjunta, para su archivo.',
+      btn1Texto: '📧 Abrir Gmail',
+      btn1Accion: () => window.open('https://mail.google.com/mail/u/0/#drafts', '_blank'),
+      btn2Texto: null,
+    });
   } catch (err) {
     toast('⚠️ Error: ' + err.message, 'error');
   }
@@ -3273,7 +3809,7 @@ async function modalDocEnviarCorreo() {
       }
     }, () => {
       toast('Proceso cancelado');
-    });
+    }, { esTecnico: true });
     return;
   }
   
@@ -3599,9 +4135,10 @@ function iniciarNuevaAnotacionLibro() {
     tiempoInicio: 0,
     intervaloTiempo: null,
     textoGenerado: '',
-    fechaDetectada: null, // ⭐ v1.6.3
+    fechaDetectada: null,
     anotacionEditandoId: null,
     ultimoDictadoActa: '',
+    ultimaFechaActa: '',
   };
   
   document.getElementById('libroTranscripcion').value = '';
@@ -3611,6 +4148,20 @@ function iniciarNuevaAnotacionLibro() {
   document.getElementById('btnGrabarLibro').classList.remove('grabando');
   document.querySelector('#btnGrabarLibro .texto').textContent = 'GRABAR';
   document.getElementById('grabacionTiempoLibro').style.display = 'none';
+  
+  // ⭐ v1.7.0: recuperar un dictado del Libro que se quedó a medias
+  const pendiente = leerDictadoLocal('libro');
+  if (pendiente && pendiente.texto && pendiente.texto.trim()) {
+    const cuando = new Date(pendiente.fecha).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    if (confirm('Tienes un dictado del Libro de Órdenes sin terminar (' + cuando + ').\n\n¿Quieres recuperarlo?\n\nAceptar = recuperarlo · Cancelar = empezar de cero')) {
+      libroState.transcripcion = pendiente.texto;
+      document.getElementById('libroTranscripcion').value = pendiente.texto;
+      document.getElementById('libroTranscripcionWrapper').style.display = 'block';
+      document.getElementById('libroAccionesPost').style.display = 'block';
+    } else {
+      borrarDictadoLocal('libro');
+    }
+  }
   
   estadoApp.pantalla = 'libro-dictado';
   mostrarPantalla('screen-libro-dictado');
@@ -3671,6 +4222,7 @@ function iniciarGrabacionLibro() {
     if (nuevoTextoFinal) {
       textoConfirmado += nuevoTextoFinal;
       libroState.transcripcion = textoConfirmado;
+      guardarDictadoLocal('libro', textoConfirmado, []); // ⭐ v1.7.0
     }
     
     document.getElementById('libroTranscripcion').value = textoConfirmado + textoInterim;
@@ -3753,6 +4305,7 @@ function detenerGrabacionLibro() {
   
   const transcripcion = document.getElementById('libroTranscripcion').value.trim();
   libroState.transcripcion = transcripcion;
+  guardarDictadoLocal('libro', transcripcion, []); // ⭐ v1.7.0
   
   if (transcripcion) {
     document.getElementById('libroAccionesPost').style.display = 'block';
@@ -3762,20 +4315,21 @@ function detenerGrabacionLibro() {
 async function generarAnotacionLibroIA() {
   let transcripcion = document.getElementById('libroTranscripcion').value.trim();
   if (!transcripcion) {
-    toast('⚠️ No hay transcripción', 'error');
+    toast('El dictado está vacío. Pulsa GRABAR y dicta la anotación.', 'error');
     return;
   }
   
-  // ⭐ v1.6.4: detectar texto duplicado
+  if (libroState.grabando) detenerGrabacionLibro();
+  libroState.transcripcion = transcripcion;
+  guardarDictadoLocal('libro', transcripcion, []);
+  
   if (detectarTextoDuplicado(transcripcion)) {
-    if (confirm('Parece que en la transcripción hay texto repetido (puede haber pasado por bloquearse la pantalla durante la grabación).\n\n¿Quieres editar el texto antes de generar la anotación?\n\n- Aceptar = volver a editar\n- Cancelar = generar con el texto tal cual')) {
+    if (confirm('Parece que en la transcripción hay texto repetido (puede pasar si la pantalla se bloqueó durante la grabación).\n\n¿Quieres corregirlo antes de generar la anotación?\n\nAceptar = corregir · Cancelar = generar igualmente')) {
       document.getElementById('libroTranscripcion').focus();
-      toast('Edita la transcripción y pulsa GENERAR de nuevo', 'ok');
+      toast('Corrige la transcripción y pulsa «Generar» de nuevo', 'ok');
       return;
     }
   }
-  
-  toast('Generando anotación con IA...');
   
   try {
     const res = await backendPost({
@@ -3784,14 +4338,25 @@ async function generarAnotacionLibroIA() {
       dictado: transcripcion,
     });
     
-    if (!res.ok) throw new Error(res.error);
+    if (!res.ok) {
+      if (res.todosFallan) {
+        // ⭐ v1.7.0: sin IA disponible → el dictado pasa a la anotación para corregirlo a mano
+        if (!confirm('Ninguna IA ha respondido ahora mismo.\n\n¿Quieres redactar la anotación a mano a partir de tu dictado?\n\nAceptar = redactar a mano · Cancelar = volver al dictado (queda guardado)')) return;
+        libroState.textoGenerado = '- ' + transcripcion;
+        libroState.fechaDetectada = null;
+        libroState.anotacionEditandoId = null;
+        irAPreviewLibro();
+        return;
+      }
+      throw new Error(res.error);
+    }
     
     libroState.textoGenerado = res.texto;
-    libroState.fechaDetectada = res.fechaDetectada || null; // ⭐ v1.6.3
+    libroState.fechaDetectada = res.fechaDetectada || null;
     libroState.anotacionEditandoId = null;
     irAPreviewLibro();
   } catch (err) {
-    toast('⚠️ Error: ' + err.message, 'error');
+    toast('⚠️ Error: ' + err.message + '\n\nTu dictado está guardado: puedes volver a pulsar «Generar».', 'error');
   }
 }
 
@@ -3835,15 +4400,13 @@ async function guardarAnotacionLibroFinal() {
   const fecha = document.getElementById('libro-fecha').value;
   
   if (!texto) {
-    toast('⚠️ El texto está vacío', 'error');
+    toast('El texto de la anotación está vacío.', 'error');
     return;
   }
   if (!fecha) {
-    toast('⚠️ Falta la fecha', 'error');
+    toast('Falta la fecha de la anotación.', 'error');
     return;
   }
-  
-  toast('Guardando y generando PDF...');
   
   try {
     const res = await backendPost({
@@ -3855,6 +4418,8 @@ async function guardarAnotacionLibroFinal() {
     });
     
     if (!res.ok) throw new Error(res.error);
+    
+    if (!libroState.anotacionEditandoId) borrarDictadoLocal('libro'); // ⭐ v1.7.0
     
     mostrarModalResultado({
       icono: '✅',
@@ -3870,7 +4435,7 @@ async function guardarAnotacionLibroFinal() {
       },
     });
   } catch (err) {
-    toast('⚠️ Error: ' + err.message, 'error');
+    toast('⚠️ Error al guardar la anotación: ' + err.message + '\n\nEl texto sigue en pantalla: puedes volver a pulsar «Guardar».', 'error');
   }
 }
 
@@ -3966,9 +4531,10 @@ async function compilarLibroTodo() {
  * si se quiere generar también la anotación del Libro.
  * El dictado del acta se guarda temporalmente.
  */
-function ofrecerConvertirActaALibro(dictadoActa) {
+function ofrecerConvertirActaALibro(dictadoActa, fechaActa) {
   libroState.ultimoDictadoActa = dictadoActa || '';
-  if (!libroState.ultimoDictadoActa) return; // no hay dictado, no se ofrece
+  libroState.ultimaFechaActa = fechaActa || fechaHoyISO();
+  if (!libroState.ultimoDictadoActa) return;
   document.getElementById('modalActaALibro').style.display = 'flex';
 }
 
@@ -3980,21 +4546,24 @@ async function confirmarConvertirActaALibro() {
   cerrarModalActaALibro();
   
   if (!libroState.ultimoDictadoActa) {
-    toast('No hay dictado disponible', 'error');
+    toast('No hay dictado disponible para crear la anotación.', 'error');
     return;
   }
-  
-  toast('Generando anotación del Libro de Órdenes...');
   
   try {
     const res = await backendPost({
       action: 'convertirActaALibro',
       idObra: estadoApp.obraActual.id,
       dictado: libroState.ultimoDictadoActa,
-      fecha: new Date().toISOString(),
+      fecha: libroState.ultimaFechaActa || fechaHoyISO(),
     });
     
-    if (!res.ok) throw new Error(res.error);
+    if (!res.ok) {
+      if (res.todosFallan) {
+        throw new Error('Ninguna IA ha respondido ahora mismo. Puedes crear la anotación más tarde desde «Libro de Órdenes».');
+      }
+      throw new Error(res.error);
+    }
     
     mostrarModalResultado({
       icono: '📕',
@@ -4018,11 +4587,37 @@ async function confirmarConvertirActaALibro() {
 // INICIALIZACIÓN
 // ============================================================================
 
+/**
+ * ⭐ v1.7.0: avisa si la app y el servidor no tienen la misma versión
+ * (por ejemplo, si se subió el index.html pero no se implementó el Code.gs).
+ */
+async function comprobarVersionServidor() {
+  try {
+    const res = await backendGet('ping');
+    if (res && res.version && res.version !== APP_VERSION) {
+      const banner = document.getElementById('configBanner');
+      banner.textContent = '⚠️ La app es la v' + APP_VERSION + ' pero el servidor es la v' + res.version +
+        '. Implementa la nueva versión del Code.gs en Apps Script (o recarga la app si ya lo hiciste).';
+      banner.classList.add('visible', 'aviso-version');
+    }
+  } catch (e) { /* sin conexión: no se comprueba */ }
+}
+
 async function init() {
   if (BACKEND_URL.includes('PEGAR_AQUI')) {
     document.getElementById('configBanner').classList.add('visible');
     return;
   }
+  
+  // ⭐ v1.7.0: las correcciones a mano del dictado también se guardan
+  document.getElementById('actaTranscripcion').addEventListener('input', (e) => {
+    actaState.transcripcion = e.target.value;
+    guardarDictadoLocal('acta', e.target.value, actaState.fotosIds);
+  });
+  document.getElementById('libroTranscripcion').addEventListener('input', (e) => {
+    libroState.transcripcion = e.target.value;
+    guardarDictadoLocal('libro', e.target.value, []);
+  });
   
   try {
     await abrirDB();
@@ -4030,6 +4625,7 @@ async function init() {
     setInterval(procesarCola, 30000);
     window.addEventListener('online', procesarCola);
     cargarObras();
+    comprobarVersionServidor();
   } catch (err) {
     document.getElementById('lista-obras').innerHTML = 
       '<div class="loading-screen">⚠️ Error al iniciar: ' + err.message + '</div>';
