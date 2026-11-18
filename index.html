@@ -284,6 +284,41 @@ body {
 .ss-estado-item .accion-marcar { margin-left: auto; font-size: 12px; text-decoration: underline; color: #856404; white-space: nowrap; }
 .aviso-version { background: #fff3cd; color: #856404; }
 
+/* ⭐ v1.9.0 — control de calidad sencillo */
+.cal-decreto { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: var(--sombra); margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.cal-decreto .txt { flex: 1; }
+.cal-decreto .txt b { color: var(--azul); }
+.cal-decreto button { background: none; border: 1px solid var(--gris-medio); border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+.cal-resumen { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.cal-resumen > div { background: white; border-radius: 10px; padding: 10px 6px; text-align: center; box-shadow: var(--sombra); }
+.cal-resumen .num { font-size: 22px; font-weight: 700; }
+.cal-resumen .etq { font-size: 12px; color: var(--gris-texto); }
+.cal-resumen .ok .num { color: var(--verde-ok); }
+.cal-resumen .medio .num { color: var(--naranja); }
+.cal-resumen .mal .num { color: var(--rojo); }
+.cal-titulo { font-size: 14px; font-weight: 600; color: var(--gris-texto); margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .3px; }
+.cal-fila { display: flex; align-items: center; gap: 10px; background: white; border-radius: 10px; padding: 10px 12px; box-shadow: var(--sombra); margin-bottom: 6px; }
+.cal-fila .ico { font-size: 20px; width: 24px; text-align: center; }
+.cal-fila .info { flex: 1; min-width: 0; }
+.cal-fila .nom { font-weight: 600; font-size: 15px; }
+.cal-fila .sub { font-size: 12px; color: var(--gris-texto); }
+.cal-fila .btn-cal { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 9px 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.cal-fila .btn-cal.sec { background: white; color: var(--azul); border: 1px solid var(--azul); }
+.cal-fila.noaplica { opacity: .55; }
+.cal-fila .na { background: none; border: none; color: var(--gris-texto); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 4px; }
+.cal-rec { font-size: 12px; color: var(--gris-texto); margin-top: 3px; }
+.cal-rec a { color: var(--azul); }
+.cal-add { display: flex; gap: 8px; margin-top: 6px; }
+.cal-add input { flex: 1; padding: 9px 10px; border: 1px solid var(--gris-medio); border-radius: 6px; font-size: 15px; }
+.cal-add button { background: white; border: 1px solid var(--azul); color: var(--azul); border-radius: 6px; padding: 0 14px; font-weight: 600; }
+.cal-fotos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 6px 0 12px; }
+.cal-fotos button { background: white; border: 1px dashed var(--azul); color: var(--azul); border-radius: 8px; padding: 12px 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.cal-fotos button.hecho { border-style: solid; background: #e8f4f1; }
+.cal-estado-btns { display: flex; gap: 8px; margin-bottom: 12px; }
+.cal-estado-btns button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--gris-medio); background: white; font-size: 15px; font-weight: 600; cursor: pointer; }
+.cal-estado-btns button.sel-ok { background: var(--verde-ok); color: white; border-color: var(--verde-ok); }
+.cal-estado-btns button.sel-no { background: var(--rojo); color: white; border-color: var(--rojo); }
+.cal-ayuda { font-size: 13px; color: var(--gris-texto); background: #f0f6f5; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -378,19 +413,19 @@ body {
     </div>
   </div>
 
-  <!-- ===== PANTALLA: CONTROL DE CALIDAD ===== -->
+  <!-- ===== PANTALLA: CONTROL DE CALIDAD (⭐ v1.9.0) ===== -->
   <div class="screen" id="screen-cc">
     <div class="header">
       <button class="back" onclick="irAObra()">←</button>
       <h1>🧪 Control de calidad</h1>
     </div>
     <div class="content">
+      <div id="cal-contenido"><div class="loading-screen"><div class="spinner"></div><div>Cargando...</div></div></div>
+
+      <div class="cal-titulo">Otros</div>
       <div class="acciones">
-        <button class="btn-principal" onclick="abrirCamara('cc-foto')">
-          <span class="icon">📷</span><span>FOTO FICHA TÉCNICA</span>
-        </button>
         <button class="btn-accion" onclick="subirDocumentoCC()">
-          <span class="icon">📄</span><span class="label">Subir documento de obra</span><span class="arrow">›</span>
+          <span class="icon">📄</span><span class="label">Subir otro documento</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="abrirCarpetaCC()">
           <span class="icon">📁</span><span class="label">Ver todo en Drive</span><span class="arrow">›</span>
@@ -961,6 +996,90 @@ body {
   </div>
 </div>
 
+<!-- ⭐ v1.9.0 — RECIBIR MATERIAL -->
+<div class="modal-overlay" id="modalRecepcion" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo" id="recTitulo">Ha llegado un material</div>
+    <div class="cal-ayuda" id="recPide"></div>
+    <div class="form-group">
+      <label>Qué es (opcional)</label>
+      <input type="text" id="recDescripcion" placeholder="Ej.: XPS 6 cm cubierta, lámina muro sótano">
+    </div>
+    <label style="font-size:13px;font-weight:600;color:var(--gris-texto)">Fotos y documentos</label>
+    <div class="cal-fotos">
+      <button id="recBtnAlbaran" onclick="calCapturar('albaran')">📷 Albarán</button>
+      <button id="recBtnEtiqueta" onclick="calCapturar('etiqueta')">📷 Etiqueta</button>
+      <button id="recBtnDop" onclick="calCapturar('dop')">📄 DoP</button>
+    </div>
+    <div class="form-group">
+      <label>Nº de la DoP (si no tienes el documento)</label>
+      <input type="text" id="recNumDoP" placeholder="Ej.: DoP 0123-CPR-4567">
+      <div class="hint">Basta con el número que pone la etiqueta o el albarán.</div>
+    </div>
+    <div class="cal-estado-btns">
+      <button id="recAceptado" onclick="calEstadoRec('aceptado')">✓ Aceptado</button>
+      <button id="recRechazado" onclick="calEstadoRec('rechazado')">✗ Rechazado</button>
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calGuardarRecepcion()">Guardar</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalRecepcion')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.9.0 — PRUEBA DE SERVICIO -->
+<div class="modal-overlay" id="modalPrueba" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo" id="prTitulo">Prueba de servicio</div>
+    <div class="cal-estado-btns">
+      <button id="prAvisado" onclick="calEstadoPrueba('avisado')">📞 Laboratorio avisado</button>
+      <button id="prHecha" onclick="calEstadoPrueba('hecha')">✓ Hecha</button>
+    </div>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="prFecha">
+    </div>
+    <div class="cal-fotos" style="grid-template-columns:1fr">
+      <button id="prBtnActa" onclick="calCapturar('acta')">📄 Acta del laboratorio</button>
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calGuardarPrueba()">Guardar</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalPrueba')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.9.0 — DATOS DE CALIDAD DE LA OBRA -->
+<div class="modal-overlay" id="modalCalDatos" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">Datos del control de calidad</div>
+    <div class="form-group">
+      <label>Fecha de SOLICITUD de la licencia</label>
+      <input type="date" id="cdFecha">
+      <div class="hint">La de solicitud, no la de concesión. Antes del 09/05/2023 → Decreto 1/2015; después → Decreto 10/2023 (GESCAL).</div>
+    </div>
+    <div class="form-group">
+      <label>Laboratorio</label>
+      <input type="text" id="cdLab" placeholder="Ej.: Lesin Levante">
+    </div>
+    <div class="form-group">
+      <label>Email del laboratorio</label>
+      <input type="email" id="cdLabEmail" placeholder="laboratorio@...">
+    </div>
+    <div class="form-group">
+      <label>¿El promotor tiene certificado digital? (firma del libro en GESCAL)</label>
+      <select id="cdCert"><option value="">No lo sé</option><option>Sí</option><option>No</option></select>
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calGuardarDatos()">Guardar</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalDatos')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="calInputFoto" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="calInputArchivo" accept="image/*,application/pdf" style="display:none">
+
 <!-- ⭐ v1.7.0 — PANTALLA DE ESPERA -->
 <div class="cargando-overlay" id="cargandoOverlay" role="status" aria-live="polite">
   <div class="spinner"></div>
@@ -979,9 +1098,9 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.8.3';
+const APP_VERSION = '1.9.0';
 // Versión del Code.gs que necesita esta app (v1.8.3 solo cambia la app)
-const SERVIDOR_REQUERIDO = '1.8.2';
+const SERVIDOR_REQUERIDO = '1.9.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1113,6 +1232,9 @@ function fotoLocalDelete(id) {
 
 // ⭐ v1.7.0: operaciones largas → pantalla de espera con texto claro
 const ACCIONES_LARGAS = {
+  cal_guardarRecepcion: 'Guardando el material y sus fotos...',
+  cal_guardarPrueba: 'Guardando la prueba de servicio...',
+  cal_correoPendiente: 'Preparando el borrador en Gmail...',
   generarActa: 'Redactando el acta con IA...',
   guardarActa: 'Generando el PDF del acta...',
   generarAnotacionLibro: 'Limpiando el dictado con IA...',
@@ -1320,10 +1442,6 @@ function irAObra() {
   renderObra();
 }
 
-function irAControlCalidad() {
-  estadoApp.pantalla = 'cc';
-  mostrarPantalla('screen-cc');
-}
 
 function irAFormularioNueva() {
   estadoApp.pantalla = 'form';
@@ -4966,6 +5084,312 @@ async function comprobarVersionServidor() {
     }
   } catch (e) { /* sin conexión: no se comprueba */ }
 }
+
+// ============================================================================
+// ⭐ v1.9.0 — CONTROL DE CALIDAD SENCILLO (mínimo que cumple el Decreto 10/2023)
+// ============================================================================
+
+let calState = { datos: null, rec: null, prueba: null };
+
+function irAControlCalidad() {
+  estadoApp.pantalla = 'cc';
+  mostrarPantalla('screen-cc');
+  calCargar();
+}
+
+async function calCargar() {
+  const cont = document.getElementById('cal-contenido');
+  const obra = estadoApp.obraActual;
+  if (!obra) return irALista();
+  cont.innerHTML = '<div class="loading-screen"><div class="spinner"></div><div>Cargando el control de calidad...</div></div>';
+  try {
+    const res = await backendPost({ action: 'cal_get', idObra: obra.id });
+    if (!res.ok) throw new Error(res.error);
+    calState.datos = res;
+    calRender();
+  } catch (err) {
+    cont.innerHTML = '<div class="loading-screen">⚠️ ' + escape(err.message) +
+      '<br><br><button class="btn-secundario" onclick="calCargar()">Reintentar</button></div>';
+  }
+}
+
+function calClaseResumen(r) {
+  if (!r.total) return 'ok';
+  if (r.ok >= r.total) return 'ok';
+  return r.ok === 0 ? 'mal' : 'medio';
+}
+
+function calFechaCorta(iso) {
+  if (!iso) return '';
+  const p = String(iso).slice(0, 10).split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0].slice(2) : iso;
+}
+
+function calRender() {
+  const d = calState.datos;
+  const r = d.resumen;
+  const est = r.estadoMateriales;
+  const iconoMat = { completo: '✅', incompleto: '🟠', falta: '⏳', noaplica: '➖' };
+  const textoMat = { completo: 'Completo', incompleto: 'Falta la DoP o el albarán', falta: 'Aún no ha llegado', noaplica: 'No aplica en esta obra' };
+  let h = '';
+
+  h += '<div class="cal-decreto"><div class="txt">' +
+    (d.datos.decreto ? '<b>' + escape(d.datos.decreto) + '</b>' : '⚠️ Falta la fecha de solicitud de la licencia') +
+    (d.datos.laboratorio ? '<br><span style="font-size:12px;color:var(--gris-texto)">Laboratorio: ' + escape(d.datos.laboratorio) + '</span>' : '') +
+    '</div><button onclick="calAbrirDatos()">Datos</button></div>';
+
+  h += '<div class="cal-resumen">' +
+    '<div class="' + calClaseResumen(r.materiales) + '"><div class="num">' + r.materiales.ok + '/' + r.materiales.total + '</div><div class="etq">materiales</div></div>' +
+    '<div class="' + calClaseResumen(r.controles) + '"><div class="num">' + r.controles.ok + '/' + r.controles.total + '</div><div class="etq">comprobaciones</div></div>' +
+    '<div class="' + calClaseResumen(r.pruebas) + '"><div class="num">' + r.pruebas.ok + '/' + r.pruebas.total + '</div><div class="etq">pruebas</div></div>' +
+    '</div>';
+
+  // MATERIALES
+  h += '<div class="cal-titulo">Materiales (albarán + DoP)</div>';
+  d.materiales.forEach(m => {
+    const e = est[m.clave];
+    const recs = d.recepciones.filter(x => x.material === m.clave);
+    let detalle = '';
+    recs.forEach(x => {
+      detalle += '<div class="cal-rec">' + (x.estado === 'rechazado' ? '✗ ' : '• ') + calFechaCorta(x.fecha) + ' ' +
+        escape(x.descripcion || '') + (x.numDoP ? ' · DoP ' + escape(x.numDoP) : '') +
+        ' · <a href="#" onclick="calAbrirRecepcion(\'' + m.clave + '\',\'' + x.id + '\');return false">editar</a></div>';
+    });
+    h += '<div class="cal-fila' + (e === 'noaplica' ? ' noaplica' : '') + '">' +
+      '<div class="ico">' + iconoMat[e] + '</div>' +
+      '<div class="info"><div class="nom">' + escape(m.nombre) + '</div><div class="sub">' + textoMat[e] + '</div>' + detalle +
+      '<button class="na" onclick="calNoAplica(\'material:' + m.clave + '\',' + (e !== 'noaplica') + ')">' + (e === 'noaplica' ? 'Sí aplica' : 'No aplica') + '</button></div>' +
+      (e === 'noaplica' ? '' : '<button class="btn-cal" onclick="calAbrirRecepcion(\'' + m.clave + '\')">+ Recibir</button>') +
+      '</div>';
+  });
+
+  // COMPROBACIONES
+  h += '<div class="cal-titulo">Comprobaciones en obra</div>';
+  d.controles.forEach(c => {
+    h += '<div class="cal-fila">' +
+      '<div class="ico">' + (c.fecha ? '✅' : '⬜') + '</div>' +
+      '<div class="info"><div class="nom">' + escape(c.unidad) + '</div>' +
+      '<div class="sub">' + (c.fecha ? 'Comprobado el ' + calFechaCorta(c.fecha) : 'Pendiente') + '</div></div>' +
+      (c.fecha
+        ? '<button class="btn-cal sec" onclick="calMarcarControl(\'' + c.id + '\', false)">Quitar</button>'
+        : '<button class="btn-cal" onclick="calMarcarControl(\'' + c.id + '\', true)">✓ Hoy</button>') +
+      '</div>';
+  });
+  h += '<div class="cal-add"><input type="text" id="calNuevaUnidad" placeholder="Añadir: Estructura: forjado 2"><button onclick="calAddControl()">Añadir</button></div>';
+
+  // PRUEBAS
+  h += '<div class="cal-titulo">Pruebas de servicio (laboratorio)</div>';
+  d.pruebas.forEach(p => {
+    const icono = p.noAplica ? '➖' : (p.estado === 'hecha' && p.acta ? '✅' : (p.estado === 'hecha' ? '🟠' : (p.estado === 'avisado' ? '📞' : '⏳')));
+    const sub = p.noAplica ? 'No aplica en esta obra' :
+      (p.estado === 'hecha' ? 'Hecha ' + calFechaCorta(p.fecha) + (p.acta ? ' · acta guardada' : ' · falta el acta') :
+       (p.estado === 'avisado' ? 'Laboratorio avisado' : 'Pendiente'));
+    h += '<div class="cal-fila' + (p.noAplica ? ' noaplica' : '') + '">' +
+      '<div class="ico">' + icono + '</div>' +
+      '<div class="info"><div class="nom">' + escape(p.nombre) + '</div><div class="sub">' + sub + '</div>' +
+      '<button class="na" onclick="calNoAplica(\'prueba:' + p.clave + '\',' + (!p.noAplica) + ')">' + (p.noAplica ? 'Sí aplica' : 'No aplica') + '</button></div>' +
+      (p.noAplica ? '' : '<button class="btn-cal' + (p.estado === 'hecha' && p.acta ? ' sec' : '') + '" onclick="calAbrirPrueba(\'' + p.clave + '\')">' + (p.estado === 'hecha' ? 'Ver' : 'Anotar') + '</button>') +
+      '</div>';
+  });
+
+  // CORREO
+  const faltan = d.materiales.filter(m => est[m.clave] === 'incompleto' || est[m.clave] === 'falta').length;
+  h += '<div class="acciones" style="margin-top:16px">' +
+    '<button class="btn-principal" onclick="calCorreoPendiente()"><span class="icon">✉️</span><span>PEDIR LO QUE FALTA (' + faltan + ')</span></button>' +
+    '</div>';
+
+  document.getElementById('cal-contenido').innerHTML = h;
+}
+
+// ---------- DATOS ----------
+function calAbrirDatos() {
+  const d = calState.datos.datos;
+  document.getElementById('cdFecha').value = (d.fechaSolicitudLicencia || '').slice(0, 10);
+  document.getElementById('cdLab').value = d.laboratorio || '';
+  document.getElementById('cdLabEmail').value = d.emailLaboratorio || '';
+  document.getElementById('cdCert').value = d.promotorCertificado || '';
+  document.getElementById('modalCalDatos').style.display = 'flex';
+}
+
+async function calGuardarDatos() {
+  const datos = {
+    fechaSolicitudLicencia: document.getElementById('cdFecha').value,
+    laboratorio: document.getElementById('cdLab').value.trim(),
+    emailLaboratorio: document.getElementById('cdLabEmail').value.trim(),
+    promotorCertificado: document.getElementById('cdCert').value,
+  };
+  try {
+    const res = await backendPost({ action: 'cal_guardarDatos', idObra: estadoApp.obraActual.id, datos });
+    if (!res.ok) throw new Error(res.error);
+    calCerrarModal('modalCalDatos');
+    toast('✓ Datos guardados' + (res.decreto ? ' · ' + res.decreto : ''), 'ok');
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+// ---------- RECEPCIÓN DE MATERIAL ----------
+function calAbrirRecepcion(clave, idRec) {
+  const d = calState.datos;
+  const m = d.materiales.find(x => x.clave === clave);
+  const previa = idRec ? d.recepciones.find(x => x.id === idRec) : null;
+  calState.rec = {
+    id: previa ? previa.id : '', material: clave, estado: previa ? previa.estado : 'aceptado',
+    nuevos: [], tiene: previa ? (previa.archivos || []).map(a => a.tipo) : [],
+  };
+  document.getElementById('recTitulo').textContent = (previa ? 'Editar · ' : 'Ha llegado: ') + m.nombre;
+  document.getElementById('recPide').textContent = 'Hace falta: ' + m.pide + '.';
+  document.getElementById('recDescripcion').value = previa ? (previa.descripcion || '') : '';
+  document.getElementById('recNumDoP').value = previa ? (previa.numDoP || '') : '';
+  calPintarRecepcion();
+  document.getElementById('modalRecepcion').style.display = 'flex';
+}
+
+function calPintarRecepcion() {
+  const r = calState.rec;
+  const marca = (tipo, id, texto) => {
+    const n = r.nuevos.filter(a => a.tipo === tipo).length + r.tiene.filter(t => t === tipo).length;
+    const b = document.getElementById(id);
+    b.textContent = texto + (n ? ' ✓' + (n > 1 ? n : '') : '');
+    b.classList.toggle('hecho', n > 0);
+  };
+  marca('albaran', 'recBtnAlbaran', '📷 Albarán');
+  marca('etiqueta', 'recBtnEtiqueta', '📷 Etiqueta');
+  marca('dop', 'recBtnDop', '📄 DoP');
+  document.getElementById('recAceptado').className = r.estado === 'aceptado' ? 'sel-ok' : '';
+  document.getElementById('recRechazado').className = r.estado === 'rechazado' ? 'sel-no' : '';
+}
+
+function calEstadoRec(e) { calState.rec.estado = e; calPintarRecepcion(); }
+
+/** Foto con la cámara (albarán, etiqueta) o archivo (DoP, acta: PDF o imagen). */
+function calCapturar(tipo) {
+  const input = document.getElementById(tipo === 'dop' || tipo === 'acta' ? 'calInputArchivo' : 'calInputFoto');
+  input.value = '';
+  input.onchange = async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      let blob = file, mime = file.type || 'application/octet-stream';
+      if (mime.startsWith('image/')) { blob = await comprimirImagen(file, 2000, 0.85); mime = 'image/jpeg'; }
+      const base64 = await blobABase64(blob);
+      if (tipo === 'acta') {
+        calState.prueba.acta = { nombre: file.name, base64, mime };
+        calPintarPrueba();
+      } else {
+        calState.rec.nuevos.push({ tipo, nombre: file.name, base64, mime });
+        calPintarRecepcion();
+      }
+    } catch (err) { toast('⚠️ No se ha podido leer el archivo: ' + err.message, 'error'); }
+  };
+  input.click();
+}
+
+async function calGuardarRecepcion() {
+  const r = calState.rec;
+  const recepcion = {
+    id: r.id, material: r.material, estado: r.estado,
+    descripcion: document.getElementById('recDescripcion').value.trim(),
+    numDoP: document.getElementById('recNumDoP').value.trim(),
+    fecha: fechaHoyISO(), nuevos: r.nuevos,
+  };
+  if (!r.id && !recepcion.nuevos.length && !recepcion.numDoP) {
+    toast('⚠️ Haz al menos la foto del albarán o pon el nº de la DoP', 'error');
+    return;
+  }
+  const payload = { action: 'cal_guardarRecepcion', idObra: estadoApp.obraActual.id, recepcion };
+  calCerrarModal('modalRecepcion');
+  let res;
+  try {
+    res = await backendPost(payload);
+  } catch (err) {
+    // Solo si NO hay conexión: a la cola, se envía sola al volver la cobertura
+    await colaAdd({ payload });
+    toast('Sin conexión: se guardará al volver la cobertura', 'ok');
+    procesarCola();
+    return;
+  }
+  if (!res || !res.ok) {
+    // Error del servidor: se avisa y NO se reintenta
+    toast('⚠️ ' + ((res && res.error) || 'No se ha podido guardar'), 'error');
+    return;
+  }
+  toast('✓ Material guardado', 'ok');
+  calCargar();
+}
+
+// ---------- COMPROBACIONES ----------
+async function calMarcarControl(id, hecho) {
+  try {
+    const res = await backendPost({ action: 'cal_marcarControl', idObra: estadoApp.obraActual.id, id,
+                                     fecha: hecho ? fechaHoyISO() : '', resultado: 'conforme' });
+    if (!res.ok) throw new Error(res.error);
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+async function calAddControl() {
+  const input = document.getElementById('calNuevaUnidad');
+  const unidad = input.value.trim();
+  if (!unidad) { toast('⚠️ Escribe qué se comprueba', 'error'); return; }
+  try {
+    const res = await backendPost({ action: 'cal_addControl', idObra: estadoApp.obraActual.id, unidad });
+    if (!res.ok) throw new Error(res.error);
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+// ---------- PRUEBAS DE SERVICIO ----------
+function calAbrirPrueba(clave) {
+  const p = calState.datos.pruebas.find(x => x.clave === clave);
+  calState.prueba = { clave, estado: p.estado === 'pendiente' ? 'avisado' : p.estado, fecha: p.fecha || fechaHoyISO(),
+                      tieneActa: !!p.acta, acta: null };
+  document.getElementById('prTitulo').textContent = p.nombre;
+  document.getElementById('prFecha').value = (calState.prueba.fecha || '').slice(0, 10);
+  calPintarPrueba();
+  document.getElementById('modalPrueba').style.display = 'flex';
+}
+
+function calPintarPrueba() {
+  const p = calState.prueba;
+  document.getElementById('prAvisado').className = p.estado === 'avisado' ? 'sel-ok' : '';
+  document.getElementById('prHecha').className = p.estado === 'hecha' ? 'sel-ok' : '';
+  const b = document.getElementById('prBtnActa');
+  b.textContent = '📄 Acta del laboratorio' + (p.acta || p.tieneActa ? ' ✓' : '');
+  b.classList.toggle('hecho', !!(p.acta || p.tieneActa));
+}
+
+function calEstadoPrueba(e) { calState.prueba.estado = e; calPintarPrueba(); }
+
+async function calGuardarPrueba() {
+  const p = calState.prueba;
+  const prueba = { clave: p.clave, estado: p.estado, fecha: document.getElementById('prFecha').value, acta: p.acta };
+  try {
+    const res = await backendPost({ action: 'cal_guardarPrueba', idObra: estadoApp.obraActual.id, prueba });
+    if (!res.ok) throw new Error(res.error);
+    calCerrarModal('modalPrueba');
+    toast('✓ Prueba guardada', 'ok');
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+// ---------- NO APLICA / CORREO ----------
+async function calNoAplica(clave, noAplica) {
+  try {
+    const res = await backendPost({ action: 'cal_noAplica', idObra: estadoApp.obraActual.id, clave, noAplica });
+    if (!res.ok) throw new Error(res.error);
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+async function calCorreoPendiente() {
+  try {
+    const res = await backendPost({ action: 'cal_correoPendiente', idObra: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ ' + res.message, 'ok');
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+function calCerrarModal(id) { document.getElementById(id).style.display = 'none'; }
 
 async function init() {
   if (BACKEND_URL.includes('PEGAR_AQUI')) {
