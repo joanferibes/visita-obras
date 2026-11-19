@@ -284,11 +284,12 @@ body {
 .ss-estado-item .accion-marcar { margin-left: auto; font-size: 12px; text-decoration: underline; color: #856404; white-space: nowrap; }
 .aviso-version { background: #fff3cd; color: #856404; }
 
-/* ⭐ v1.9.0 — control de calidad sencillo */
+/* ⭐ v1.10.0 — control de calidad por factores de riesgo + cambio de constructor */
 .cal-decreto { background: white; border-radius: 10px; padding: 10px 14px; box-shadow: var(--sombra); margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
 .cal-decreto .txt { flex: 1; }
 .cal-decreto .txt b { color: var(--azul); }
 .cal-decreto button { background: none; border: 1px solid var(--gris-medio); border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+.cal-aviso { background: #fff8e1; border-left: 3px solid #f0ad4e; border-radius: 6px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; }
 .cal-resumen { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
 .cal-resumen > div { background: white; border-radius: 10px; padding: 10px 6px; text-align: center; box-shadow: var(--sombra); }
 .cal-resumen .num { font-size: 22px; font-weight: 700; }
@@ -302,15 +303,12 @@ body {
 .cal-fila .info { flex: 1; min-width: 0; }
 .cal-fila .nom { font-weight: 600; font-size: 15px; }
 .cal-fila .sub { font-size: 12px; color: var(--gris-texto); }
-.cal-fila .btn-cal { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 9px 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.cal-fila .btn-cal.sec { background: white; color: var(--azul); border: 1px solid var(--azul); }
+.cal-fila .btn-cal, .cal-btn { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 9px 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.cal-fila .btn-cal.sec, .cal-btn.sec { background: white; color: var(--azul); border: 1px solid var(--azul); }
 .cal-fila.noaplica { opacity: .55; }
-.cal-fila .na { background: none; border: none; color: var(--gris-texto); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 4px; }
+.na { background: none; border: none; color: var(--gris-texto); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 4px; }
 .cal-rec { font-size: 12px; color: var(--gris-texto); margin-top: 3px; }
 .cal-rec a { color: var(--azul); }
-.cal-add { display: flex; gap: 8px; margin-top: 6px; }
-.cal-add input { flex: 1; padding: 9px 10px; border: 1px solid var(--gris-medio); border-radius: 6px; font-size: 15px; }
-.cal-add button { background: white; border: 1px solid var(--azul); color: var(--azul); border-radius: 6px; padding: 0 14px; font-weight: 600; }
 .cal-fotos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 6px 0 12px; }
 .cal-fotos button { background: white; border: 1px dashed var(--azul); color: var(--azul); border-radius: 8px; padding: 12px 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .cal-fotos button.hecho { border-style: solid; background: #e8f4f1; }
@@ -319,6 +317,57 @@ body {
 .cal-estado-btns button.sel-ok { background: var(--verde-ok); color: white; border-color: var(--verde-ok); }
 .cal-estado-btns button.sel-no { background: var(--rojo); color: white; border-color: var(--rojo); }
 .cal-ayuda { font-size: 13px; color: var(--gris-texto); background: #f0f6f5; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; }
+/* unidades y lotes */
+.cal-unidad { background: white; border-radius: 10px; box-shadow: var(--sombra); margin-bottom: 10px; padding: 10px 12px; }
+.cal-unidad.noaplica { opacity: .55; }
+.cal-unidad .cab { display: flex; align-items: baseline; gap: 8px; }
+.cal-unidad .cab .nom { font-weight: 700; font-size: 15px; flex: 1; }
+.cal-unidad .cab .cnt { font-size: 12px; color: var(--gris-texto); white-space: nowrap; }
+.cal-unidad .tam { font-size: 12px; color: var(--gris-texto); margin: 2px 0 6px; }
+.cal-lote { border-top: 1px solid #eee; padding: 8px 0 4px; }
+.cal-lote .lnom { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.cal-lote .lnom button { background: none; border: none; color: var(--gris-texto); font-size: 13px; cursor: pointer; padding: 0 4px; }
+.cal-hitos { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 6px; }
+.cal-hito { border: 1px solid var(--gris-medio); background: white; border-radius: 8px; padding: 7px 4px; text-align: center; cursor: pointer; font-size: 12px; line-height: 1.3; }
+.cal-hito b { display: block; font-size: 14px; margin-top: 2px; }
+.cal-hito.m { background: #e8f4f1; border-color: var(--verde-ok); }
+.cal-hito.m b { color: var(--verde-ok); }
+.cal-hito .p { color: #999; font-style: italic; font-weight: 400; }
+.cal-hito .e { color: #2a6db0; font-weight: 600; }
+.cal-hito.e { border-color: #9cc1e6; background: #f2f7fc; }
+.cal-caja.e { background: #f2f7fc; border-color: #9cc1e6; color: #2a6db0; }
+.cal-tabla .e { color: #2a6db0; }
+.cal-tabla .fte { display: block; font-size: 10px; color: #777; }
+.cal-fase { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.cal-fase .fn { flex: 1; font-size: 13px; }
+.cal-caja { width: 50px; height: 38px; border: 1px solid var(--gris-medio); border-radius: 6px; background: white; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0; }
+.cal-caja.m { background: #e8f4f1; border-color: var(--verde-ok); color: var(--verde-ok); }
+.cal-addlote { background: none; border: 1px dashed var(--azul); color: var(--azul); border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; margin-top: 6px; }
+/* constructores */
+.cal-constr { background: white; border-radius: 10px; box-shadow: var(--sombra); padding: 10px 12px; margin-bottom: 10px; }
+.cal-constr .fila { display: flex; align-items: center; gap: 8px; }
+.cal-constr .fila .txt { flex: 1; font-size: 14px; }
+.cal-constr .hist { font-size: 12px; color: var(--gris-texto); margin-top: 4px; }
+.cal-check { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid #f0f0f0; font-size: 13px; }
+.cal-check .t { flex: 1; }
+.cal-check input { width: 20px; height: 20px; }
+.cal-cierre { border-left: 4px solid var(--naranja); }
+.cal-cierre.hecho { border-left-color: var(--verde-ok); }
+.cal-botones { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.cal-botones button { flex: 1; min-width: 140px; }
+/* tabla CCWin */
+.cal-tabla { width: 100%; border-collapse: collapse; font-size: 12px; }
+.cal-tabla td, .cal-tabla th { border-bottom: 1px solid #eee; padding: 4px 3px; text-align: left; vertical-align: top; }
+.cal-tabla th { background: #f5f5f5; position: sticky; top: 0; }
+.cal-tabla .p { color: #999; font-style: italic; }
+.cal-tabla .vacia { color: var(--rojo); }
+/* libro de órdenes */
+#libro-cal { background: #f6faf9; border: 1px solid #d5e8e3; border-radius: 10px; padding: 8px 10px; margin: 10px 0; }
+#libro-cal .lc-cab { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+#libro-cal .lc-lote { font-size: 13px; margin: 8px 0 4px; font-weight: 600; }
+#libro-cal .lc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#libro-cal .lc-chip { border: 1px solid var(--gris-medio); border-radius: 16px; padding: 6px 10px; font-size: 13px; background: white; cursor: pointer; }
+#libro-cal .lc-chip.sel { background: var(--verde-ok); color: white; border-color: var(--verde-ok); }
 </style>
 </head>
 <body>
@@ -379,7 +428,7 @@ body {
           <span class="icon">📄</span><span class="label">Subir documento</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="irAControlCalidad()">
-          <span class="icon">🧪</span><span class="label">Control de calidad</span><span class="arrow">›</span>
+          <span class="icon">🧪</span><span class="label">Calidad y materiales</span><span class="arrow">›</span>
         </button>
         <button class="btn-accion" onclick="irAActa()">
           <span class="icon">🎙️</span><span class="label">Acta de visita</span><span class="arrow">›</span>
@@ -413,11 +462,11 @@ body {
     </div>
   </div>
 
-  <!-- ===== PANTALLA: CONTROL DE CALIDAD (⭐ v1.9.0) ===== -->
+  <!-- ===== PANTALLA: CONTROL DE CALIDAD (⭐ v1.10.0) ===== -->
   <div class="screen" id="screen-cc">
     <div class="header">
       <button class="back" onclick="irAObra()">←</button>
-      <h1>🧪 Control de calidad</h1>
+      <h1>🧪 Calidad y materiales</h1>
     </div>
     <div class="content">
       <div id="cal-contenido"><div class="loading-screen"><div class="spinner"></div><div>Cargando...</div></div></div>
@@ -780,6 +829,8 @@ body {
         <div class="hint">Cada línea que empieza por guion (-) es un punto. Puedes corregir lo que quieras antes de guardar.</div>
       </div>
       
+      <!-- ⭐ v1.10.0 — marcar comprobaciones de calidad con la fecha de la anotación -->
+      <div id="libro-cal" style="display:none"></div>
       <button class="btn-guardar" onclick="guardarAnotacionLibroFinal()">💾 Guardar y generar PDF</button>
       <button class="btn-secundario" onclick="volverADictadoLibro()">← Volver al dictado</button>
     </div>
@@ -1049,7 +1100,7 @@ body {
   </div>
 </div>
 
-<!-- ⭐ v1.9.0 — DATOS DE CALIDAD DE LA OBRA -->
+<!-- ⭐ v1.10.0 — DATOS DE CALIDAD DE LA OBRA (con factores de riesgo) -->
 <div class="modal-overlay" id="modalCalDatos" style="display:none">
   <div class="modal-caja">
     <div class="modal-titulo">Datos del control de calidad</div>
@@ -1057,6 +1108,24 @@ body {
       <label>Fecha de SOLICITUD de la licencia</label>
       <input type="date" id="cdFecha">
       <div class="hint">La de solicitud, no la de concesión. Antes del 09/05/2023 → Decreto 1/2015; después → Decreto 10/2023 (GESCAL).</div>
+    </div>
+    <div class="form-group">
+      <label>¿Esta obra lleva control de calidad?</label>
+      <select id="cdCC"><option value="si">Sí (programa de control, CCWin, libro)</option><option value="no">No: solo fotos de materiales</option></select>
+    </div>
+    <div class="form-group">
+      <label>Libro de gestión de calidad</label>
+      <select id="cdLibro">
+        <option value="">Según la fecha de solicitud</option>
+        <option value="LG14">LG14 · Decreto 1/2015 (CCWin 3)</option>
+        <option value="LG23">LG23 · Decreto 10/2023 (CCWin 4)</option>
+      </select>
+      <div class="hint">Solo hace falta elegirlo si la licencia se solicitó entre el 09/05/2023 y el 09/11/2023 (periodo transitorio: se podía seguir con el LG14).</div>
+    </div>
+    <div class="form-group">
+      <label>Factores de riesgo (los del plan de control del proyecto)</label>
+      <div id="cdFactores" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px"></div>
+      <div class="hint">Deciden qué hay que comprobar y cuántas veces (anexos II y III del Decreto 10/2023). Si cambian, la lista de comprobaciones cambia sola.</div>
     </div>
     <div class="form-group">
       <label>Laboratorio</label>
@@ -1073,6 +1142,119 @@ body {
     <div class="modal-botones">
       <button class="btn-guardar" onclick="calGuardarDatos()">Guardar</button>
       <button class="btn-secundario" onclick="calCerrarModal('modalCalDatos')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.10.0 — FECHA DE UNA COMPROBACIÓN -->
+<div class="modal-overlay" id="modalCalFecha" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo" id="cfTitulo">Comprobación</div>
+    <div class="cal-ayuda" id="cfSub"></div>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="cfFecha">
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calGuardarFecha()">✓ Guardar</button>
+      <button class="btn-secundario" id="cfQuitar" onclick="calQuitarFecha()">Quitar la fecha</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalFecha')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.10.0 — CAMBIAR DE CONSTRUCTOR -->
+<div class="modal-overlay" id="modalCalCambio" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">Cambiar de constructor</div>
+    <div class="cal-ayuda" id="ccAyuda"></div>
+    <div class="form-group">
+      <label>Último día del constructor actual</label>
+      <input type="date" id="ccHasta">
+    </div>
+    <div class="form-group">
+      <label>Qué ha hecho</label>
+      <input type="text" id="ccAlcance" value="Estructura" placeholder="Ej.: Estructura">
+    </div>
+    <label class="cal-check" style="border:none"><input type="checkbox" id="ccFin" onchange="calCambioFin()"><span class="t"><b>Es el fin de la obra</b> (no entra ningún constructor)</span></label>
+    <div class="form-group" id="ccNuevoGrupo">
+      <label>Constructor nuevo (si aún no lo sabes, déjalo en blanco)</label>
+      <input type="text" id="ccNombre" placeholder="Nombre de la empresa">
+      <input type="text" inputmode="email" autocapitalize="off" autocorrect="off" id="ccEmail" placeholder="email@empresa.com" style="margin-top:6px">
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calGuardarCambio()">Guardar el cambio</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalCambio')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.10.0 — DATOS DE UN CONSTRUCTOR -->
+<div class="modal-overlay" id="modalCalConstr" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo" id="ckTitulo">Constructor</div>
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="ckNombre">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="text" inputmode="email" autocapitalize="off" autocorrect="off" id="ckEmail">
+      <div class="hint">El del constructor que está ahora en obra pasa también a «Datos del expediente».</div>
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calGuardarConstr()">Guardar</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalConstr')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.10.0 — FECHAS PARA EL CCWIN -->
+<div class="modal-overlay" id="modalCalCCWin" style="display:none">
+  <div class="modal-caja" style="max-height:90vh;overflow:auto">
+    <div class="modal-titulo">Fechas para el CCWin</div>
+    <div class="cal-ayuda">En negro, las marcadas en obra. En azul, las estimadas por Pepe (con de dónde salen: acta, Libro de Órdenes o foto). En gris y cursiva, las puestas por pauta. En rojo, las que aún no tienen fecha. Cada fecha va a nombre del constructor que había ese día.</div>
+    <div id="ccwTabla"></div>
+    <div class="modal-botones">
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalCCWin')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.10.0 — FOTO DE ETIQUETA: ¿QUÉ MATERIAL? -->
+<div class="modal-overlay" id="modalCalElegir" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">📷 Foto de un material</div>
+    <div class="form-group">
+      <label>¿Qué material es?</label>
+      <input type="text" id="ceNombre" list="ceLista" placeholder="Ej.: Aislante XPS, teja, aerotermia…" autocomplete="off">
+      <datalist id="ceLista"></datalist>
+      <div class="hint">Elige uno de la lista o escribe uno nuevo. Después se abre la cámara para la etiqueta.</div>
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calElegirSeguir()">📷 Seguir</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalElegir')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ v1.10.0 — AVISAR A PEPE -->
+<div class="modal-overlay" id="modalCalPepe" style="display:none">
+  <div class="modal-caja">
+    <div class="modal-titulo">📨 Avisar a Pepe</div>
+    <div class="cal-ayuda">Crea una tarjeta en la lista de Pepe en Trello con todo lo de esta obra. Cuando le digas «Pepe, tienes trabajo en la lista», lo hará.</div>
+    <div class="cal-estado-btns" style="flex-direction:column">
+      <button id="cpProgramacion" onclick="calElegirMotivo('programacion')">📋 Hacer la programación (al empezar)</button>
+      <button id="cpCierre" onclick="calElegirMotivo('cierre')">🔒 Cerrar lo del constructor que se va</button>
+      <button id="cpFin" onclick="calElegirMotivo('fin')">🏁 Fin de obra (libro, GESCAL, informe del cliente)</button>
+    </div>
+    <div class="form-group">
+      <label>Nota para Pepe (opcional)</label>
+      <input type="text" id="cpNota" placeholder="Ej.: el colector se hizo en dos tramos">
+    </div>
+    <div class="modal-botones">
+      <button class="btn-guardar" onclick="calEnviarAvisoPepe()">Crear la tarjeta</button>
+      <button class="btn-secundario" onclick="calCerrarModal('modalCalPepe')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1098,9 +1280,9 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.9.0';
+const APP_VERSION = '1.10.0';
 // Versión del Code.gs que necesita esta app (v1.8.3 solo cambia la app)
-const SERVIDOR_REQUERIDO = '1.9.0';
+const SERVIDOR_REQUERIDO = '1.10.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
 
 // ============================================================================
@@ -1232,6 +1414,9 @@ function fotoLocalDelete(id) {
 
 // ⭐ v1.7.0: operaciones largas → pantalla de espera con texto claro
 const ACCIONES_LARGAS = {
+  cal_correoSaliente: 'Preparando el borrador al constructor...',
+  cal_correoLaboratorio: 'Preparando el borrador al laboratorio...',
+  cal_avisarPepe: 'Creando la tarjeta en Trello...',
   cal_guardarRecepcion: 'Guardando el material y sus fotos...',
   cal_guardarPrueba: 'Guardando la prueba de servicio...',
   cal_correoPendiente: 'Preparando el borrador en Gmail...',
@@ -4512,7 +4697,7 @@ function irAPreviewLibro() {
   }
   
   estadoApp.pantalla = 'libro-preview';
-  mostrarPantalla('screen-libro-preview');
+  mostrarPantalla('screen-libro-preview'); libroCalPreparar();
 }
 
 function volverADictadoLibro() {
@@ -4547,6 +4732,7 @@ async function guardarAnotacionLibroFinal() {
     if (!res.ok) throw new Error(res.error);
     
     if (!libroState.anotacionEditandoId) borrarDictadoLocal('libro'); // ⭐ v1.7.0
+    await libroCalGuardar(fecha); // ⭐ v1.10.0
     
     mostrarModalResultado({
       icono: '✅',
@@ -4596,7 +4782,7 @@ async function editarAnotacion(id) {
     document.getElementById('libro-texto').value = anotacion.texto;
     
     estadoApp.pantalla = 'libro-preview';
-    mostrarPantalla('screen-libro-preview');
+    mostrarPantalla('screen-libro-preview'); libroCalPreparar();
   } catch (err) {
     toast('⚠️ Error: ' + err.message, 'error');
   }
@@ -5086,10 +5272,10 @@ async function comprobarVersionServidor() {
 }
 
 // ============================================================================
-// ⭐ v1.9.0 — CONTROL DE CALIDAD SENCILLO (mínimo que cumple el Decreto 10/2023)
+// ⭐ v1.10.0 — CONTROL DE CALIDAD (mínimo del Decreto 10/2023 según los factores de riesgo)
 // ============================================================================
 
-let calState = { datos: null, rec: null, prueba: null };
+let calState = { datos: null, rec: null, prueba: null, fecha: null, constr: null, libroSel: [], libroAbierto: false };
 
 function irAControlCalidad() {
   estadoApp.pantalla = 'cc';
@@ -5124,28 +5310,389 @@ function calFechaCorta(iso) {
   const p = String(iso).slice(0, 10).split('-');
   return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0].slice(2) : iso;
 }
+function calDM(iso) { const p = String(iso || '').slice(0, 10).split('-'); return p.length === 3 ? p[2] + '/' + p[1] : ''; }
+function calJS(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
 
 function calRender() {
   const d = calState.datos;
+  if (d.factores.cc === '') return calRenderPregunta(d);
+  if (d.factores.cc === 'no') return calRenderSinCC(d);
   const r = d.resumen;
-  const est = r.estadoMateriales;
-  const iconoMat = { completo: '✅', incompleto: '🟠', falta: '⏳', noaplica: '➖' };
-  const textoMat = { completo: 'Completo', incompleto: 'Falta la DoP o el albarán', falta: 'Aún no ha llegado', noaplica: 'No aplica en esta obra' };
   let h = '';
 
   h += '<div class="cal-decreto"><div class="txt">' +
-    (d.datos.decreto ? '<b>' + escape(d.datos.decreto) + '</b>' : '⚠️ Falta la fecha de solicitud de la licencia') +
-    (d.datos.laboratorio ? '<br><span style="font-size:12px;color:var(--gris-texto)">Laboratorio: ' + escape(d.datos.laboratorio) + '</span>' : '') +
+    '<b>' + escape(d.datos.decreto) + '</b>' +
+    (!d.datos.fechaSolicitudLicencia && !d.datos.libroManual ? '<br><span style="font-size:12px;color:var(--rojo)">⚠️ Falta la fecha de solicitud de la licencia: de momento se toma el LG23</span>' : '') +
+    '<br><span style="font-size:12px;color:var(--gris-texto)">Al final: ' +
+    (d.libro === 'LG14' ? 'los 39 impresos del LG-14 firmados (también los vacíos) y el registro telemático en la GVA.'
+                        : 'el libro en GESCAL firmado por promotor, director de ejecución, constructor y laboratorio, e inscrito.') + '</span>' +
+    '<br><span style="font-size:12px;color:var(--gris-texto)">Factores: ' +
+    d.factoresDef.map(f => f.c + d.factores[f.c]).join(' · ') +
+    (d.datos.laboratorio ? ' · Laboratorio: ' + escape(d.datos.laboratorio) : '') + '</span>' +
     '</div><button onclick="calAbrirDatos()">Datos</button></div>';
+  if (!d.factores.definidos) {
+    h += '<div class="cal-aviso">⚠️ Pon los <b>factores de riesgo</b> del plan de control del proyecto (botón «Datos»). ' +
+         'Mientras tanto se usa todo a 1: carpintería, cubierta plana y colectores, además de la estructura.</div>';
+  }
+
+  h += calRenderConstructores(d);
 
   h += '<div class="cal-resumen">' +
     '<div class="' + calClaseResumen(r.materiales) + '"><div class="num">' + r.materiales.ok + '/' + r.materiales.total + '</div><div class="etq">materiales</div></div>' +
-    '<div class="' + calClaseResumen(r.controles) + '"><div class="num">' + r.controles.ok + '/' + r.controles.total + '</div><div class="etq">comprobaciones</div></div>' +
+    '<div class="' + calClaseResumen({ ok: r.controles.ok + r.controles.estimadas, total: r.controles.total }) + '"><div class="num">' + r.controles.ok + '/' + r.controles.total + '</div><div class="etq">comprobaciones' +
+      (r.controles.estimadas ? '<br><span style="color:#2a6db0">+' + r.controles.estimadas + ' estimadas</span>' : '') + '</div></div>' +
     '<div class="' + calClaseResumen(r.pruebas) + '"><div class="num">' + r.pruebas.ok + '/' + r.pruebas.total + '</div><div class="etq">pruebas</div></div>' +
     '</div>';
 
-  // MATERIALES
-  h += '<div class="cal-titulo">Materiales (albarán + DoP)</div>';
+  const sinFecha = r.controles.total - r.controles.ok - r.controles.estimadas;
+  const cerrado = (d.constructores || []).some(c => c.hasta);
+  if (sinFecha > 0 && cerrado) {
+    h += '<div class="cal-aviso">📅 Quedan <b>' + sinFecha + '</b> comprobaciones sin fecha. Dile a Pepe: ' +
+      '<i>«Pepe, rellena las fechas de calidad de ' + escape(d.obra.expediente || d.obra.nombre) + '»</i>. ' +
+      'Las saca de las actas del laboratorio, del Libro de Órdenes y de las fotos, y aquí salen en azul.</div>';
+  }
+
+  h += calRenderMateriales(d);
+  h += calRenderUnidades(d);
+  h += calRenderPruebas(d);
+
+  if (d.antiguas && d.antiguas.length) {
+    h += '<div class="cal-titulo">Comprobaciones de la versión anterior</div><div class="cal-ayuda">' +
+      d.antiguas.map(a => escape(a.unidad) + ': ' + calFechaCorta(a.fecha)).join('<br>') + '</div>';
+  }
+
+  const est = r.estadoMateriales;
+  const faltan = d.materiales.filter(m => est[m.clave] === 'incompleto' || est[m.clave] === 'falta').length;
+  h += calRenderOtros(d);
+  h += '<div class="acciones" style="margin-top:16px">' +
+    '<button class="btn-principal" onclick="calAbrirElegir()"><span class="icon">📷</span><span>FOTO DE UN MATERIAL</span></button>' +
+    '<button class="btn-principal" onclick="calAbrirPepe()"><span class="icon">📨</span><span>AVISAR A PEPE</span></button>' +
+    '<button class="btn-principal" onclick="calVerCCWin()"><span class="icon">📋</span><span>FECHAS PARA EL CCWIN</span></button>' +
+    '<button class="btn-principal" onclick="calCorreoPendiente()"><span class="icon">✉️</span><span>PEDIR LO QUE FALTA (' + faltan + ')</span></button>' +
+    '</div>';
+
+  document.getElementById('cal-contenido').innerHTML = h;
+}
+
+// ---------- ¿LLEVA CONTROL DE CALIDAD? / OBRA SIN CONTROL ----------
+function calRenderPregunta(d) {
+  document.getElementById('cal-contenido').innerHTML =
+    '<div class="cal-constr" style="text-align:center;padding:18px 14px">' +
+    '<div style="font-size:17px;font-weight:700;margin-bottom:6px">¿Esta obra lleva control de calidad?</div>' +
+    '<div class="cal-ayuda" style="text-align:left">Sí: programa de control, CCWin y libro (LG14 o LG23).<br>' +
+    'No: solo fotos de las etiquetas de los materiales que creas importantes.<br>Se puede cambiar después en «Datos».</div>' +
+    '<div class="cal-estado-btns"><button class="sel-ok" onclick="calContestarCC(\'si\')">Sí, lleva control</button>' +
+    '<button onclick="calContestarCC(\'no\')">No, solo fotos</button></div></div>';
+}
+
+async function calContestarCC(cc) {
+  try {
+    const res = await backendPost({ action: 'cal_llevaControl', idObra: estadoApp.obraActual.id, cc });
+    if (!res.ok) throw new Error(res.error);
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+/** Obra sin control de calidad: solo fotos de materiales (y avisar a Pepe al acabar). */
+function calRenderSinCC(d) {
+  let h = '<div class="cal-decreto"><div class="txt"><b>Sin control de calidad</b><br>' +
+    '<span style="font-size:12px;color:var(--gris-texto)">Solo fotos de las etiquetas de los materiales que creas importantes.</span></div>' +
+    '<button onclick="calAbrirDatos()">Cambiar</button></div>';
+  h += '<div class="acciones"><button class="btn-principal" onclick="calAbrirElegir()"><span class="icon">📷</span><span>FOTO DE UN MATERIAL</span></button></div>';
+  h += calRenderOtros(d, true);
+  h += '<div class="acciones" style="margin-top:16px"><button class="btn-principal" onclick="calAbrirPepe(\'fin\')"><span class="icon">🏁</span><span>FIN DE OBRA: AVISAR A PEPE</span></button></div>';
+  document.getElementById('cal-contenido').innerHTML = h;
+}
+
+/** Lista de materiales fotografiados: los libres y, en obras sin control, también los de la lista oficial. */
+function calRenderOtros(d, todos) {
+  const nombre = c => c.indexOf('otro:') === 0 ? c.slice(5) : ((d.materiales.find(m => m.clave === c) || {}).nombre || c);
+  const recs = d.recepciones.filter(x => todos || String(x.material).indexOf('otro:') === 0);
+  let h = '<div class="cal-titulo">' + (todos ? 'Materiales fotografiados' : 'Otros materiales (los que tú quieras)') + '</div>';
+  const grupos = {};
+  recs.forEach(x => { (grupos[x.material] = grupos[x.material] || []).push(x); });
+  const claves = Object.keys(grupos).sort((a, b) => nombre(a).localeCompare(nombre(b)));
+  if (!claves.length) h += '<div class="cal-ayuda">Aún no hay ninguno. Con «Foto de un material» eliges o escribes el material y se abre la cámara.</div>';
+  claves.forEach(c => {
+    h += '<div class="cal-fila"><div class="ico">📦</div><div class="info"><div class="nom">' + escape(nombre(c)) + '</div>' +
+      grupos[c].map(x => '<div class="cal-rec">• ' + calFechaCorta(x.fecha) + ' · ' + (x.archivos || []).length + ' foto(s)' +
+        (x.descripcion ? ' · ' + escape(x.descripcion) : '') + (x.numDoP ? ' · DoP ' + escape(x.numDoP) : '') +
+        ' · <a href="#" onclick="calAbrirRecepcion(\'' + calJS(c) + '\',\'' + x.id + '\');return false">editar</a></div>').join('') +
+      '</div><button class="btn-cal sec" onclick="calAbrirRecepcion(\'' + calJS(c) + '\')">+ Foto</button></div>';
+  });
+  return h;
+}
+
+function calAbrirElegir() {
+  const d = calState.datos;
+  const nombres = d.materiales.map(m => m.nombre).concat(d.otros || []);
+  document.getElementById('ceLista').innerHTML = nombres.map(n => '<option value="' + escape(n) + '">').join('');
+  document.getElementById('ceNombre').value = '';
+  document.getElementById('modalCalElegir').style.display = 'flex';
+  setTimeout(() => document.getElementById('ceNombre').focus(), 100);
+}
+
+function calElegirSeguir() {
+  const n = document.getElementById('ceNombre').value.trim();
+  if (!n) { toast('⚠️ Escribe o elige el material', 'error'); return; }
+  const d = calState.datos;
+  const oficial = d.materiales.find(m => m.nombre.toLowerCase() === n.toLowerCase());
+  calCerrarModal('modalCalElegir');
+  calAbrirRecepcion(oficial ? oficial.clave : 'otro:' + n);
+  calCapturar('etiqueta');   // se abre la cámara directamente
+}
+
+// ---------- AVISAR A PEPE ----------
+function calAbrirPepe(motivo) {
+  calState.motivoPepe = motivo || '';
+  document.getElementById('cpNota').value = '';
+  const sinCC = calState.datos.factores.cc === 'no';
+  document.getElementById('cpProgramacion').style.display = sinCC ? 'none' : '';
+  document.getElementById('cpCierre').style.display = sinCC ? 'none' : '';
+  calPintarMotivo();
+  document.getElementById('modalCalPepe').style.display = 'flex';
+}
+function calElegirMotivo(m) { calState.motivoPepe = m; calPintarMotivo(); }
+function calPintarMotivo() {
+  ['programacion', 'cierre', 'fin'].forEach(m => {
+    document.getElementById('cp' + m.charAt(0).toUpperCase() + m.slice(1)).className = calState.motivoPepe === m ? 'sel-ok' : '';
+  });
+}
+
+async function calEnviarAvisoPepe() {
+  const motivo = calState.motivoPepe;
+  if (!motivo) { toast('⚠️ Elige qué tiene que hacer Pepe', 'error'); return; }
+  const nota = document.getElementById('cpNota').value.trim();
+  try {
+    let res = await backendPost({ action: 'cal_avisarPepe', idObra: estadoApp.obraActual.id, motivo, nota });
+    if (!res.ok && res.sinConfigurar) {
+      const email = prompt('Solo la primera vez: pega la dirección de correo del tablero de Trello.\n\n' +
+        'En Trello: tablero TRABAJOS OFICINA TÉCNICA → Menú (…) → Configuración → «Correo electrónico al tablero» → ' +
+        'lista «PEPE (CLAUDE)» → copiar la dirección (acaba en @boards.trello.com).');
+      if (!email) return;
+      const c = await backendPost({ action: 'cal_configTrello', email: email.trim() });
+      if (!c.ok) throw new Error(c.error);
+      res = await backendPost({ action: 'cal_avisarPepe', idObra: estadoApp.obraActual.id, motivo, nota });
+    }
+    if (!res.ok) throw new Error(res.error);
+    calCerrarModal('modalCalPepe');
+    toast('✓ ' + res.message, 'ok');
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+// ---------- CONSTRUCTORES ----------
+function calRenderConstructores(d) {
+  const lista = d.constructores || [];
+  const actual = lista[lista.length - 1] || {};
+  const ia = lista.length - 1;
+  let h = '<div class="cal-constr"><div class="fila"><div class="txt">' +
+    (actual.finObra ? '🏁 <b>Obra terminada</b> el ' + calFechaCorta(actual.hasta) + ' · ' + escape(actual.nombre || '') :
+      '🏗️ ' + (actual.nombre ? '<b>' + escape(actual.nombre) + '</b>' : '<b style="color:var(--rojo)">⚠️ Falta el constructor nuevo</b>') +
+      (actual.desde ? ' <span style="font-size:12px;color:var(--gris-texto)">desde ' + calFechaCorta(actual.desde) + '</span>' : '')) +
+    '</div>' +
+    (actual.finObra || (actual.nombre && actual.email) ? '' : '<button class="cal-btn sec" onclick="calAbrirConstr(' + ia + ')">Poner datos</button>') +
+    (actual.finObra ? '' : '<button class="cal-btn sec" onclick="calAbrirCambio()">Cambiar / Fin de obra</button>') + '</div>';
+  if (lista.length > 1 || actual.finObra) {
+    h += '<div class="hist"><button class="na" onclick="calDeshacerCambio()">Deshacer el último cambio</button></div>';
+  }
+  if (lista.length > 1) {
+    h += '<div class="hist">' + lista.slice(0, -1).map(c => escape(c.nombre || '?') + ' (' + (c.alcance ? escape(c.alcance) + ', ' : '') +
+      'hasta ' + calFechaCorta(c.hasta) + ')').join(' · ') + '</div>';
+  }
+  h += '</div>';
+
+  // Cierre de cada constructor que se ha ido
+  lista.forEach((c, i) => { if (c.hasta) h += calRenderCierre(d, c, i); });
+  // Arranque del nuevo
+  if (lista.length > 1 && !actual.finObra) h += calRenderInicio(actual, ia);
+  return h;
+}
+
+/** Fechas sin marcar ni estimar (estructura, o todo si es el fin de obra). */
+function calFechasSinFecha(d, soloEstructura) {
+  let n = 0;
+  d.unidades.filter(u => !u.noAplica && (!soloEstructura || u.grupo === 'estructura')).forEach(u => u.lotes.forEach(l => {
+    const tiene = (c, i) => (l.marcas[c] && l.marcas[c][i]) || (l.est && l.est[c] && l.est[c][i] && l.est[c][i].f);
+    if (u.grupo === 'estructura') u.hitos.forEach(x => { if (!tiene(x.c, 0)) n++; });
+    else u.fases.forEach(fa => { for (let i = 0; i < u.fc; i++) if (!tiene(fa.c, i)) n++; });
+  }));
+  return n;
+}
+
+async function calDeshacerCambio() {
+  if (!confirm('¿Deshacer el último cambio de constructor (o el fin de obra)?')) return;
+  try {
+    const res = await backendPost({ action: 'cal_deshacerCambio', idObra: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ Deshecho. Si el constructor de «Datos del expediente» había cambiado, corrígelo allí.', 'ok');
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+function calCambioFin() {
+  const fin = document.getElementById('ccFin').checked;
+  document.getElementById('ccNuevoGrupo').style.display = fin ? 'none' : '';
+  const a = document.getElementById('ccAlcance');
+  if (fin && a.value === 'Estructura') a.value = 'Toda la obra';
+  if (!fin && a.value === 'Toda la obra') a.value = 'Estructura';
+}
+
+function calCheck(i, clave, texto, marcas, auto) {
+  if (auto !== undefined) {
+    return '<div class="cal-check"><span>' + (auto ? '✅' : '⬜') + '</span><span class="t">' + texto + '</span></div>';
+  }
+  const v = !!(marcas && marcas[clave]);
+  return '<div class="cal-check"><span class="t">' + texto + (v ? ' <span style="color:var(--gris-texto)">(' + calFechaCorta(marcas[clave]) + ')</span>' : '') +
+    '</span><input type="checkbox" ' + (v ? 'checked' : '') + ' onchange="calMarcaCierre(' + i + ',\'' + clave + '\',this.checked)"></div>';
+}
+
+function calRenderCierre(d, c, i) {
+  const m = c.marcas || {};
+  const manual = ['certificados', 'laboratorio', 'impresos', 'libro'];
+  const hecho = manual.every(k => m[k]);
+  const sinFecha = calFechasSinFecha(d, !c.finObra);
+  const est = d.resumen.estadoMateriales;
+  const matOk = ['hormigon', 'acero'].every(k => est[k] === 'completo' || est[k] === 'noaplica');
+  let h = '<div class="cal-constr cal-cierre' + (hecho ? ' hecho' : '') + '">' +
+    '<div class="fila"><div class="txt"><b>' + (hecho ? '✅ Cerrado: ' : (c.finObra ? '🏁 Cerrar la obra con ' : '🔒 Cerrar lo de ')) + escape(c.nombre || '?') + '</b>' +
+    (c.alcance ? ' · ' + escape(c.alcance) : '') + ' · hasta ' + calFechaCorta(c.hasta) + '</div></div>';
+  if (!hecho) {
+    h += calCheck(i, '', (c.finObra ? 'Todas las comprobaciones con fecha' : 'Fechas de la estructura') +
+        (sinFecha ? ' — faltan ' + sinFecha + ': las estima Pepe (actas, Libro de Órdenes, fotos)' : ''), null, sinFecha === 0) +
+      calCheck(i, '', 'Hormigón y acero con albarán y DoP', null, matOk) +
+      calCheck(i, 'certificados', 'Certificados finales de suministro firmados (hormigón, ferralla, malla)', m) +
+      calCheck(i, 'laboratorio', 'Actas e impresos del laboratorio, firmados', m) +
+      calCheck(i, 'impresos', 'Impresos de la estructura firmados por el constructor', m) +
+      calCheck(i, 'libro', 'Anotación de su fin en el Libro de Órdenes', m) +
+      '<div class="cal-botones">' +
+      '<button class="cal-btn sec" onclick="calCorreoSaliente(' + i + ')">✉️ Borrador al constructor</button>' +
+      '<button class="cal-btn sec" onclick="calCorreoLaboratorio()">✉️ Borrador al laboratorio</button>' +
+      '<button class="cal-btn" onclick="calAbrirPepe(\'' + (c.finObra ? 'fin' : 'cierre') + '\')">📨 Avisar a Pepe</button></div>';
+  }
+  return h + '</div>';
+}
+
+function calRenderInicio(c, i) {
+  const m = c.marcas || {};
+  const datos = !!(c.nombre && c.email);
+  if (datos && m.pss && m.apertura) return '';
+  return '<div class="cal-constr cal-cierre"><div class="fila"><div class="txt"><b>🚧 Empezar con ' + escape(c.nombre || 'el constructor nuevo') + '</b>' +
+    (c.desde ? ' · desde ' + calFechaCorta(c.desde) : '') + '</div></div>' +
+    calCheck(i, '', 'Nombre y email del constructor', null, datos) +
+    calCheck(i, 'pss', 'Plan de Seguridad nuevo y su acta de aprobación', m) +
+    calCheck(i, 'apertura', 'Comunicación de apertura del constructor nuevo', m) +
+    '</div>';
+}
+
+function calAbrirCambio() {
+  const lista = calState.datos.constructores;
+  const actual = lista[lista.length - 1] || {};
+  document.getElementById('ccAyuda').textContent = 'Termina: ' + (actual.nombre || 'el constructor actual') +
+    '. Desde el día siguiente las comprobaciones van a nombre del nuevo, y la app te enseña lo que hay que cerrar con el que se va.';
+  document.getElementById('ccHasta').value = fechaHoyISO();
+  document.getElementById('ccAlcance').value = 'Estructura';
+  document.getElementById('ccNombre').value = '';
+  document.getElementById('ccEmail').value = '';
+  document.getElementById('ccFin').checked = false;
+  calCambioFin();
+  document.getElementById('modalCalCambio').style.display = 'flex';
+}
+
+async function calGuardarCambio() {
+  const hasta = document.getElementById('ccHasta').value;
+  const finObra = document.getElementById('ccFin').checked;
+  const nuevo = finObra ? {} : { nombre: document.getElementById('ccNombre').value.trim(), email: document.getElementById('ccEmail').value.trim() };
+  if (!hasta) { toast('⚠️ Pon el último día del constructor actual', 'error'); return; }
+  if (nuevo.email) { const e = comprobarEmails(nuevo.email, 'del constructor nuevo'); if (e) { toast(e, 'error'); return; } }
+  const pregunta = finObra ? '¿Dar por terminada la obra el ' + calFechaCorta(hasta) + '?\n\nTe saldrá la lista de lo que hay que cerrar.' :
+    '¿Cambiar de constructor a partir del ' + calFechaCorta(hasta) + '?' +
+    (nuevo.nombre ? '\n\nEl nuevo (' + nuevo.nombre + ') pasará también a «Datos del expediente».' : '\n\nEl nuevo queda pendiente: lo pones cuando lo sepas.');
+  if (!confirm(pregunta)) return;
+  try {
+    const res = await backendPost({ action: 'cal_cambiarConstructor', idObra: estadoApp.obraActual.id, hasta, finObra,
+                                     alcance: document.getElementById('ccAlcance').value.trim(), nuevo });
+    if (!res.ok) throw new Error(res.error);
+    calCerrarModal('modalCalCambio');
+    if (nuevo.nombre) await calActualizarConstructorObra(nuevo.nombre, nuevo.email);
+    toast('✓ Cambio guardado. Abajo tienes lo que hay que cerrar.', 'ok');
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+function calAbrirConstr(i) {
+  const c = calState.datos.constructores[i] || {};
+  calState.constr = i;
+  document.getElementById('ckTitulo').textContent = c.hasta ? 'Constructor (hasta ' + calFechaCorta(c.hasta) + ')' : 'Constructor en obra';
+  document.getElementById('ckNombre').value = c.nombre || '';
+  document.getElementById('ckEmail').value = c.email || '';
+  document.getElementById('modalCalConstr').style.display = 'flex';
+}
+
+async function calGuardarConstr() {
+  const i = calState.constr;
+  const nombre = document.getElementById('ckNombre').value.trim();
+  const email = document.getElementById('ckEmail').value.trim();
+  if (email) { const e = comprobarEmails(email, 'del constructor'); if (e) { toast(e, 'error'); return; } }
+  try {
+    const res = await backendPost({ action: 'cal_datosConstructor', idObra: estadoApp.obraActual.id, indice: i, nombre, email });
+    if (!res.ok) throw new Error(res.error);
+    calCerrarModal('modalCalConstr');
+    if (i === res.constructores.length - 1 && nombre) await calActualizarConstructorObra(nombre, email);
+    toast('✓ Constructor guardado', 'ok');
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+/** Pasa el constructor nuevo a «Datos del expediente» (la misma acción que el formulario de la obra). */
+async function calActualizarConstructorObra(nombre, email) {
+  const o = estadoApp.obraActual;
+  const campos = ['nombreCorto', 'tituloOficial', 'numExpediente', 'direccion', 'municipio', 'promotor', 'arquitecto',
+                  'constructor', 'otrasEspecialidades', 'carpetaDriveId', 'emailPromotor', 'emailConstructor'];
+  const datos = {};
+  campos.forEach(c => { datos[c] = o[c] || ''; });
+  datos.constructor = nombre;
+  datos.emailConstructor = email || '';
+  try {
+    const res = await backendPost({ action: 'editarObra', id: o.id, obra: datos });
+    if (!res.ok) throw new Error(res.error);
+    if (res.emailConstructor !== undefined) datos.emailConstructor = res.emailConstructor;
+    Object.assign(o, datos);
+  } catch (err) {
+    toast('⚠️ El cambio está guardado, pero no he podido poner el constructor en «Datos del expediente»: ' + err.message, 'error');
+  }
+}
+
+async function calMarcaCierre(i, clave, valor) {
+  try {
+    const res = await backendPost({ action: 'cal_marcaCierre', idObra: estadoApp.obraActual.id, indice: i, clave, valor });
+    if (!res.ok) throw new Error(res.error);
+    calState.datos.constructores = res.constructores;
+    calRender();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); calCargar(); }
+}
+
+async function calCorreoSaliente(i) {
+  try {
+    const res = await backendPost({ action: 'cal_correoSaliente', idObra: estadoApp.obraActual.id, indice: i });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ ' + res.message, 'ok');
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+async function calCorreoLaboratorio() {
+  try {
+    const res = await backendPost({ action: 'cal_correoLaboratorio', idObra: estadoApp.obraActual.id });
+    if (!res.ok) throw new Error(res.error);
+    toast('✓ ' + res.message, 'ok');
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+// ---------- MATERIALES ----------
+function calRenderMateriales(d) {
+  const est = d.resumen.estadoMateriales;
+  const iconoMat = { completo: '✅', incompleto: '🟠', falta: '⏳', noaplica: '➖' };
+  const textoMat = { completo: 'Completo', incompleto: 'Falta la DoP o el albarán', falta: 'Aún no ha llegado', noaplica: 'No aplica en esta obra' };
+  let h = '<div class="cal-titulo">Materiales (albarán + DoP)</div>';
   d.materiales.forEach(m => {
     const e = est[m.clave];
     const recs = d.recepciones.filter(x => x.material === m.clave);
@@ -5162,61 +5709,200 @@ function calRender() {
       (e === 'noaplica' ? '' : '<button class="btn-cal" onclick="calAbrirRecepcion(\'' + m.clave + '\')">+ Recibir</button>') +
       '</div>';
   });
+  return h;
+}
 
-  // COMPROBACIONES
-  h += '<div class="cal-titulo">Comprobaciones en obra</div>';
-  d.controles.forEach(c => {
-    h += '<div class="cal-fila">' +
-      '<div class="ico">' + (c.fecha ? '✅' : '⬜') + '</div>' +
-      '<div class="info"><div class="nom">' + escape(c.unidad) + '</div>' +
-      '<div class="sub">' + (c.fecha ? 'Comprobado el ' + calFechaCorta(c.fecha) : 'Pendiente') + '</div></div>' +
-      (c.fecha
-        ? '<button class="btn-cal sec" onclick="calMarcarControl(\'' + c.id + '\', false)">Quitar</button>'
-        : '<button class="btn-cal" onclick="calMarcarControl(\'' + c.id + '\', true)">✓ Hoy</button>') +
-      '</div>';
+// ---------- COMPROBACIONES DE EJECUCIÓN ----------
+function calRenderUnidades(d) {
+  let h = '<div class="cal-titulo">Comprobaciones de ejecución</div>' +
+    '<div class="cal-ayuda">Toca una casilla el día que lo compruebes (se pone la fecha de hoy; la puedes cambiar). ' +
+    'Lo que no marques lo estima Pepe al cerrar (actas del laboratorio, Libro de Órdenes, fotos) y sale en azul; si no hay nada, por pauta.</div>';
+  d.unidades.forEach(u => {
+    let marcadas = 0, total = 0;
+    u.lotes.forEach(l => {
+      if (u.grupo === 'estructura') u.hitos.forEach(x => { total++; if (l.marcas[x.c] && l.marcas[x.c][0]) marcadas++; });
+      else u.fases.forEach(fa => { for (let i = 0; i < u.fc; i++) { total++; if (l.marcas[fa.c] && l.marcas[fa.c][i]) marcadas++; } });
+    });
+    h += '<div class="cal-unidad' + (u.noAplica ? ' noaplica' : '') + '"><div class="cab"><div class="nom">' + escape(u.nombre) + '</div>' +
+      '<div class="cnt">' + (u.noAplica ? 'no hay' : marcadas + '/' + total) + '</div></div>' +
+      '<div class="tam">' + escape(u.tam) + (u.grupo === 'estructura' ? (d.libro === 'LG14' ? '' : ' · Código Estructural') :
+        ' · ' + u.fc + (u.fc === 1 ? ' comprobación' : ' comprobaciones') + ' de cada fase') +
+      ' · <button class="na" onclick="calNoAplica(\'unidad:' + u.clave + '\',' + (!u.noAplica) + ')">' + (u.noAplica ? 'Sí hay' : 'No hay en esta obra') + '</button></div>';
+    if (!u.noAplica) {
+      u.lotes.forEach(l => { h += calRenderLote(u, l); });
+      if (u.opcional && !u.lotes.length) h += '<div class="tam">Solo si la obra tiene muros de hormigón.</div>';
+      h += '<button class="cal-addlote" onclick="calAddLote(\'' + u.clave + '\')">+ Añadir lote</button>';
+    }
+    h += '</div>';
   });
-  h += '<div class="cal-add"><input type="text" id="calNuevaUnidad" placeholder="Añadir: Estructura: forjado 2"><button onclick="calAddControl()">Añadir</button></div>';
+  return h;
+}
 
-  // PRUEBAS
-  h += '<div class="cal-titulo">Pruebas de servicio (laboratorio)</div>';
+function calRenderLote(u, l) {
+  let h = '<div class="cal-lote"><div class="lnom">' + escape(l.nombre) +
+    '<button onclick="calRenombrarLote(\'' + l.id + '\',\'' + calJS(l.nombre) + '\')">✎</button></div>';
+  if (u.grupo === 'estructura') {
+    h += '<div class="cal-hitos" style="grid-template-columns:repeat(' + (u.hitos.length === 4 ? 2 : u.hitos.length) + ',1fr)">';
+    u.hitos.forEach(x => {
+      const m = l.marcas[x.c] && l.marcas[x.c][0];
+      const calc = l.fechas.hitos[x.c] || {};
+      const est = !m && calc.o === 'e';
+      h += '<div class="cal-hito' + (m ? ' m' : (est ? ' e' : '')) + '" title="' + escape(est ? 'Estimada por Pepe: ' + (calc.fuente || '') : '') +
+        '" onclick="calAbrirFecha(\'' + l.id + '\',\'' + x.c + '\',0)">' + escape(x.n) +
+        (m ? '<b>✓ ' + calDM(m) + '</b>' : est ? '<b class="e">est. ' + calDM(calc.f) + '</b>' :
+          (calc.f ? '<b class="p">pauta ' + calDM(calc.f) + '</b>' : '<b>—</b>')) + '</div>';
+    });
+    h += '</div>';
+  } else {
+    u.fases.forEach(fa => {
+      h += '<div class="cal-fase"><div class="fn">' + escape(fa.n) + '</div>';
+      for (let i = 0; i < u.fc; i++) {
+        const m = l.marcas[fa.c] && l.marcas[fa.c][i];
+        const x = (l.fechas.fases[fa.c] || [])[i] || {};
+        const est = !m && x.o === 'e';
+        h += '<button class="cal-caja' + (m ? ' m' : (est ? ' e' : '')) + '" title="' + escape(est ? 'Estimada por Pepe: ' + (x.fuente || '') : '') +
+          '" onclick="calAbrirFecha(\'' + l.id + '\',\'' + fa.c + '\',' + i + ')">' +
+          (m ? calDM(m) : (est ? calDM(x.f) : '+')) + '</button>';
+      }
+      h += '</div>';
+    });
+  }
+  return h + '</div>';
+}
+
+function calBuscarLote(idLote) {
+  for (const u of calState.datos.unidades) { const l = u.lotes.find(x => x.id === idLote); if (l) return { u, l }; }
+  return null;
+}
+
+function calAbrirFecha(idLote, fase, n) {
+  const x = calBuscarLote(idLote);
+  if (!x) return;
+  const { u, l } = x;
+  const marcada = l.marcas[fase] && l.marcas[fase][n];
+  const nombreFase = u.grupo === 'estructura' ? (u.hitos.find(h => h.c === fase) || {}).n : (u.fases.find(f => f.c === fase) || {}).n;
+  calState.fecha = { idLote, fase, n };
+  document.getElementById('cfTitulo').textContent = nombreFase + (u.fc > 1 && u.grupo !== 'estructura' ? ' (' + (n + 1) + '/' + u.fc + ')' : '');
+  let sub = u.nombre + ' · ' + l.nombre;
+  if (u.grupo === 'estructura') {
+    const usa = u.fases.filter(f => f.de === fase).map(f => f.n);
+    if (usa.length) sub += '. Sirve para: ' + usa.join(', ') + '.';
+    if (fase === 'hormigonado') sub += ' Es la fecha de la toma del laboratorio.';
+  }
+  const calc = u.grupo === 'estructura' ? (l.fechas.hitos[fase] || {}) : ((l.fechas.fases[fase] || [])[n] || {});
+  if (!marcada && calc.o === 'e') sub += ' · Estimada por Pepe el ' + calFechaCorta(calc.f) + ' (' + (calc.fuente || '') + '). Si la marcas tú, manda la tuya.';
+  document.getElementById('cfSub').textContent = sub;
+  document.getElementById('cfFecha').value = (marcada || (calc.o === 'e' ? calc.f : '') || fechaHoyISO()).slice(0, 10);
+  document.getElementById('cfQuitar').style.display = marcada ? '' : 'none';
+  document.getElementById('modalCalFecha').style.display = 'flex';
+}
+
+async function calEnviarFecha(fecha) {
+  const f = calState.fecha;
+  try {
+    const res = await backendPost({ action: 'cal_marcar', idObra: estadoApp.obraActual.id, idLote: f.idLote, fase: f.fase, n: f.n, fecha });
+    if (!res.ok) throw new Error(res.error);
+    calCerrarModal('modalCalFecha');
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+function calGuardarFecha() {
+  const v = document.getElementById('cfFecha').value;
+  if (!v) { toast('⚠️ Pon la fecha', 'error'); return; }
+  calEnviarFecha(v);
+}
+function calQuitarFecha() { calEnviarFecha(''); }
+
+async function calAddLote(unidad) {
+  const u = calState.datos.unidades.find(x => x.clave === unidad);
+  const nombre = prompt('Nombre del lote nuevo de «' + u.nombre + '»\n(p. ej.: Forjado planta 1, Pilares planta baja, Colector 2)');
+  if (!nombre || !nombre.trim()) return;
+  try {
+    const res = await backendPost({ action: 'cal_addLote', idObra: estadoApp.obraActual.id, unidad, nombre: nombre.trim() });
+    if (!res.ok) throw new Error(res.error);
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+async function calRenombrarLote(id, actual) {
+  const nombre = prompt('Nombre del lote (déjalo vacío para borrarlo):', actual);
+  if (nombre === null) return;
+  if (!nombre.trim() && !confirm('¿Borrar el lote «' + actual + '»?')) return;
+  try {
+    const res = await backendPost({ action: 'cal_renombrarLote', idObra: estadoApp.obraActual.id, id, nombre: nombre.trim() });
+    if (!res.ok) throw new Error(res.error);
+    calCargar();
+  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
+}
+
+function calVerCCWin() {
+  const d = calState.datos;
+  let h = '<table class="cal-tabla"><tr><th>Unidad · lote</th><th>Fase</th><th>Fecha</th><th>Constructor</th></tr>';
+  let ant = '';
+  d.ccwin.forEach(x => {
+    const ul = x.unidad + ' · ' + x.lote;
+    h += '<tr><td>' + (ul !== ant ? escape(ul) : '') + '</td><td>' + escape(x.fase) + '</td>' +
+      '<td class="' + (x.origen === 'p' ? 'p' : x.origen === 'e' ? 'e' : (x.fecha ? '' : 'vacia')) + '">' + (x.fecha ? calFechaCorta(x.fecha) : 'sin fecha') +
+      (x.origen === 'e' && x.fuente ? '<span class="fte">' + escape(x.fuente) + '</span>' : '') + '</td>' +
+      '<td>' + escape(x.constructor || '') + '</td></tr>';
+    ant = ul;
+  });
+  d.pruebas.filter(p => !p.noAplica).forEach(p => {
+    h += '<tr><td>Prueba de servicio</td><td>' + escape(p.nombre) + '</td><td class="' + (p.fecha ? '' : 'vacia') + '">' +
+      (p.fecha ? calFechaCorta(p.fecha) : 'sin fecha') + '</td><td></td></tr>';
+  });
+  document.getElementById('ccwTabla').innerHTML = h + '</table>';
+  document.getElementById('modalCalCCWin').style.display = 'flex';
+}
+
+// ---------- PRUEBAS ----------
+function calRenderPruebas(d) {
+  let h = '<div class="cal-titulo">Pruebas de servicio (laboratorio)</div>';
   d.pruebas.forEach(p => {
     const icono = p.noAplica ? '➖' : (p.estado === 'hecha' && p.acta ? '✅' : (p.estado === 'hecha' ? '🟠' : (p.estado === 'avisado' ? '📞' : '⏳')));
-    const sub = p.noAplica ? 'No aplica en esta obra' :
+    const sub = !p.obligatoria ? 'No obligatoria con factor dimensional D' + d.factores.D :
+      p.noAplica ? 'No aplica en esta obra' :
       (p.estado === 'hecha' ? 'Hecha ' + calFechaCorta(p.fecha) + (p.acta ? ' · acta guardada' : ' · falta el acta') :
-       (p.estado === 'avisado' ? 'Laboratorio avisado' : 'Pendiente'));
+       (p.estado === 'avisado' ? 'Laboratorio avisado' : 'Pendiente · ' + escape(p.ui)));
     h += '<div class="cal-fila' + (p.noAplica ? ' noaplica' : '') + '">' +
       '<div class="ico">' + icono + '</div>' +
       '<div class="info"><div class="nom">' + escape(p.nombre) + '</div><div class="sub">' + sub + '</div>' +
-      '<button class="na" onclick="calNoAplica(\'prueba:' + p.clave + '\',' + (!p.noAplica) + ')">' + (p.noAplica ? 'Sí aplica' : 'No aplica') + '</button></div>' +
+      (p.obligatoria ? '<button class="na" onclick="calNoAplica(\'prueba:' + p.clave + '\',' + (!p.noAplica) + ')">' + (p.noAplica ? 'Sí aplica' : 'No aplica') + '</button>' : '') +
+      '</div>' +
       (p.noAplica ? '' : '<button class="btn-cal' + (p.estado === 'hecha' && p.acta ? ' sec' : '') + '" onclick="calAbrirPrueba(\'' + p.clave + '\')">' + (p.estado === 'hecha' ? 'Ver' : 'Anotar') + '</button>') +
       '</div>';
   });
-
-  // CORREO
-  const faltan = d.materiales.filter(m => est[m.clave] === 'incompleto' || est[m.clave] === 'falta').length;
-  h += '<div class="acciones" style="margin-top:16px">' +
-    '<button class="btn-principal" onclick="calCorreoPendiente()"><span class="icon">✉️</span><span>PEDIR LO QUE FALTA (' + faltan + ')</span></button>' +
-    '</div>';
-
-  document.getElementById('cal-contenido').innerHTML = h;
+  return h;
 }
 
 // ---------- DATOS ----------
 function calAbrirDatos() {
-  const d = calState.datos.datos;
-  document.getElementById('cdFecha').value = (d.fechaSolicitudLicencia || '').slice(0, 10);
-  document.getElementById('cdLab').value = d.laboratorio || '';
-  document.getElementById('cdLabEmail').value = d.emailLaboratorio || '';
-  document.getElementById('cdCert').value = d.promotorCertificado || '';
+  const d = calState.datos;
+  document.getElementById('cdFecha').value = (d.datos.fechaSolicitudLicencia || '').slice(0, 10);
+  document.getElementById('cdLab').value = d.datos.laboratorio || '';
+  document.getElementById('cdLabEmail').value = d.datos.emailLaboratorio || '';
+  document.getElementById('cdCert').value = d.datos.promotorCertificado || '';
+  document.getElementById('cdLibro').value = d.factores.libro || '';
+  document.getElementById('cdCC').value = d.factores.cc || 'si';
+  document.getElementById('cdFactores').innerHTML = d.factoresDef.map(f => {
+    let ops = '';
+    for (let i = 1; i <= f.max; i++) ops += '<option value="' + i + '"' + (d.factores[f.c] === i ? ' selected' : '') + '>' + f.c + i + '</option>';
+    return '<label style="font-size:12px;font-weight:400">' + f.n + '<select id="cdF' + f.c + '" style="width:100%">' + ops + '</select></label>';
+  }).join('');
   document.getElementById('modalCalDatos').style.display = 'flex';
 }
 
 async function calGuardarDatos() {
+  const factores = {};
+  calState.datos.factoresDef.forEach(f => { factores[f.c] = Number(document.getElementById('cdF' + f.c).value); });
+  factores.libro = document.getElementById('cdLibro').value;
+  factores.cc = document.getElementById('cdCC').value;
   const datos = {
     fechaSolicitudLicencia: document.getElementById('cdFecha').value,
     laboratorio: document.getElementById('cdLab').value.trim(),
     emailLaboratorio: document.getElementById('cdLabEmail').value.trim(),
     promotorCertificado: document.getElementById('cdCert').value,
+    factores,
   };
   try {
     const res = await backendPost({ action: 'cal_guardarDatos', idObra: estadoApp.obraActual.id, datos });
@@ -5230,7 +5916,8 @@ async function calGuardarDatos() {
 // ---------- RECEPCIÓN DE MATERIAL ----------
 function calAbrirRecepcion(clave, idRec) {
   const d = calState.datos;
-  const m = d.materiales.find(x => x.clave === clave);
+  const m = d.materiales.find(x => x.clave === clave) ||
+    { clave, nombre: String(clave).replace(/^otro:/, ''), pide: 'Foto de la etiqueta; si los hay, albarán y DoP (no es obligatorio)' };
   const previa = idRec ? d.recepciones.find(x => x.id === idRec) : null;
   calState.rec = {
     id: previa ? previa.id : '', material: clave, estado: previa ? previa.estado : 'aceptado',
@@ -5309,33 +5996,11 @@ async function calGuardarRecepcion() {
     return;
   }
   if (!res || !res.ok) {
-    // Error del servidor: se avisa y NO se reintenta
     toast('⚠️ ' + ((res && res.error) || 'No se ha podido guardar'), 'error');
     return;
   }
   toast('✓ Material guardado', 'ok');
   calCargar();
-}
-
-// ---------- COMPROBACIONES ----------
-async function calMarcarControl(id, hecho) {
-  try {
-    const res = await backendPost({ action: 'cal_marcarControl', idObra: estadoApp.obraActual.id, id,
-                                     fecha: hecho ? fechaHoyISO() : '', resultado: 'conforme' });
-    if (!res.ok) throw new Error(res.error);
-    calCargar();
-  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
-}
-
-async function calAddControl() {
-  const input = document.getElementById('calNuevaUnidad');
-  const unidad = input.value.trim();
-  if (!unidad) { toast('⚠️ Escribe qué se comprueba', 'error'); return; }
-  try {
-    const res = await backendPost({ action: 'cal_addControl', idObra: estadoApp.obraActual.id, unidad });
-    if (!res.ok) throw new Error(res.error);
-    calCargar();
-  } catch (err) { toast('⚠️ ' + err.message, 'error'); }
 }
 
 // ---------- PRUEBAS DE SERVICIO ----------
@@ -5390,6 +6055,62 @@ async function calCorreoPendiente() {
 }
 
 function calCerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// ---------- LIBRO DE ÓRDENES: marcar comprobaciones con la fecha de la anotación ----------
+async function libroCalPreparar() {
+  const caja = document.getElementById('libro-cal');
+  if (!caja || !estadoApp.obraActual) return;
+  calState.libroSel = [];
+  calState.libroAbierto = false;
+  caja.style.display = 'none';
+  try {
+    if (!calState.datos || !calState.datos.obra || calState.datos.obra.id !== estadoApp.obraActual.id) {
+      const res = await backendPost({ action: 'cal_get', idObra: estadoApp.obraActual.id });
+      if (!res.ok) return;
+      calState.datos = res;
+    }
+    libroCalPintar();
+    caja.style.display = '';
+  } catch (err) { /* sin conexión: no se ofrece */ }
+}
+
+function libroCalPintar() {
+  const caja = document.getElementById('libro-cal');
+  const n = calState.libroSel.length;
+  let h = '<div class="lc-cab" onclick="calState.libroAbierto=!calState.libroAbierto;libroCalPintar()">🧪 <span style="flex:1">' +
+    'Marcar comprobaciones de calidad con esta fecha' + (n ? ' (' + n + ')' : '') + '</span>' + (calState.libroAbierto ? '▴' : '▾') + '</div>';
+  if (calState.libroAbierto) {
+    calState.datos.unidades.filter(u => !u.noAplica).forEach(u => u.lotes.forEach(l => {
+      const opciones = u.grupo === 'estructura' ? u.hitos : u.fases;
+      h += '<div class="lc-lote">' + escape(u.nombre) + ' · ' + escape(l.nombre) + '</div><div class="lc-chips">';
+      opciones.forEach(o => {
+        const sel = calState.libroSel.some(s => s.idLote === l.id && s.fase === o.c);
+        h += '<span class="lc-chip' + (sel ? ' sel' : '') + '" onclick="libroCalToggle(\'' + l.id + '\',\'' + o.c + '\')">' + escape(o.n) + '</span>';
+      });
+      h += '</div>';
+    }));
+  }
+  caja.innerHTML = h;
+}
+
+function libroCalToggle(idLote, fase) {
+  const i = calState.libroSel.findIndex(s => s.idLote === idLote && s.fase === fase);
+  if (i === -1) calState.libroSel.push({ idLote, fase }); else calState.libroSel.splice(i, 1);
+  libroCalPintar();
+}
+
+/** Se llama después de guardar la anotación. */
+async function libroCalGuardar(fecha) {
+  if (!calState.libroSel.length) return;
+  const marcas = calState.libroSel.map(s => ({ idLote: s.idLote, fase: s.fase, fecha }));
+  calState.libroSel = [];
+  try {
+    const res = await backendPost({ action: 'cal_marcarVarios', idObra: estadoApp.obraActual.id, marcas });
+    if (!res.ok) throw new Error(res.error);
+    calState.datos = null;
+    toast('✓ Control de calidad: ' + res.hechas + ' comprobación(es) marcadas con fecha ' + calFechaCorta(fecha), 'ok');
+  } catch (err) { toast('⚠️ La anotación está guardada, pero no las comprobaciones de calidad: ' + err.message, 'error'); }
+}
 
 async function init() {
   if (BACKEND_URL.includes('PEGAR_AQUI')) {
