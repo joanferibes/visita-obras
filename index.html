@@ -1280,7 +1280,7 @@ body {
 // CONFIGURACIÓN
 // ============================================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwAElsuhzGrK-8KGsRqYgQoDofMh3CH8hinxApIyztZHz5-bV3guPTiBM_Gkzubpc2klw/exec';
-const APP_VERSION = '1.10.0';
+const APP_VERSION = '1.11.0';
 // Versión del Code.gs que necesita esta app (v1.8.3 solo cambia la app)
 const SERVIDOR_REQUERIDO = '1.10.0';
 const DRIVE_ACCOUNT_EMAIL = 'joanferibes@gmail.com';
@@ -5717,24 +5717,32 @@ function calRenderUnidades(d) {
   let h = '<div class="cal-titulo">Comprobaciones de ejecución</div>' +
     '<div class="cal-ayuda">Toca una casilla el día que lo compruebes (se pone la fecha de hoy; la puedes cambiar). ' +
     'Lo que no marques lo estima Pepe al cerrar (actas del laboratorio, Libro de Órdenes, fotos) y sale en azul; si no hay nada, por pauta.</div>';
-  d.unidades.forEach(u => {
+  // v1.11 (Joanfe, 21/11/2026): lo que no hay en la obra no sale; queda plegado al final por si hay que recuperarlo
+  const ocultas = d.unidades.filter(u => u.noAplica || (u.opcional && !u.lotes.length));
+  d.unidades.filter(u => ocultas.indexOf(u) === -1).forEach(u => {
     let marcadas = 0, total = 0;
     u.lotes.forEach(l => {
       if (u.grupo === 'estructura') u.hitos.forEach(x => { total++; if (l.marcas[x.c] && l.marcas[x.c][0]) marcadas++; });
       else u.fases.forEach(fa => { for (let i = 0; i < u.fc; i++) { total++; if (l.marcas[fa.c] && l.marcas[fa.c][i]) marcadas++; } });
     });
-    h += '<div class="cal-unidad' + (u.noAplica ? ' noaplica' : '') + '"><div class="cab"><div class="nom">' + escape(u.nombre) + '</div>' +
-      '<div class="cnt">' + (u.noAplica ? 'no hay' : marcadas + '/' + total) + '</div></div>' +
+    h += '<div class="cal-unidad"><div class="cab"><div class="nom">' + escape(u.nombre) + '</div>' +
+      '<div class="cnt">' + marcadas + '/' + total + '</div></div>' +
       '<div class="tam">' + escape(u.tam) + (u.grupo === 'estructura' ? (d.libro === 'LG14' ? '' : ' · Código Estructural') :
         ' · ' + u.fc + (u.fc === 1 ? ' comprobación' : ' comprobaciones') + ' de cada fase') +
-      ' · <button class="na" onclick="calNoAplica(\'unidad:' + u.clave + '\',' + (!u.noAplica) + ')">' + (u.noAplica ? 'Sí hay' : 'No hay en esta obra') + '</button></div>';
-    if (!u.noAplica) {
-      u.lotes.forEach(l => { h += calRenderLote(u, l); });
-      if (u.opcional && !u.lotes.length) h += '<div class="tam">Solo si la obra tiene muros de hormigón.</div>';
-      h += '<button class="cal-addlote" onclick="calAddLote(\'' + u.clave + '\')">+ Añadir lote</button>';
-    }
+      ' · <button class="na" onclick="calNoAplica(\'unidad:' + u.clave + '\',true)">No hay en esta obra</button></div>';
+    u.lotes.forEach(l => { h += calRenderLote(u, l); });
+    h += '<button class="cal-addlote" onclick="calAddLote(\'' + u.clave + '\')">+ Añadir lote</button>';
     h += '</div>';
   });
+  if (ocultas.length) {
+    h += '<details class="cal-unidad noaplica"><summary>No hay en esta obra (' + ocultas.length + ')</summary>';
+    ocultas.forEach(u => {
+      h += '<div class="tam">' + escape(u.nombre) + ' · ' + (u.noAplica
+        ? '<button class="na" onclick="calNoAplica(\'unidad:' + u.clave + '\',false)">Sí hay</button>'
+        : '<button class="na" onclick="calAddLote(\'' + u.clave + '\')">Sí hay: añadir lote</button>') + '</div>';
+    });
+    h += '</details>';
+  }
   return h;
 }
 
